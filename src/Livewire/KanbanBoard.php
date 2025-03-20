@@ -191,8 +191,8 @@ class KanbanBoard extends Component
             $this->dispatch('kanban-count-updated', [
                 'oldColumn' => $oldStatus,
                 'newColumn' => $newStatus,
-                'oldCount' => $this->columns[$oldStatus]->count(),
-                'newCount' => $this->columns[$newStatus]->count()
+                'oldCount' => isset($this->columns[$oldStatus]) ? $this->columns[$oldStatus]->count() : 0,
+                'newCount' => isset($this->columns[$newStatus]) ? $this->columns[$newStatus]->count() : 0
             ]);
         }
     }

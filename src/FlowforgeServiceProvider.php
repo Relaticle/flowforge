@@ -91,7 +91,7 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
 
         // Testing
-        Testable::mixin(new TestsFlowforge);
+        // Testable::mixin(new TestsFlowforge);
     }
 
     protected function getAssetPackageName(): ?string
