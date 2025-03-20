@@ -9,6 +9,7 @@ use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Blade;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -85,13 +86,41 @@ class FlowforgeServiceProvider extends PackageServiceProvider
                     $file->getRealPath() => base_path("stubs/flowforge/{$file->getFilename()}"),
                 ], 'flowforge-stubs');
             }
+
+            // Publish assets
+            $this->publishes([
+                __DIR__ . '/../resources/css' => public_path('vendor/flowforge/css'),
+                __DIR__ . '/../resources/js' => public_path('vendor/flowforge/js'),
+            ], 'flowforge-assets');
         }
+
+        // Include the CSS and JS files in Filament 
+        // This will ensure they're always loaded in the Filament panel
+        $this->callAfterResolving('filament', function () {
+            // Added this for debugging
+            \Log::debug('Flowforge assets registered: ' . __DIR__ . '/../resources/css/flowforge.css');
+        });
 
         // Register Livewire Components
         Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
+        
+        // Register Blade Components
+        $this->registerBladeComponents();
 
         // Testing
         // Testable::mixin(new TestsFlowforge);
+    }
+
+    /**
+     * Register Blade components for the Kanban board
+     * 
+     * @return void
+     */
+    protected function registerBladeComponents(): void
+    {
+        // Register components using Blade directive
+        Blade::component(\Relaticle\Flowforge\View\Components\Card::class, 'flowforge.card');
+        Blade::component(\Relaticle\Flowforge\View\Components\Column::class, 'flowforge.column');
     }
 
     protected function getAssetPackageName(): ?string
@@ -106,8 +135,8 @@ class FlowforgeServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/components/flowforge.js'),
-            Css::make('flowforge-styles', __DIR__ . '/../resources/dist/flowforge.css'),
-            Js::make('flowforge-scripts', __DIR__ . '/../resources/dist/flowforge.js'),
+            Css::make('flowforge-styles', __DIR__ . '/../resources/css/flowforge.css'),
+            Js::make('flowforge-scripts', __DIR__ . '/../resources/js/flowforge.js'),
         ];
     }
 
@@ -142,7 +171,11 @@ class FlowforgeServiceProvider extends PackageServiceProvider
      */
     protected function getScriptData(): array
     {
-        return [];
+        return [
+            'flowforge' => [
+                'baseUrl' => url('/'),
+            ],
+        ];
     }
 
     /**
