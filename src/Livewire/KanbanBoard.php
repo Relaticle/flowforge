@@ -126,15 +126,16 @@ class KanbanBoard extends Component
      * @param string $status The new status value
      * @return bool
      */
-    public function updateStatus($id, string $status): bool
+    public function updateStatus($id, $status): bool
     {
-        $item = $this->adapter->getModelById($id);
+             $item = $this->adapter->getModelById($id);
 
         if (!$item) {
             return false;
         }
 
-        $result = $this->adapter->updateStatus($item, $status);
+
+   $result = $this->adapter->updateStatus($item, $status);
 
         if ($result) {
             $this->loadColumnsData();

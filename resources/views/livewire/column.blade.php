@@ -2,19 +2,6 @@
 
 <div
     class="flex flex-col h-full min-w-64 w-64 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-sm p-2"
-    x-data="{
-        columnId: '{{ $columnId }}',
-        items: @js($column['items']),
-        isOver: false
-    }"
-    x-on:dragover.prevent="isOver = true; $event.dataTransfer.dropEffect = 'move';"
-    x-on:dragleave.prevent="isOver = false"
-    x-on:drop.prevent="
-        isOver = false;
-        const data = JSON.parse($event.dataTransfer.getData('text/plain'));
-        $wire.updateStatus(data.id, columnId);
-    "
-    :class="{ 'border-2 border-primary-500 dark:border-primary-400': isOver }"
 >
     <!-- Column Header -->
     <div class="flex items-center justify-between p-2 mb-2 font-medium">
@@ -31,9 +18,21 @@
     </div>
 
     <!-- Column Content with Scroll Area -->
-    <div class="flex-1 overflow-y-auto overflow-x-hidden p-1">
-        <template x-for="(card, index) in items" :key="card.id">
-            <x-flowforge::kanban.card :config="$config" />
-        </template>
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-1"
+         x-sortable
+         x-sortable-group="cards"
+         data-column-id="{{ $columnId }}"
+         @end.stop="
+
+         $wire.updateStatus($event.item.getAttribute('x-sortable-item'), $event.to.getAttribute('data-column-id'))"
+
+    >
+        @foreach($column['items'] as $card)
+            <x-flowforge::kanban.card
+                :config="$config"
+                :card="$card"
+                :column-id="$columnId"
+            />
+        @endforeach
     </div>
 </div>

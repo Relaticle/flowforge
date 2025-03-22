@@ -7,6 +7,7 @@
     x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('flowforge', package: 'relaticle/flowforge') }}"
     x-data="flowforge({
         state: {
+            columns: @js($columns),
             statusField: '{{ $config['statusField'] }}',
         }
     })"

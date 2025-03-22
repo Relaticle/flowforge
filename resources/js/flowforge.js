@@ -3,8 +3,9 @@ export default function flowforge({state}) {
         state,
         currentColumn: null,
         currentCard: null,
+        columns: state.columns,
         formData: {
-            a: '23',
+
         },
 
         init: function () {
