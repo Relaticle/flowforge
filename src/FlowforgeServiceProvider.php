@@ -76,12 +76,13 @@ class FlowforgeServiceProvider extends PackageServiceProvider
             $this->getAssetPackageName()
         );
 
+
         // Asset Registration
         FilamentAsset::register(
             assets:[
-                AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js'),
+                AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js')
             ],
-            package: 'relaticle/flowforge'
+            package: $this->getAssetPackageName()
         );
 
         FilamentAsset::registerScriptData(
@@ -136,7 +137,7 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         return [
             // AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/components/flowforge.js'),
             Css::make('flowforge', __DIR__.'/../resources/dist/flowforge.css')->loadedOnRequest(),
-//            Js::make('flowforge', __DIR__.'/../resources/dist/flowforge.js')->loadedOnRequest()
+            Js::make('flowforge', __DIR__.'/../resources/dist/flowforge.js')->loadedOnRequest()
         ];
     }
 

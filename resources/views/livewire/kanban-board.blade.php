@@ -1,68 +1,15 @@
 <div>
     <div
         class="w-full h-full flex flex-col"
+        x-load
         x-load-css="[@js(\Filament\Support\Facades\FilamentAsset::getStyleHref('flowforge', package: 'relaticle/flowforge'))]"
-        x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('flowforge', 'relaticle/flowforge') }}"
-        x-data="{
-        showCreateModal: false,
-        showEditModal: false,
-        currentColumn: null,
-        currentCard: null,
-        formData: {},
-
-        openCreateModal(columnId) {
-            this.currentColumn = columnId;
-            this.formData = {
-                {{ $config['statusField'] }}: columnId
-            };
-            $dispatch('open-modal', { id: 'create-card-modal' })
-        },
-
-        submitCreateForm() {
-        console.log(this.formData);
-            $wire.createCard(this.formData).then(cardId => {
-                if (cardId) {
-                    this.showCreateModal = false;
-                    this.formData = {};
-                }
-            });
-        },
-
-        openEditModal(card, columnId) {
-            this.currentCard = card;
-            this.currentColumn = columnId;
-
-            // Initialize form data with current card values
-            this.formData = {...card};
-            this.formData['{{ $config['statusField'] }}'] = columnId;
-
-            $dispatch('open-modal', { id: 'edit-card-modal' })
-        },
-
-        submitEditForm() {
-            $wire.updateCard(this.currentCard.id, this.formData).then(result => {
-                if (result) {
-                    this.showEditModal = false;
-                    this.formData = {};
-                }
-            });
-        },
-
-        deleteCard() {
-            if (confirm('Are you sure you want to delete this card? This action cannot be undone.')) {
-                $wire.deleteCard(this.currentCard.id).then(result => {
-                    if (result) {
-                        this.showEditModal = false;
-                        this.formData = {};
-                    }
-                });
+        x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('flowforge', package: 'relaticle/flowforge') }}"
+        x-data="flowforge({
+            state: {
+                statusField: '{{ $config['statusField'] }}',
             }
-        }
-    }"
+        })"
     >
-        <div>barev
-        <div x-text="showCreateModal"></div>
-        </div>
         <!-- Board Content -->
         <div class="flex flex-row h-full w-full overflow-x-auto overflow-y-hidden py-4 px-2 gap-4">
             @foreach($columns as $columnId => $column)
@@ -90,8 +37,11 @@
                             class="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
                             x-on:click="openCreateModal('{{ $columnId }}')"
                         >
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                 fill="currentColor">
+                                <path fill-rule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                                      clip-rule="evenodd"/>
                             </svg>
                         </button>
                     </div>
@@ -118,10 +68,12 @@
                                 x-on:dragend="$event.target.classList.remove('opacity-50')"
                                 x-on:click.stop="openEditModal(card, columnId)"
                             >
-                                <div class="text-sm font-medium text-gray-900 dark:text-white mb-1" x-text="card.title"></div>
+                                <div class="text-sm font-medium text-gray-900 dark:text-white mb-1"
+                                     x-text="card.title"></div>
 
                                 <template x-if="card.description">
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2" x-text="card.description"></div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2"
+                                         x-text="card.description"></div>
                                 </template>
 
                                 <div class="flex flex-wrap gap-2 mt-2">
@@ -193,7 +145,8 @@
 
                 <!-- Additional Card Attributes -->
                 @foreach($config['cardAttributes'] as $attribute)
-                    <x-filament::input.wrapper label="{{ __(ucfirst(str_replace('_', ' ', $attribute))) }}" class="mt-4">
+                    <x-filament::input.wrapper label="{{ __(ucfirst(str_replace('_', ' ', $attribute))) }}"
+                                               class="mt-4">
                         <x-filament::input
                             id="{{ $attribute }}"
                             type="text"
@@ -267,7 +220,8 @@
 
                 <!-- Additional Card Attributes -->
                 @foreach($config['cardAttributes'] as $attribute)
-                    <x-filament::input.wrapper label="{{ __(ucfirst(str_replace('_', ' ', $attribute))) }}" class="mt-4">
+                    <x-filament::input.wrapper label="{{ __(ucfirst(str_replace('_', ' ', $attribute))) }}"
+                                               class="mt-4">
                         <x-filament::input
                             id="edit-{{ $attribute }}"
                             type="text"
@@ -313,7 +267,9 @@
     </div>
 
     <style>
-        [x-cloak] { display: none !important; }
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 
 </div>
