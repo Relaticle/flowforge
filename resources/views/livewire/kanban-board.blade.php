@@ -1,14 +1,13 @@
 <div
-    class="filament-flowforge-kanban w-full h-full flex flex-col"
-    x-data=""
+    class="w-full h-full flex flex-col"
     x-load-css="[@js(\Filament\Support\Facades\FilamentAsset::getStyleHref('flowforge', package: 'relaticle/flowforge'))]"
     x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('flowforge', 'relaticle/flowforge') }}"
 >
     <!-- Board Content -->
-    <div class="flowforge-kanban-board">
+    <div class="flex flex-row h-full w-full overflow-x-auto overflow-y-hidden py-4 px-2 gap-4">
         @foreach($columns as $columnId => $column)
             <div
-                class="flowforge-kanban-column"
+                class="flex flex-col h-full min-w-64 w-64 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-sm p-2"
                 x-data="{
                     columnId: '{{ $columnId }}',
                     items: @js($column['items']),
@@ -24,15 +23,15 @@
                 :class="{ 'border-2 border-primary-500 dark:border-primary-400': isOver }"
             >
                 <!-- Column Header -->
-                <div class="flowforge-kanban-column-header">
+                <div class="flex items-center justify-between p-2 mb-2 font-medium">
                     <h3 class="text-gray-900 dark:text-white">{{ $column['name'] }}</h3>
                 </div>
 
                 <!-- Column Content -->
-                <div class="flowforge-kanban-column-content">
+                <div class="flex-1 overflow-y-auto overflow-x-hidden p-1">
                     <template x-for="(card, index) in items" :key="card.id">
                         <div
-                            class="flowforge-kanban-card"
+                            class="bg-white dark:bg-gray-700 rounded-md shadow-sm mb-2 p-3 cursor-grab select-none transition-all duration-200 hover:shadow-md hover:-translate-y-[2px]"
                             :class="{
                                 'border-l-4 border-red-500': card.priority === 'high',
                                 'border-l-4 border-yellow-500': card.priority === 'medium',
@@ -49,17 +48,17 @@
                             "
                             x-on:dragend="$event.target.classList.remove('opacity-50')"
                         >
-                            <div class="flowforge-kanban-card-title" x-text="card.title"></div>
+                            <div class="text-sm font-medium text-gray-900 dark:text-white mb-1" x-text="card.title"></div>
 
                             <template x-if="card.description">
-                                <div class="flowforge-kanban-card-description" x-text="card.description"></div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2" x-text="card.description"></div>
                             </template>
 
-                            <div class="flowforge-kanban-card-attributes">
+                            <div class="flex flex-wrap gap-2 mt-2">
                                 <template x-for="(value, key) in card" :key="key">
                                     <template x-if="!['id', 'title', 'description'].includes(key) && value">
                                         <div
-                                            class="flowforge-kanban-card-attribute"
+                                            class="inline-flex items-center text-xs px-2 py-0.5 rounded-full"
                                             :class="{
                                                 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': key === 'category',
                                                 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300': key === 'assignee',
