@@ -77,4 +77,29 @@ interface IKanbanAdapter
      * @return string|null
      */
     public function getDescriptionAttribute(): ?string;
+
+    /**
+     * Create a new card with the given attributes.
+     *
+     * @param array<string, mixed> $attributes The card attributes
+     * @return Model|null
+     */
+    public function createCard(array $attributes): ?Model;
+
+    /**
+     * Update an existing card with the given attributes.
+     *
+     * @param Model $card The card to update
+     * @param array<string, mixed> $attributes The card attributes to update
+     * @return bool
+     */
+    public function updateCard(Model $card, array $attributes): bool;
+
+    /**
+     * Delete an existing card.
+     *
+     * @param Model $card The card to delete
+     * @return bool
+     */
+    public function deleteCard(Model $card): bool;
 }

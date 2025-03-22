@@ -185,4 +185,84 @@ class DefaultKanbanAdapter implements IKanbanAdapter
         $model->{$this->getStatusField()} = $status;
         return $model->save();
     }
+
+    /**
+     * Create a new card with the given attributes.
+     *
+     * @param array<string, mixed> $attributes The card attributes
+     * @return Model|null
+     */
+    public function createCard(array $attributes): ?Model
+    {
+        $modelClass = $this->getModel();
+        $card = new $modelClass();
+        
+        // Set status if provided, otherwise use the first status as default
+        $status = $attributes[$this->getStatusField()] ?? array_key_first($this->getStatusValues());
+        $card->{$this->getStatusField()} = $status;
+        
+        // Set title
+        if (isset($attributes[$this->getTitleAttribute()])) {
+            $card->{$this->getTitleAttribute()} = $attributes[$this->getTitleAttribute()];
+        }
+        
+        // Set description if the attribute exists
+        if ($this->getDescriptionAttribute() && isset($attributes[$this->getDescriptionAttribute()])) {
+            $card->{$this->getDescriptionAttribute()} = $attributes[$this->getDescriptionAttribute()];
+        }
+        
+        // Set additional card attributes
+        foreach ($this->getCardAttributes() as $attribute) {
+            if (isset($attributes[$attribute])) {
+                $card->{$attribute} = $attributes[$attribute];
+            }
+        }
+        
+        return $card->save() ? $card : null;
+    }
+
+    /**
+     * Update an existing card with the given attributes.
+     *
+     * @param Model $card The card to update
+     * @param array<string, mixed> $attributes The card attributes to update
+     * @return bool
+     */
+    public function updateCard(Model $card, array $attributes): bool
+    {
+        // Update status if provided
+        if (isset($attributes[$this->getStatusField()])) {
+            $card->{$this->getStatusField()} = $attributes[$this->getStatusField()];
+        }
+        
+        // Update title if provided
+        if (isset($attributes[$this->getTitleAttribute()])) {
+            $card->{$this->getTitleAttribute()} = $attributes[$this->getTitleAttribute()];
+        }
+        
+        // Update description if provided and the attribute exists
+        if ($this->getDescriptionAttribute() && isset($attributes[$this->getDescriptionAttribute()])) {
+            $card->{$this->getDescriptionAttribute()} = $attributes[$this->getDescriptionAttribute()];
+        }
+        
+        // Update additional card attributes
+        foreach ($this->getCardAttributes() as $attribute) {
+            if (isset($attributes[$attribute])) {
+                $card->{$attribute} = $attributes[$attribute];
+            }
+        }
+        
+        return $card->save();
+    }
+
+    /**
+     * Delete an existing card.
+     *
+     * @param Model $card The card to delete
+     * @return bool
+     */
+    public function deleteCard(Model $card): bool
+    {
+        return $card->delete();
+    }
 }

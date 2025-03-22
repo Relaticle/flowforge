@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Relaticle\Flowforge\Livewire;
 
 use Illuminate\Support\Collection;
+use Illuminate\View\View;
 use Livewire\Component;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
 
@@ -38,6 +39,7 @@ class KanbanBoard extends Component
     public function mount(IKanbanAdapter $adapter): void
     {
         $this->adapter = $adapter;
+
         $this->config = [
             'statusField' => $adapter->getStatusField(),
             'statusValues' => $adapter->getStatusValues(),
@@ -55,17 +57,14 @@ class KanbanBoard extends Component
      */
     protected function loadColumnsData(): void
     {
-        $columns = [];
         $statusValues = $this->adapter->getStatusValues();
-
-        foreach ($statusValues as $statusValue => $statusLabel) {
-            $items = $this->getItemsForStatus($statusValue);
-            $columns[$statusValue] = [
-                'name' => $statusLabel,
-                'items' => $items,
+        $columns = [];
+        foreach ($statusValues as $value => $label) {
+            $columns[$value] = [
+                'name' => $label,
+                'items' => $this->getItemsForStatus($value),
             ];
         }
-
         $this->columns = $columns;
     }
 
@@ -126,23 +125,17 @@ class KanbanBoard extends Component
      */
     public function updateStatus($id, string $status): bool
     {
-        $model = $this->adapter->getModelById($id);
+        $item = $this->adapter->getModelById($id);
 
-        if (!$model) {
+        if (!$item) {
             return false;
         }
 
-        $result = $this->adapter->updateStatus($model, $status);
+        $result = $this->adapter->updateStatus($item, $status);
 
         if ($result) {
-            // Refresh the columns data
             $this->loadColumnsData();
-
-            // Emit an event to notify the frontend
-            $this->dispatch('kanban-card-moved', [
-                'id' => $id,
-                'status' => $status,
-            ]);
+            $this->dispatch('kanban-item-moved', ['id' => $id, 'status' => $status]);
         }
 
         return $result;
@@ -159,11 +152,83 @@ class KanbanBoard extends Component
     }
 
     /**
+     * Create a new card with the given attributes.
+     *
+     * @param array<string, mixed> $attributes The card attributes
+     * @return mixed|null The ID of the created card or null if creation failed
+     */
+    public function createCard(array $attributes): mixed
+    {
+        $card = $this->adapter->createCard($attributes);
+
+        if ($card) {
+            $this->loadColumnsData();
+            $this->dispatch('kanban-card-created', [
+                'id' => $card->getKey(),
+                'status' => $card->{$this->adapter->getStatusField()},
+            ]);
+
+            return $card->getKey();
+        }
+
+        return null;
+    }
+
+    /**
+     * Update an existing card with the given attributes.
+     *
+     * @param string|int $id The ID of the card to update
+     * @param array<string, mixed> $attributes The card attributes to update
+     * @return bool
+     */
+    public function updateCard(string|int $id, array $attributes): bool
+    {
+        $card = $this->adapter->getModelById($id);
+
+        if (!$card) {
+            return false;
+        }
+
+        $result = $this->adapter->updateCard($card, $attributes);
+
+        if ($result) {
+            $this->loadColumnsData();
+            $this->dispatch('kanban-card-updated', ['id' => $id]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Delete an existing card.
+     *
+     * @param string|int $id The ID of the card to delete
+     * @return bool
+     */
+    public function deleteCard(string|int $id): bool
+    {
+        $card = $this->adapter->getModelById($id);
+
+        if (!$card) {
+            return false;
+        }
+
+        $result = $this->adapter->deleteCard($card);
+
+        if ($result) {
+            $this->loadColumnsData();
+            $this->dispatch('kanban-card-deleted', ['id' => $id]);
+        }
+
+        return $result;
+    }
+
+    /**
      * Render the component.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
-    public function render()
+    public function render(): View
     {
         return view('flowforge::livewire.kanban-board');
     }
