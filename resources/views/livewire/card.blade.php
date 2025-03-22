@@ -1,8 +1,9 @@
-@props(['config', 'card'])
+@props(['config', 'columnId', 'card'])
 
 <div
     x-sortable-handle
     x-sortable-item="{{ $card['id'] }}"
+    x-on:click.stop="openEditModal({{ $card['id'] }}, '{{ $columnId }}')"
     class="bg-white dark:bg-gray-700 rounded-md shadow-sm mb-2 p-3  transition-all duration-200 hover:shadow-md hover:-translate-y-[2px]"
 >
     <div class="text-sm font-medium text-gray-900 dark:text-white mb-1">{{ $card['title'] }}</div>
