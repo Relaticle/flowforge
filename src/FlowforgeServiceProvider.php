@@ -105,23 +105,8 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         // Register Livewire Components
         Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
 
-        // Register Blade Components
-        $this->registerBladeComponents();
-
         // Testing
         // Testable::mixin(new TestsFlowforge);
-    }
-
-    /**
-     * Register Blade components for the Kanban board
-     *
-     * @return void
-     */
-    protected function registerBladeComponents(): void
-    {
-        // Register components using Blade directive
-        Blade::component(\Relaticle\Flowforge\View\Components\Card::class, 'flowforge.card');
-        Blade::component(\Relaticle\Flowforge\View\Components\Column::class, 'flowforge.column');
     }
 
     protected function getAssetPackageName(): ?string
