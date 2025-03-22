@@ -13,11 +13,19 @@ use Illuminate\Support\Collection;
 interface IKanbanAdapter
 {
     /**
-     * Get the model instance.
+     * Get the model class.
      *
-     * @return Model
+     * @return string
      */
-    public function getModel(): Model;
+    public function getModel(): string;
+
+    /**
+     * Find a model by its ID.
+     *
+     * @param mixed $id The model ID
+     * @return Model|null
+     */
+    public function getModelById($id): ?Model;
 
     /**
      * Get the status field name for the model.

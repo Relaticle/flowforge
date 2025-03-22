@@ -142,13 +142,31 @@ class KanbanBoard extends Page
         
         // Check if the model uses the HasKanbanBoard trait
         if (method_exists($model, 'getKanbanAdapter')) {
-            return $model::kanban(
-                $this->statusField,
-                $this->statusValues,
-                $this->titleAttribute,
-                $this->descriptionAttribute,
-                $this->cardAttributes
-            );
+            // Create an instance and configure it
+            $instance = new $model();
+            
+            // Override default values if they are provided
+            if (method_exists($instance, 'setKanbanStatusField') && $this->statusField) {
+                $instance->setKanbanStatusField($this->statusField);
+            }
+            
+            if (method_exists($instance, 'setKanbanStatusValues') && $this->statusValues) {
+                $instance->setKanbanStatusValues($this->statusValues);
+            }
+            
+            if (method_exists($instance, 'setKanbanTitleAttribute') && $this->titleAttribute) {
+                $instance->setKanbanTitleAttribute($this->titleAttribute);
+            }
+            
+            if (method_exists($instance, 'setKanbanDescriptionAttribute') && $this->descriptionAttribute) {
+                $instance->setKanbanDescriptionAttribute($this->descriptionAttribute);
+            }
+            
+            if (method_exists($instance, 'setKanbanCardAttributes') && $this->cardAttributes) {
+                $instance->setKanbanCardAttributes($this->cardAttributes);
+            }
+            
+            return $instance->getKanbanAdapter();
         }
         
         throw new \Exception('Model does not use the HasKanbanBoard trait.');

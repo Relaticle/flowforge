@@ -10,12 +10,14 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Route;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Relaticle\Flowforge\Commands\FlowforgeCommand;
+use Relaticle\Flowforge\Http\Controllers\KanbanController;
 use Relaticle\Flowforge\Livewire\KanbanBoard;
 use Relaticle\Flowforge\Testing\TestsFlowforge;
 
@@ -59,6 +61,9 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         if (file_exists($package->basePath('/../resources/views'))) {
             $package->hasViews(static::$viewNamespace);
         }
+
+        // Register routes
+        $package->hasRoutes(['web']);
     }
 
     public function packageRegistered(): void {}
@@ -71,6 +76,14 @@ class FlowforgeServiceProvider extends PackageServiceProvider
             $this->getAssetPackageName()
         );
 
+        // Asset Registration
+        FilamentAsset::register(
+            assets:[
+                AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js'),
+            ],
+            package: 'relaticle/flowforge'
+        );
+
         FilamentAsset::registerScriptData(
             $this->getScriptData(),
             $this->getAssetPackageName()
@@ -81,29 +94,16 @@ class FlowforgeServiceProvider extends PackageServiceProvider
 
         // Handle Stubs
         if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
+            foreach (app(Filesystem::class)->files(__DIR__.'/../stubs/') as $file) {
                 $this->publishes([
-                    $file->getRealPath() => base_path("stubs/flowforge/{$file->getFilename()}"),
-                ], 'flowforge-stubs');
+                    $file->getRealPath() => base_path("stubs/custom-fields/{$file->getFilename()}"),
+                ], 'custom-fields-stubs');
             }
-
-            // Publish assets
-            $this->publishes([
-                __DIR__ . '/../resources/css' => public_path('vendor/flowforge/css'),
-                __DIR__ . '/../resources/js' => public_path('vendor/flowforge/js'),
-            ], 'flowforge-assets');
         }
-
-        // Include the CSS and JS files in Filament 
-        // This will ensure they're always loaded in the Filament panel
-        $this->callAfterResolving('filament', function () {
-            // Added this for debugging
-            \Log::debug('Flowforge assets registered: ' . __DIR__ . '/../resources/css/flowforge.css');
-        });
 
         // Register Livewire Components
         Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
-        
+
         // Register Blade Components
         $this->registerBladeComponents();
 
@@ -113,7 +113,7 @@ class FlowforgeServiceProvider extends PackageServiceProvider
 
     /**
      * Register Blade components for the Kanban board
-     * 
+     *
      * @return void
      */
     protected function registerBladeComponents(): void
@@ -135,8 +135,8 @@ class FlowforgeServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/components/flowforge.js'),
-            Css::make('flowforge-styles', __DIR__ . '/../resources/css/flowforge.css'),
-            Js::make('flowforge-scripts', __DIR__ . '/../resources/js/flowforge.js'),
+            Css::make('flowforge', __DIR__.'/../resources/dist/flowforge.css')->loadedOnRequest(),
+//            Js::make('flowforge', __DIR__.'/../resources/dist/flowforge.js')->loadedOnRequest()
         ];
     }
 
@@ -174,6 +174,9 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         return [
             'flowforge' => [
                 'baseUrl' => url('/'),
+                'routes' => [
+                    'updateStatus' => config('app.url') . '/flowforge/kanban/update-status',
+                ],
             ],
         ];
     }
