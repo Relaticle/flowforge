@@ -7,7 +7,7 @@ use Relaticle\Flowforge\Contracts\IKanbanAdapter;
 
 class KanbanBoard extends Page
 {
-    protected static string $view = 'flowforge::filament.resources.pages.kanban-board';
+    protected static string $view = 'flowforge::filament.pages.kanban-board-page';
 
     /**
      * @var string
@@ -58,7 +58,7 @@ class KanbanBoard extends Page
     public function statusField(string $field): static
     {
         $this->statusField = $field;
-        
+
         return $this;
     }
 
@@ -71,7 +71,7 @@ class KanbanBoard extends Page
     public function statusValues(array $values): static
     {
         $this->statusValues = $values;
-        
+
         return $this;
     }
 
@@ -84,7 +84,7 @@ class KanbanBoard extends Page
     public function titleAttribute(string $attribute): static
     {
         $this->titleAttribute = $attribute;
-        
+
         return $this;
     }
 
@@ -97,7 +97,7 @@ class KanbanBoard extends Page
     public function descriptionAttribute(string $attribute): static
     {
         $this->descriptionAttribute = $attribute;
-        
+
         return $this;
     }
 
@@ -110,7 +110,7 @@ class KanbanBoard extends Page
     public function cardAttributes(array $attributes): static
     {
         $this->cardAttributes = $attributes;
-        
+
         return $this;
     }
 
@@ -123,7 +123,7 @@ class KanbanBoard extends Page
     public function adapter(IKanbanAdapter $adapter): static
     {
         $this->adapter = $adapter;
-        
+
         return $this;
     }
 
@@ -139,36 +139,36 @@ class KanbanBoard extends Page
         }
 
         $model = $this->getModel();
-        
+
         // Check if the model uses the HasKanbanBoard trait
         if (method_exists($model, 'getKanbanAdapter')) {
             // Create an instance and configure it
             $instance = new $model();
-            
+
             // Override default values if they are provided
             if (method_exists($instance, 'setKanbanStatusField') && $this->statusField) {
                 $instance->setKanbanStatusField($this->statusField);
             }
-            
+
             if (method_exists($instance, 'setKanbanStatusValues') && $this->statusValues) {
                 $instance->setKanbanStatusValues($this->statusValues);
             }
-            
+
             if (method_exists($instance, 'setKanbanTitleAttribute') && $this->titleAttribute) {
                 $instance->setKanbanTitleAttribute($this->titleAttribute);
             }
-            
+
             if (method_exists($instance, 'setKanbanDescriptionAttribute') && $this->descriptionAttribute) {
                 $instance->setKanbanDescriptionAttribute($this->descriptionAttribute);
             }
-            
+
             if (method_exists($instance, 'setKanbanCardAttributes') && $this->cardAttributes) {
                 $instance->setKanbanCardAttributes($this->cardAttributes);
             }
-            
+
             return $instance->getKanbanAdapter();
         }
-        
+
         throw new \Exception('Model does not use the HasKanbanBoard trait.');
     }
 
