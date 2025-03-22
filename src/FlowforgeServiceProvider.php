@@ -93,6 +93,9 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         // Icon Registration
         FilamentIcon::register($this->getIcons());
 
+        // Register Blade Components
+        $this->registerBladeComponents();
+
         // Handle Stubs
         if (app()->runningInConsole()) {
             foreach (app(Filesystem::class)->files(__DIR__.'/../stubs/') as $file) {
@@ -107,6 +110,25 @@ class FlowforgeServiceProvider extends PackageServiceProvider
 
         // Testing
         // Testable::mixin(new TestsFlowforge);
+    }
+
+    /**
+     * Register the package Blade components.
+     *
+     * @return void
+     */
+    private function registerBladeComponents(): void
+    {
+        // Register kanban board related components
+        Blade::componentNamespace('Relaticle\\Flowforge\\View\\Components', 'flowforge');
+
+        // Manually register components that don't have a class
+        Blade::component('flowforge::livewire.board', 'flowforge::kanban.board');
+        Blade::component('flowforge::livewire.column', 'flowforge::kanban.column');
+        Blade::component('flowforge::livewire.card', 'flowforge::kanban.card');
+        Blade::component('flowforge::livewire.card-badge', 'flowforge::kanban.card-badge');
+        Blade::component('flowforge::livewire.modals.create-card', 'flowforge::kanban.modals.create-card');
+        Blade::component('flowforge::livewire.modals.edit-card', 'flowforge::kanban.modals.edit-card');
     }
 
     protected function getAssetPackageName(): ?string

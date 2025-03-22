@@ -233,6 +233,6 @@ class KanbanBoard extends Component
      */
     public function render(): View
     {
-        return view('flowforge::livewire.kanban-board');
+        return view('flowforge::livewire.board');
     }
 }
