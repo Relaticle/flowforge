@@ -6,6 +6,7 @@ namespace Relaticle\Flowforge\Livewire;
 
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
 
@@ -14,7 +15,8 @@ class KanbanBoard extends Component
     /**
      * The Kanban board adapter.
      */
-    protected IKanbanAdapter $adapter;
+    #[Locked]
+    public IKanbanAdapter $adapter;
 
     /**
      * The Kanban board configuration.

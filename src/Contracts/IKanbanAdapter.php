@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 /**
  * Interface for Kanban board adapters.
- * 
+ *
  * Adapters are responsible for the interaction between the Kanban board and models.
  */
 interface IKanbanAdapter

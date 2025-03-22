@@ -6,9 +6,10 @@ namespace Relaticle\Flowforge\Adapters;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Livewire\Wireable;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
 
-class DefaultKanbanAdapter implements IKanbanAdapter
+class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 {
     /**
      * The status field for the model.
@@ -196,28 +197,28 @@ class DefaultKanbanAdapter implements IKanbanAdapter
     {
         $modelClass = $this->getModel();
         $card = new $modelClass();
-        
+
         // Set status if provided, otherwise use the first status as default
         $status = $attributes[$this->getStatusField()] ?? array_key_first($this->getStatusValues());
         $card->{$this->getStatusField()} = $status;
-        
+
         // Set title
         if (isset($attributes[$this->getTitleAttribute()])) {
             $card->{$this->getTitleAttribute()} = $attributes[$this->getTitleAttribute()];
         }
-        
+
         // Set description if the attribute exists
         if ($this->getDescriptionAttribute() && isset($attributes[$this->getDescriptionAttribute()])) {
             $card->{$this->getDescriptionAttribute()} = $attributes[$this->getDescriptionAttribute()];
         }
-        
+
         // Set additional card attributes
         foreach ($this->getCardAttributes() as $attribute) {
             if (isset($attributes[$attribute])) {
                 $card->{$attribute} = $attributes[$attribute];
             }
         }
-        
+
         return $card->save() ? $card : null;
     }
 
@@ -234,24 +235,24 @@ class DefaultKanbanAdapter implements IKanbanAdapter
         if (isset($attributes[$this->getStatusField()])) {
             $card->{$this->getStatusField()} = $attributes[$this->getStatusField()];
         }
-        
+
         // Update title if provided
         if (isset($attributes[$this->getTitleAttribute()])) {
             $card->{$this->getTitleAttribute()} = $attributes[$this->getTitleAttribute()];
         }
-        
+
         // Update description if provided and the attribute exists
         if ($this->getDescriptionAttribute() && isset($attributes[$this->getDescriptionAttribute()])) {
             $card->{$this->getDescriptionAttribute()} = $attributes[$this->getDescriptionAttribute()];
         }
-        
+
         // Update additional card attributes
         foreach ($this->getCardAttributes() as $attribute) {
             if (isset($attributes[$attribute])) {
                 $card->{$attribute} = $attributes[$attribute];
             }
         }
-        
+
         return $card->save();
     }
 
@@ -264,5 +265,40 @@ class DefaultKanbanAdapter implements IKanbanAdapter
     public function deleteCard(Model $card): bool
     {
         return $card->delete();
+    }
+
+    /**
+     * Convert the adapter to a Livewire-compatible array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toLivewire(): array
+    {
+        return [
+            'model' => $this->getModel(),
+            'statusField' => $this->getStatusField(),
+            'statusValues' => $this->getStatusValues(),
+            'titleAttribute' => $this->getTitleAttribute(),
+            'descriptionAttribute' => $this->getDescriptionAttribute(),
+            'cardAttributes' => $this->getCardAttributes(),
+        ];
+    }
+
+    /**
+     * Create a new adapter instance from a Livewire-compatible array.
+     *
+     * @param array<string, mixed> $value The Livewire-compatible array
+     * @return static
+     */
+    public static function fromLivewire($value)
+    {
+        return new static(
+            $value['model'],
+            $value['statusField'],
+            $value['statusValues'],
+            $value['titleAttribute'],
+            $value['descriptionAttribute'] ?? null,
+            $value['cardAttributes'] ?? []
+        );
     }
 }

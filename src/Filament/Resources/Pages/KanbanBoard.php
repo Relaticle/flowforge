@@ -2,6 +2,7 @@
 
 namespace Relaticle\Flowforge\Filament\Resources\Pages;
 
+use Exception;
 use Filament\Resources\Pages\Page;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
 
@@ -131,6 +132,7 @@ class KanbanBoard extends Page
      * Get the Kanban adapter.
      *
      * @return IKanbanAdapter
+     * @throws Exception
      */
     public function getAdapter(): IKanbanAdapter
     {
@@ -169,7 +171,7 @@ class KanbanBoard extends Page
             return $instance->getKanbanAdapter();
         }
 
-        throw new \Exception('Model does not use the HasKanbanBoard trait.');
+        throw new Exception('Model does not use the HasKanbanBoard trait.');
     }
 
     /**

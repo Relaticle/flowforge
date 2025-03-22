@@ -13,13 +13,13 @@ use Relaticle\Flowforge\Traits\HasKanbanBoard;
 class MockTask extends Model
 {
     use HasKanbanBoard;
-    
+
     protected $fillable = ['title', 'description', 'status', 'priority', 'due_date'];
-    
+
     protected $table = 'mock_tasks';
-    
+
     public $timestamps = false;
-    
+
     public static function getStatusOptions(): array
     {
         return [
@@ -34,11 +34,11 @@ class MockTask extends Model
 class KanbanBoardTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create the mock_tasks table
         $this->app['db']->connection()->getSchemaBuilder()->create('mock_tasks', function ($table) {
             $table->id();
