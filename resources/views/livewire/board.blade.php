@@ -23,13 +23,6 @@
         </div>
     </div>
 
-    <!-- Board Header with filters or actions could go here -->
-    <div class="flex items-center justify-between mb-4 px-3">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">{{ $config['pluralRecordLabel'] ?? 'Cards' }} Board</h2>
-
-        <!-- Optional board-level actions could go here -->
-    </div>
-
     <!-- Board Content -->
     <div class="flex-1 overflow-hidden">
         <div class="flex flex-row h-full overflow-x-auto overflow-y-hidden py-4 px-2 gap-5 kanban-board pb-4">
