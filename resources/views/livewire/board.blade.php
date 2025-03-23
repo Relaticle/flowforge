@@ -44,58 +44,6 @@
         </div>
     </div>
 
-    <x-filament::modal id="create-card-modal" :heading="__('Create New :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card'])">
-        <x-filament::modal.description>
-            {{ __('Add a new :recordLabel to the board', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}
-        </x-filament::modal.description>
-
-        {{ $this->createForm }}
-
-        <x-slot name="footer">
-            <div class="flex justify-end gap-x-3">
-                <x-filament::button
-                    color="gray"
-                    x-on:click="$dispatch('close-modal', { id: 'create-card-modal' })"
-                >
-                    {{ __('Cancel') }}
-                </x-filament::button>
-
-                <x-filament::button
-                    wire:click="createCard"
-                >
-                    {{ __('Create :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card']) }}
-                </x-filament::button>
-            </div>
-        </x-slot>
-    </x-filament::modal>
-
-    <x-filament::modal id="edit-card-modal" :heading="__('Edit :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card'])">
-        {{ $this->editForm }}
-
-        <x-slot name="footer">
-            <div class="flex items-center justify-between">
-                <x-filament::button
-                    color="danger"
-                    wire:click="deleteCard"
-                >
-                    {{ __('Delete') }}
-                </x-filament::button>
-
-                <div class="flex gap-x-3">
-                    <x-filament::button
-                        color="gray"
-                        x-on:click="$dispatch('close-modal', { id: 'edit-card-modal' })"
-                    >
-                        {{ __('Cancel') }}
-                    </x-filament::button>
-
-                    <x-filament::button
-                        wire:click="updateCard"
-                    >
-                        {{ __('Save Changes') }}
-                    </x-filament::button>
-                </div>
-            </div>
-        </x-slot>
-    </x-filament::modal>
+    <x-flowforge::modals.create-card :config="$config" />
+    <x-flowforge::modals.edit-card :config="$config" />
 </div>
