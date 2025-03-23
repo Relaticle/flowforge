@@ -285,11 +285,6 @@
     @apply opacity-0 transition-opacity group-hover:opacity-70 hover:opacity-100;
 }
 
-/* Loading State */
-.kanban-loading-indicator {
-    @apply flex items-center justify-center h-full w-full;
-}
-
 .kanban-loading-shimmer {
     @apply animate-pulse rounded-md bg-gray-200 dark:bg-gray-700;
 }
