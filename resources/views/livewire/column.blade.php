@@ -1,55 +1,50 @@
 @props(['columnId', 'column', 'config'])
 
-<div
-    class="flex flex-col h-full min-w-64 w-64 bg-kanban-column-bg rounded-xl shadow-kanban-column p-3 kanban-column"
->
+<div class="kanban-column w-[300px] min-w-[300px] flex-shrink-0 bg-kanban-column-bg dark:bg-kanban-column-bg border border-kanban-column-border dark:border-gray-700 shadow-kanban-column dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden">
     <!-- Column Header -->
-    <div class="flex items-center justify-between p-2 mb-3 font-medium kanban-column-header">
-        <div class="flex items-center space-x-2">
-            <h3 class="text-kanban-column-header text-sm font-semibold uppercase tracking-wider">{{ $column['name'] }}</h3>
-            <div class="flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 w-5 h-5 text-xs">
+    <div class="kanban-column-header flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center">
+            <h3 class="text-sm font-medium text-kanban-column-header dark:text-kanban-column-header">
+                {{ $column['name'] }}
+            </h3>
+            <div class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium kanban-status-{{ str_replace('_', '-', $columnId) }}">
                 {{ count($column['items']) }}
             </div>
         </div>
         <button
             type="button"
-            class="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
-            x-on:click="openCreateModal('{{ $columnId }}')"
+            @click="openCreateModal('{{ $columnId }}')"
+            class="text-gray-400 hover:text-primary-500 dark:text-gray-500 dark:hover:text-primary-400"
         >
-            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
         </button>
     </div>
 
-    <!-- Column Content with Scroll Area -->
-    <div class="flex-1 overflow-y-auto overflow-x-hidden p-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
-         x-sortable
-         x-sortable-group="cards"
-         data-column-id="{{ $columnId }}"
-         @end.stop="$wire.updateColumnCards($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
+    <!-- Column Content -->
+    <div
+        x-sortable
+        x-sortable-group="cards"
+        data-column-id="{{ $columnId }}"
+        @end.stop="$wire.updateColumnCards($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
+        class="p-3 flex-1 overflow-y-auto overflow-x-hidden"
+        style="max-height: calc(100vh - 13rem);"
     >
-        @if(count($column['items']) > 0)
-            @foreach($column['items'] as $card)
+        @if (count($column['items']) > 0)
+            @foreach ($column['items'] as $card)
                 <x-flowforge::kanban.card
                     :config="$config"
+                    :columnId="$columnId"
                     :card="$card"
-                    :column-id="$columnId"
                 />
             @endforeach
         @else
-            <!-- Empty state -->
-            <div class="flex flex-col items-center justify-center h-32 kanban-empty-column">
-                <svg class="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            <div class="kanban-empty-column h-24 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 text-sm">
+                <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                <p class="text-xs text-gray-500 dark:text-gray-400 text-center font-medium">No items yet</p>
-                <button
-                    x-on:click="openCreateModal('{{ $columnId }}')"
-                    class="mt-2 text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300"
-                >
-                    Add a card
-                </button>
+                <span>No items</span>
             </div>
         @endif
     </div>
