@@ -14,7 +14,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Relaticle\Flowforge\Contracts\IKanbanAdapter;
+use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 use Relaticle\Flowforge\Enums\KanbanColor;
 
 class KanbanBoard extends Component implements HasForms
@@ -26,10 +26,10 @@ class KanbanBoard extends Component implements HasForms
      * The Kanban board adapter.
      */
     #[Locked]
-    public IKanbanAdapter $adapter;
+    public KanbanAdapterInterface $adapter;
 
     /**
-     * The Kanban board configuration.
+     * The Kanban board configuration from the adapter.
      *
      * @var array
      */
@@ -43,156 +43,171 @@ class KanbanBoard extends Component implements HasForms
     public array $columns = [];
 
     /**
-     * The currently active column for creating a card.
+     * Column card limits.
+     *
+     * @var array<string, int>
+     */
+    public array $columnCardLimits = [];
+
+    /**
+     * Cards by column.
+     *
+     * @var array<string, array>
+     */
+    public array $columnCards = [];
+
+    /**
+     * The active column for modal operations.
      *
      * @var string|null
      */
     public ?string $activeColumn = null;
 
     /**
-     * The currently selected card ID for editing.
+     * The active card for modal operations.
      *
-     * @var int|string|null
+     * @var string|int|null
      */
-    public string|int|null $activeCardId = null;
+    public string|int|null $activeCard = null;
 
     /**
-     * Form data property for create form
+     * Whether the create modal is open.
      */
-    #[Validate]
-    public array $createFormData = [
-        'title' => '',
-        'description' => '',
-    ];
+    public bool $isCreateModalOpen = false;
 
     /**
-     * Form data property for edit form
+     * Whether the edit modal is open.
      */
-    #[Validate]
-    public array $editFormData = [
-        'title' => '',
-        'description' => '',
-    ];
+    public bool $isEditModalOpen = false;
 
     /**
-     * The number of cards to show per column.
+     * Whether the delete confirm modal is open.
+     */
+    public bool $isDeleteConfirmOpen = false;
+
+    /**
+     * Search query for filtering cards.
+     */
+    public ?string $search = null;
+
+    /**
+     * Searchable fields.
+     *
+     * @var array<int, string>
+     */
+    public array $searchable = [];
+
+    /**
+     * Card data for form operations.
      *
      * @var array
      */
-    public array $perPage = [];
+    #[Validate]
+    public array $cardData = [];
 
     /**
-     * The columns currently being loaded.
-     *
-     * @var array
+     * Number of cards to load when clicking "load more".
      */
-    public array $loading = [];
+    public int $cardsIncrement;
 
     /**
-     * The initial number of cards to show per column.
+     * Initialize the Kanban board.
      *
-     * @var int
+     * @param KanbanAdapterInterface $adapter The Kanban adapter
+     * @param int|null $initialCardsCount The initial number of cards to load per column
+     * @param int|null $cardsIncrement The number of cards to load on "load more"
+     * @param array<int, string> $searchable The searchable fields
      */
-    public int $initialCardsCount = 10;
-
-    /**
-     * The number of cards to load when loading more.
-     *
-     * @var int
-     */
-    public int $cardsIncrement = 10;
-
-    /**
-     * Mount the component.
-     *
-     * @param IKanbanAdapter $adapter The Kanban board adapter
-     * @param int|null $initialCardsCount Initial number of cards to show per column
-     * @param int|null $cardsIncrement Number of cards to load when loading more
-     * @return void
-     */
-    public function mount(IKanbanAdapter $adapter, ?int $initialCardsCount = null, ?int $cardsIncrement = null): void
-    {
+    public function mount(
+        KanbanAdapterInterface $adapter, 
+        ?int $initialCardsCount = null, 
+        ?int $cardsIncrement = null, 
+        array $searchable = []
+    ): void {
         $this->adapter = $adapter;
+        $this->searchable = $searchable;
 
-        // Set configuration values
-        if ($initialCardsCount !== null) {
-            $this->initialCardsCount = $initialCardsCount;
-        } else {
-            // Try to get from config, otherwise use default
-            $this->initialCardsCount = config('flowforge.kanban.initial_cards_count', 20);
-        }
-
-        if ($cardsIncrement !== null) {
-            $this->cardsIncrement = $cardsIncrement;
-        } else {
-            // Try to get from config, otherwise use default
-            $this->cardsIncrement = config('flowforge.kanban.cards_increment', 10);
-        }
-
+        // Extract config from adapter
         $this->config = [
-            'statusField' => $adapter->getStatusField(),
-            'statusValues' => $adapter->getStatusValues(),
-            'statusColors' => $this->resolveStatusColors(),
-            'titleAttribute' => $adapter->getTitleAttribute(),
-            'descriptionAttribute' => $adapter->getDescriptionAttribute(),
-            'cardAttributes' => $adapter->getCardAttributes(),
-            'orderField' => $adapter->getOrderField(),
-            'recordLabel' => method_exists($adapter, 'getRecordLabel') ? $adapter->getRecordLabel() : 'Card',
-            'pluralRecordLabel' => method_exists($adapter, 'getPluralRecordLabel') ? $adapter->getPluralRecordLabel() : 'Cards',
-            'initialCardsCount' => $this->initialCardsCount,
-            'cardsIncrement' => $this->cardsIncrement,
+            'columnField' => $adapter->getConfig()->getColumnField(),
+            'columnValues' => $adapter->getConfig()->getColumnValues(),
+            'titleField' => $adapter->getConfig()->getTitleField(),
+            'descriptionField' => $adapter->getConfig()->getDescriptionField(),
+            'cardAttributes' => $adapter->getConfig()->getCardAttributes(),
+            'columnColors' => $this->resolveColumnColors(),
+            'orderField' => $adapter->getConfig()->getOrderField(),
+            'cardLabel' => $adapter->getConfig()->getCardLabel(),
+            'pluralCardLabel' => $adapter->getConfig()->getPluralCardLabel(),
         ];
 
-        // Ensure the status field is populated in both form data arrays
-        $statusField = $adapter->getStatusField();
-        $this->createFormData[$statusField] = array_key_first($adapter->getStatusValues());
-        $this->editFormData[$statusField] = array_key_first($adapter->getStatusValues());
+        // Set default limits
+        $initialCardsCount = $initialCardsCount ?? 10;
+        $this->cardsIncrement = $cardsIncrement ?? 10;
 
-        // Initialize card attributes in form data
-        foreach ($adapter->getCardAttributes() as $attribute => $label) {
-            $this->createFormData[$attribute] = '';
-            $this->editFormData[$attribute] = '';
+        // Initialize columns
+        $this->columns = collect($this->config['columnValues'])
+            ->map(fn ($label, $value) => [
+                'id' => $value,
+                'label' => $label,
+                'color' => $this->config['columnColors'][$value] ?? null,
+            ])
+            ->toArray();
+
+        // Set initial card limits
+        foreach ($this->columns as $column) {
+            $this->columnCardLimits[$column['id']] = $initialCardsCount;
         }
 
-        // Initialize per-column pagination with default value
-        foreach (array_keys($adapter->getStatusValues()) as $columnId) {
-            $this->perPage[$columnId] = $this->initialCardsCount;
-        }
-
-        $this->loadColumnsData();
+        // Load initial data
+        $this->refreshBoard();
     }
 
     /**
-     * Resolve the status colors with fallback to default
-     * These are used for status count badges
-     *
-     * @return array<string, string>
+     * Resolve column colors from adapter config or use defaults.
      */
-    protected function resolveStatusColors(): array
+    protected function resolveColumnColors(): array
     {
-        // Get custom colors from adapter if available
-        $customColors = method_exists($this->adapter, 'getStatusColors')
-            ? $this->adapter->getStatusColors() ?? []
-            : [];
-
-        // Ensure all statuses have a color
-        $statuses = array_keys($this->adapter->getStatusValues());
-        $statusColors = [];
-
-        foreach ($statuses as $status) {
-            // Get the color name or default to 'default'
-            $colorName = $customColors[$status] ?? null;
-
-            // Convert to KanbanColor enum and get CSS class for the badge
-            $color = KanbanColor::fromStringOrDefault($colorName);
-            $statusColors[$status] = $color->classes();
+        $adapterColors = $this->adapter->getConfig()->getColumnColors();
+        
+        if ($adapterColors !== null) {
+            return $adapterColors;
         }
 
-        return $statusColors;
+        // Use default colors if none provided
+        $defaultColors = [
+            KanbanColor::GRAY->value,
+            KanbanColor::RED->value,
+            KanbanColor::ORANGE->value,
+            KanbanColor::AMBER->value,
+            KanbanColor::YELLOW->value,
+            KanbanColor::LIME->value,
+            KanbanColor::GREEN->value,
+            KanbanColor::EMERALD->value,
+            KanbanColor::TEAL->value,
+            KanbanColor::CYAN->value,
+            KanbanColor::SKY->value,
+            KanbanColor::BLUE->value,
+            KanbanColor::INDIGO->value,
+            KanbanColor::VIOLET->value,
+            KanbanColor::PURPLE->value,
+            KanbanColor::FUCHSIA->value,
+            KanbanColor::PINK->value,
+            KanbanColor::ROSE->value,
+        ];
+
+        $colors = [];
+        $columnKeys = array_keys($this->adapter->getConfig()->getColumnValues());
+        
+        foreach ($columnKeys as $index => $key) {
+            $colorIndex = $index % count($defaultColors);
+            $colors[$key] = $defaultColors[$colorIndex];
+        }
+
+        return $colors;
     }
 
     /**
-     * Define the create form schema.
+     * Create form configuration.
      */
     public function createForm(Form $form): Form
     {
@@ -200,7 +215,7 @@ class KanbanBoard extends Component implements HasForms
     }
 
     /**
-     * Define the edit form schema.
+     * Edit form configuration.
      */
     public function editForm(Form $form): Form
     {
@@ -208,364 +223,335 @@ class KanbanBoard extends Component implements HasForms
     }
 
     /**
-     * Load the columns data for the Kanban board.
-     *
-     * @return void
+     * Refresh all board data.
+     */
+    public function refreshBoard(): void
+    {
+        $this->loadColumnsData();
+    }
+
+    /**
+     * Load data for all columns.
      */
     protected function loadColumnsData(): void
     {
-        $statusValues = $this->adapter->getStatusValues();
-        $columns = [];
-        foreach ($statusValues as $value => $label) {
-            $columns[$value] = [
-                'name' => $label,
-                'items' => $this->getItemsForStatus($value),
-                'total' => $this->getTotalItemsCount($value),
-            ];
+        foreach ($this->columns as $column) {
+            $columnId = $column['id'];
+            $limit = $this->columnCardLimits[$columnId] ?? 10;
+            
+            $items = $this->adapter->getItemsForColumn($columnId, $limit);
+            $this->columnCards[$columnId] = $this->formatItems($items);
         }
-        $this->columns = $columns;
     }
 
     /**
-     * Get the items for a specific status with pagination.
+     * Get items for a specific column.
      *
-     * @param string $status The status value
-     * @return array
+     * @param string|int $columnId The column ID
+     * @return array The formatted items
      */
-    public function getItemsForStatus(string|int $status): array
+    public function getItemsForColumn(string|int $columnId): array
     {
-        $perPage = $this->perPage[$status] ?? 10;
-        $items = $this->adapter->getItemsForStatus($status, $perPage);
-        return $this->formatItems($items);
+        return $this->columnCards[$columnId] ?? [];
     }
 
     /**
-     * Get the total count of items for a specific status.
+     * Get the total count of items for a specific column.
      *
-     * @param string $status The status value
-     * @return int
+     * @param string|int $columnId The column ID
+     * @return int The total count
      */
-    public function getTotalItemsCount(string|int $status): int
+    public function getColumnItemsCount(string|int $columnId): int
     {
-        return $this->adapter->getTotalItemsCount($status);
+        return $this->adapter->getColumnItemsCount($columnId);
     }
 
     /**
-     * Load more items for a specific column.
+     * Load more items for a column.
      *
      * @param string $columnId The column ID
-     * @param int|null $count Number of additional items to load (null = use configured increment)
-     * @return void
+     * @param int|null $count The number of items to load
      */
     public function loadMoreItems(string $columnId, ?int $count = null): void
     {
-        $this->loading[$columnId] = true;
-
-        // Increment only the specific column's perPage value
-        if (!isset($this->perPage[$columnId])) {
-            $this->perPage[$columnId] = $this->initialCardsCount;
-        }
-
-        // Use passed count or default to configured increment
-        $increment = $count ?? $this->cardsIncrement;
-        $this->perPage[$columnId] += $increment;
-
-        // Only reload the specific column data
-        $this->columns[$columnId]['items'] = $this->getItemsForStatus($columnId);
-
-        $this->loading[$columnId] = false;
-        $this->dispatch('kanban-items-loaded', ['columnId' => $columnId]);
+        $count = $count ?? $this->cardsIncrement;
+        $currentLimit = $this->columnCardLimits[$columnId] ?? 10;
+        $newLimit = $currentLimit + $count;
+        
+        $this->columnCardLimits[$columnId] = $newLimit;
+        
+        $items = $this->adapter->getItemsForColumn($columnId, $newLimit);
+        $this->columnCards[$columnId] = $this->formatItems($items);
     }
 
     /**
-     * Format the items for display in the Kanban board.
+     * Format items for display.
      *
      * @param Collection $items The items to format
-     * @return array
+     * @return array The formatted items
      */
     protected function formatItems(Collection $items): array
     {
-        $titleAttribute = $this->adapter->getTitleAttribute();
-        $descriptionAttribute = $this->adapter->getDescriptionAttribute();
-        $cardAttributes = $this->adapter->getCardAttributes();
-
-        return $items->map(function ($item) use ($titleAttribute, $descriptionAttribute, $cardAttributes) {
-            $result = [
-                'id' => $item->getKey(),
-                'title' => $item->{$titleAttribute},
-            ];
-
-            if ($descriptionAttribute) {
-                $result['description'] = $item->{$descriptionAttribute};
-            }
-
-            foreach ($cardAttributes as $attribute => $label) {
-                $value = $item->{$attribute};
-                if ($value instanceof \DateTime) {
-                    $value = $value->format('Y-m-d');
-                } elseif (is_object($value) && method_exists($value, '__toString')) {
-                    $value = (string) $value;
-                }
-                $result[$attribute] = $value;
-            }
-
-            return $result;
-        })->toArray();
+        return $items->toArray();
     }
 
     /**
-     * Update the order of an item within the same column.
+     * Update the order of cards in a column.
      *
-     * @param $columnId
-     * @param $cards
-     * @return bool
+     * @param string|int $columnId The column ID
+     * @param array $cardIds The card IDs in their new order
+     * @return bool Whether the operation was successful
      */
-    public function updateColumnCards($columnId, $cards): bool
+    public function reorderCardsInColumn($columnId, $cardIds): bool
     {
-        $this->adapter->updateColumnCards($columnId, $cards);
-
-        $this->loadColumnsData();
-
-        return true;
+        $success = $this->adapter->reorderCardsInColumn($columnId, $cardIds);
+        
+        if ($success) {
+            $this->refreshBoard();
+        }
+        
+        return $success;
     }
 
     /**
-     * Move a card from one column to another.
+     * Move a card between columns.
      *
      * @param string|int $cardId The card ID
-     * @param string $fromColumn The source column ID
-     * @param string $toColumn The target column ID
-     * @param array $toColumnCards The ordered cards in the target column
-     * @return bool
+     * @param string|int $fromColumn The source column ID
+     * @param string|int $toColumn The target column ID
+     * @param array $toColumnCardIds The card IDs in the target column in their new order
+     * @return bool Whether the operation was successful
      */
-    public function moveCardBetweenColumns($cardId, $fromColumn, $toColumn, $toColumnCards): bool
+    public function moveCardToColumn($cardId, $fromColumn, $toColumn, $toColumnCardIds): bool
     {
         $card = $this->adapter->getModelById($cardId);
-
+        
         if (!$card) {
             return false;
         }
-
-        // First update the card's status
-        $card->{$this->adapter->getStatusField()} = $toColumn;
-        $card->save();
-
-        // Then update the order of cards in the target column
-        $this->adapter->updateColumnCards($toColumn, $toColumnCards);
-
-        $this->loadColumnsData();
-
-        return true;
+        
+        $success = $this->adapter->moveCardToColumn($card, $toColumn);
+        
+        if ($success && $this->adapter->getConfig()->getOrderField() !== null) {
+            $success = $this->adapter->reorderCardsInColumn($toColumn, $toColumnCardIds);
+        }
+        
+        if ($success) {
+            $this->refreshBoard();
+        }
+        
+        return $success;
     }
 
     /**
-     * Open the create card form modal.
+     * Open the create form modal.
      *
-     * @param string $columnId The column ID
-     * @return void
+     * @param string $columnId The column ID for the new card
      */
     public function openCreateForm(string $columnId): void
     {
         $this->activeColumn = $columnId;
-        $this->createFormData = [
-            'title' => '',
-            'description' => '',
-            $this->adapter->getStatusField() => $columnId,
-        ];
-
-        // Initialize card attributes
-        foreach ($this->adapter->getCardAttributes() as $attribute => $label) {
-            $this->createFormData[$attribute] = '';
+        $this->resetCreateForm();
+        
+        // Pre-set the column field
+        $columnField = $this->config['columnField'];
+        $this->cardData[$columnField] = $columnId;
+        
+        // Apply any order field if needed
+        $orderField = $this->config['orderField'];
+        if ($orderField !== null) {
+            $count = $this->getColumnItemsCount($columnId);
+            $this->cardData[$orderField] = $count + 1;
         }
+        
+        $this->isCreateModalOpen = true;
     }
 
     /**
-     * Open the edit card form modal.
+     * Open the edit form modal.
      *
-     * @param string|int $cardId The card ID
-     * @param string $columnId The column ID
-     * @return void
+     * @param string|int $cardId The card ID to edit
+     * @param string $columnId The column ID containing the card
      */
     public function openEditForm(string|int $cardId, string $columnId): void
     {
-        $this->activeCardId = $cardId;
         $this->activeColumn = $columnId;
-
+        $this->activeCard = $cardId;
+        
         $card = $this->adapter->getModelById($cardId);
-
+        
         if (!$card) {
             Notification::make()
-                ->title(__('Card not found'))
+                ->title('Card not found')
                 ->danger()
                 ->send();
+            
             return;
         }
-
-        $data = [
-            $this->adapter->getStatusField() => $columnId,
-            'title' => $card->{$this->adapter->getTitleAttribute()},
-            'description' => '',
-        ];
-
-        if ($descriptionAttribute = $this->adapter->getDescriptionAttribute()) {
-            $data['description'] = $card->{$descriptionAttribute} ?? '';
-        }
-
-        // Initialize card attributes
-        foreach ($this->adapter->getCardAttributes() as $attribute => $label) {
-            $data[$attribute] = $card->{$attribute} ?? '';
-        }
-
-        $this->editFormData = $data;
+        
+        $this->resetEditForm();
+        
+        // Fill form with card data
+        $this->form->fill($card->toArray());
+        $this->cardData = $card->toArray();
+        
+        $this->isEditModalOpen = true;
     }
 
     /**
-     * Create a new card with the given attributes.
-     *
-     * @return void
+     * Create a new card.
      */
     public function createCard(): void
     {
-        $form = $this->createForm;
-        $data = $form->getState();
-
+        $data = $this->form->getState();
+        
+        // Ensure column field is set
+        $columnField = $this->config['columnField'];
+        if (!isset($data[$columnField])) {
+            $data[$columnField] = $this->activeColumn;
+        }
+        
         $card = $this->adapter->createCard($data);
-
+        
         if ($card) {
-            $this->loadColumnsData();
+            $this->refreshBoard();
             $this->resetCreateForm();
-
+            $this->isCreateModalOpen = false;
+            
             Notification::make()
-                ->title(__(':recordLabel created successfully', ['recordLabel' => $this->config['recordLabel']]))
+                ->title('Card created')
                 ->success()
                 ->send();
-
-            $this->dispatch('kanban-card-created', [
-                'id' => $card->getKey(),
-                'status' => $card->{$this->adapter->getStatusField()},
-            ]);
+        } else {
+            Notification::make()
+                ->title('Failed to create card')
+                ->danger()
+                ->send();
         }
     }
 
     /**
-     * Reset the create form data.
+     * Reset the create form.
      */
     private function resetCreateForm(): void
     {
-        $this->createFormData = [
-            'title' => '',
-            'description' => '',
-            $this->adapter->getStatusField() => array_key_first($this->adapter->getStatusValues()),
-        ];
-
-        // Reset card attributes
-        foreach ($this->adapter->getCardAttributes() as $attribute => $label) {
-            $this->createFormData[$attribute] = '';
-        }
+        $this->cardData = [];
+        $this->createForm->fill();
     }
 
     /**
-     * Update an existing card with the given attributes.
-     *
-     * @return void
+     * Update an existing card.
      */
     public function updateCard(): void
     {
-        $form = $this->editForm;
-        $data = $form->getState();
-
-        $card = $this->adapter->getModelById($this->activeCardId);
-
+        $data = $this->form->getState();
+        $card = $this->adapter->getModelById($this->activeCard);
+        
         if (!$card) {
             Notification::make()
-                ->title(__('Card not found'))
+                ->title('Card not found')
                 ->danger()
                 ->send();
+            
             return;
         }
-
-        $result = $this->adapter->updateCard($card, $data);
-
-        if ($result) {
-            $this->loadColumnsData();
+        
+        $success = $this->adapter->updateCard($card, $data);
+        
+        if ($success) {
+            $this->refreshBoard();
             $this->resetEditForm();
-
-            $this->dispatch('kanban-card-updated', ['id' => $this->activeCardId]);
-
+            $this->isEditModalOpen = false;
+            
             Notification::make()
-                ->title(__(':recordLabel updated successfully', ['recordLabel' => $this->config['recordLabel']]))
+                ->title('Card updated')
                 ->success()
+                ->send();
+        } else {
+            Notification::make()
+                ->title('Failed to update card')
+                ->danger()
                 ->send();
         }
     }
 
     /**
-     * Reset the edit form data.
+     * Reset the edit form.
      */
     private function resetEditForm(): void
     {
-        $this->editFormData = [
-            'title' => '',
-            'description' => '',
-            $this->adapter->getStatusField() => array_key_first($this->adapter->getStatusValues()),
-        ];
-
-        // Reset card attributes
-        foreach ($this->adapter->getCardAttributes() as $attribute => $label) {
-            $this->editFormData[$attribute] = '';
-        }
+        $this->cardData = [];
+        $this->editForm->fill();
     }
 
     /**
-     * Delete an existing card.
+     * Open the delete confirmation modal.
      *
-     * @return void
+     * @param string|int $cardId The card ID to delete
+     * @param string $columnId The column ID containing the card
+     */
+    public function confirmDelete(string|int $cardId, string $columnId): void
+    {
+        $this->activeCard = $cardId;
+        $this->activeColumn = $columnId;
+        $this->isDeleteConfirmOpen = true;
+    }
+
+    /**
+     * Delete a card.
      */
     public function deleteCard(): void
     {
-        $card = $this->adapter->getModelById($this->activeCardId);
-
+        $card = $this->adapter->getModelById($this->activeCard);
+        
         if (!$card) {
             Notification::make()
-                ->title(__('Card not found'))
+                ->title('Card not found')
                 ->danger()
                 ->send();
+            
             return;
         }
-
-        $result = $this->adapter->deleteCard($card);
-
-        if ($result) {
-            $this->loadColumnsData();
-            $this->resetEditForm();
-
-            $this->dispatch('kanban-card-deleted', ['id' => $this->activeCardId]);
-
+        
+        $success = $this->adapter->deleteCard($card);
+        
+        if ($success) {
+            $this->refreshBoard();
+            $this->isDeleteConfirmOpen = false;
+            
             Notification::make()
-                ->title(__(':recordLabel deleted successfully', ['recordLabel' => $this->config['recordLabel']]))
+                ->title('Card deleted')
                 ->success()
+                ->send();
+        } else {
+            Notification::make()
+                ->title('Failed to delete card')
+                ->danger()
                 ->send();
         }
     }
 
     /**
-     * Register the forms with Livewire.
+     * Get the forms for the component.
      */
     protected function getForms(): array
     {
         return [
-            'createForm',
-            'editForm',
+            'createForm' => $this->makeForm()
+                ->statePath('cardData')
+                ->schema(fn (Form $form) => $this->createForm($form)->getSchema()),
+            
+            'editForm' => $this->makeForm()
+                ->statePath('cardData')
+                ->schema(fn (Form $form) => $this->editForm($form)->getSchema()),
         ];
     }
 
     /**
      * Render the component.
-     *
-     * @return View
      */
     public function render(): View
     {
-        return view('flowforge::livewire.board');
+        return view('flowforge::livewire.kanban-board');
     }
 }
