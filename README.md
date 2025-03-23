@@ -11,7 +11,7 @@ Flowforge is a lightweight Kanban board package for Laravel 11 and Filament 3 th
 
 - Simple integration with existing Eloquent models
 - Drag-and-drop functionality between columns
-- Customizable card appearance
+- Customizable card appearance and badge colors
 - Filament 3 integration
 - Responsive design
 - Dark mode support
@@ -54,48 +54,17 @@ class Task extends Model
         'priority',
         'due_date',
     ];
-    
-    /**
-     * Get the status values for the task.
-     *
-     * @return array<string, string>
-     */
-    public static function getStatusOptions(): array
-    {
-        return [
-            'todo' => 'To Do',
-            'in_progress' => 'In Progress',
-            'review' => 'In Review',
-            'done' => 'Done',
-        ];
-    }
-
-    /**
-     * Get the status colors for the Kanban board.
-     *
-     * @return array<string, string>
-     */
-    public function kanbanStatusColors(): array
-    {
-        return [
-            'todo' => 'blue',
-            'in_progress' => 'yellow',
-            'in_review' => 'purple',
-            'done' => 'green',
-        ];
-    }
 }
 ```
 
 ### 2. Create a Kanban board page in your Filament resource
 
-Create a new page that extends the `KanbanBoard` class:
+Create a new page that extends the `KanbanBoard` class and configure it with all necessary options:
 
 ```php
 namespace App\Filament\Resources\TaskResource\Pages;
 
 use App\Filament\Resources\TaskResource;
-use App\Models\Task;
 use Relaticle\Flowforge\Filament\Resources\Pages\KanbanBoard;
 
 class TaskKanbanBoard extends KanbanBoard
@@ -107,15 +76,82 @@ class TaskKanbanBoard extends KanbanBoard
         parent::mount();
         
         $this->statusField('status')
-            ->statusValues(Task::getStatusOptions())
+            ->statusValues([
+                'backlog' => 'Backlog',
+                'todo' => 'To Do',
+                'in_progress' => 'In Progress',
+                'review' => 'In Review',
+                'testing' => 'Testing',
+                'done' => 'Done',
+            ])
             ->statusColors([
+                'backlog' => 'gray',
                 'todo' => 'blue',
                 'in_progress' => 'yellow',
-                'in_review' => 'purple',
+                'review' => 'purple',
+                'testing' => 'cyan',
                 'done' => 'green',
             ])
             ->titleAttribute('title')
-            ->descriptionAttribute('description');
+            ->descriptionAttribute('description')
+            ->cardAttributes([
+                'priority' => 'Priority',
+                'due_date' => 'Due Date',
+            ])
+            ->createForm(function(Form $form) {
+                return $form
+                    ->schema([
+                        TextInput::make('title')
+                            ->required()
+                            ->maxLength(255),
+                        RichEditor::make('description')
+                            ->columnSpan('full'),
+                        Select::make('status')
+                            ->options([
+                                'todo' => 'To Do',
+                                'in_progress' => 'In Progress',
+                                'review' => 'In Review',
+                                'done' => 'Done',
+                            ])
+                            ->required()
+                            ->default($this->activeColumn),
+                        Select::make('priority')
+                            ->options([
+                                'low' => 'Low',
+                                'medium' => 'Medium',
+                                'high' => 'High',
+                                'urgent' => 'Urgent',
+                            ])
+                            ->default('medium'),
+                        DatePicker::make('due_date'),
+                    ]);
+            })
+            ->editForm(function (Form $form) {
+                return $form
+                    ->schema([
+                        TextInput::make('title')
+                            ->required()
+                            ->maxLength(255),
+                        RichEditor::make('description')
+                            ->columnSpan('full'),
+                        Select::make('status')
+                            ->options([
+                                'todo' => 'To Do',
+                                'in_progress' => 'In Progress',
+                                'review' => 'In Review',
+                                'done' => 'Done',
+                            ])
+                            ->required(),
+                        Select::make('priority')
+                            ->options([
+                                'low' => 'Low',
+                                'medium' => 'Medium',
+                                'high' => 'High',
+                                'urgent' => 'Urgent',
+                            ]),
+                        DatePicker::make('due_date'),
+                    ]);
+            });
     }
     
     protected function getHeaderActions(): array
@@ -164,50 +200,58 @@ protected function getHeaderActions(): array
 }
 ```
 
-### Customizing Column Colors
+## Configuration Options
 
-Flowforge allows you to customize the colors of your Kanban board columns. You can choose from a predefined set of Tailwind colors:
+### Status Badge Colors
 
-- default
-- slate
-- gray
-- zinc
-- neutral
-- stone
-- red
-- orange
-- amber
-- yellow
-- lime
-- green
-- emerald
-- teal
-- cyan
-- sky
-- blue
-- indigo
-- violet
-- purple
-- fuchsia
-- pink
-- rose
+You can customize the colors of the count badges in your Kanban board columns using the `statusColors` method. These are the small rounded indicators showing the number of cards in each column.
 
-The colors are defined in the CSS file and can be easily customized by publishing the assets:
+Available colors:
+- default, slate, gray, zinc, neutral, stone
+- red, orange, amber, yellow, lime, green
+- emerald, teal, cyan, sky, blue, indigo
+- violet, purple, fuchsia, pink, rose
+
+```php
+public function mount(): void
+{
+    parent::mount();
+    
+    $this->statusField('status')
+        ->statusValues([
+            'todo' => 'To Do',
+            'in_progress' => 'In Progress',
+            'review' => 'In Review',
+            'done' => 'Done',
+        ])
+        ->statusColors([
+            'todo' => 'blue',
+            'in_progress' => 'yellow',
+            'review' => 'purple',
+            'done' => 'green',
+        ]);
+}
+```
+
+### Customizing Badge Appearance
+
+The badge colors are defined in the CSS file and can be customized by publishing the assets:
 
 ```bash
 php artisan vendor:publish --tag="flowforge-assets"
 ```
 
-Then you can modify the CSS classes in `resources/css/vendor/flowforge/flowforge.css`.
+Then modify the CSS classes in `resources/css/vendor/flowforge/flowforge.css`.
 
-To customize column colors, you can use one of the following methods:
+## Alternative Configuration Approaches
+
+While we recommend configuring everything in the Filament page class as shown above, there are alternative ways to provide configuration:
 
 ### Method 1: Using DefaultKanbanAdapter
 
 ```php
 use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
 
-// With custom colors
 $adapter = new DefaultKanbanAdapter(
     Task::class,
     'status',
@@ -231,8 +275,6 @@ $adapter = new DefaultKanbanAdapter(
 
 ### Method 2: Custom Adapter Implementation
 
-If you're creating a custom adapter, implement the `getStatusColors()` method:
-
 ```php
 public function getStatusColors(): ?array
 {
@@ -245,86 +287,96 @@ public function getStatusColors(): ?array
 }
 ```
 
-### Method 3: Model-based Configuration
+### Method 3: Model-based Configuration (Not Recommended)
 
-Define a `kanbanStatusColors` method in your model:
+While it's possible to define configuration in the model, we recommend keeping all Kanban-related configuration in the Filament page for better separation of concerns.
 
-```php
-/**
- * Get the status colors for the Kanban board.
- *
- * @return array<string, string>
- */
-public function kanbanStatusColors(): array
-{
-    return [
-        'todo' => 'blue',
-        'in_progress' => 'yellow',
-        'in_review' => 'purple',
-        'done' => 'green',
-    ];
-}
-```
+### Customizing Create and Edit Forms
 
-### Method 4: Filament Resource Page
-
-Set the colors directly in your Filament page:
+You can customize the forms used for creating and editing cards by implementing custom form methods in your Kanban board page:
 
 ```php
-public function mount(): void
+use App\Filament\Resources\TaskResource;
+use Relaticle\Flowforge\Filament\Resources\Pages\KanbanBoard;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Form;
+
+class TaskKanbanBoard extends KanbanBoard
 {
-    parent::mount();
+    // ... other configurations
     
-    $this->statusField('status')
-        ->statusValues(Task::getStatusOptions())
-        ->statusColors([
-            'todo' => 'blue',
-            'in_progress' => 'yellow',
-            'in_review' => 'purple',
-            'done' => 'green',
-        ])
-        ->titleAttribute('title')
-        ->descriptionAttribute('description');
+    public function mount(): void
+    {
+        parent::mount();
+        
+        $this->statusField('status')
+            ->statusValues([
+                'todo' => 'To Do',
+                'in_progress' => 'In Progress',
+                'review' => 'In Review',
+                'done' => 'Done',
+            ])
+            // ... other configurations
+            ->createForm(function(Form $form) {
+                return $form
+                    ->schema([
+                        TextInput::make('title')
+                            ->required()
+                            ->maxLength(255),
+                        RichEditor::make('description')
+                            ->columnSpan('full'),
+                        Select::make('status')
+                            ->options([
+                                'todo' => 'To Do',
+                                'in_progress' => 'In Progress',
+                                'review' => 'In Review',
+                                'done' => 'Done',
+                            ])
+                            ->required()
+                            ->default($this->activeColumn),
+                        Select::make('priority')
+                            ->options([
+                                'low' => 'Low',
+                                'medium' => 'Medium',
+                                'high' => 'High',
+                                'urgent' => 'Urgent',
+                            ])
+                            ->default('medium'),
+                        DatePicker::make('due_date'),
+                    ]);
+            })
+            ->editForm(function (Form $form) {
+                return $form
+                    ->schema([
+                        TextInput::make('title')
+                            ->required()
+                            ->maxLength(255),
+                        RichEditor::make('description')
+                            ->columnSpan('full'),
+                        Select::make('status')
+                            ->options([
+                                'todo' => 'To Do',
+                                'in_progress' => 'In Progress',
+                                'review' => 'In Review',
+                                'done' => 'Done',
+                            ])
+                            ->required(),
+                        Select::make('priority')
+                            ->options([
+                                'low' => 'Low',
+                                'medium' => 'Medium',
+                                'high' => 'High',
+                                'urgent' => 'Urgent',
+                            ]),
+                        DatePicker::make('due_date'),
+                    ]);
+            });
+    }
 }
 ```
-
-If a status doesn't have a color defined, it will use the default styling.
-
-### Customizing Column Status Badges
-
-Flowforge allows you to customize the colors of the count badges in your Kanban board columns. These are the small rounded indicators that show the number of cards in each column. You can choose from a predefined set of Tailwind colors:
-
-- default
-- slate
-- gray
-- zinc
-- neutral
-- stone
-- red
-- orange
-- amber
-- yellow
-- lime
-- green
-- emerald
-- teal
-- cyan
-- sky
-- blue
-- indigo
-- violet
-- purple
-- fuchsia
-- pink
-- rose
-
-The badge colors are defined in the CSS file and can be easily customized by publishing the assets:
-
-```bash
-php artisan vendor:publish --tag="flowforge-assets"
-```
-
-Then you can modify the CSS classes in `resources/css/vendor/flowforge/flowforge.css`.
 
 ## Advanced Usage
 
@@ -337,6 +389,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Task;
 use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
+use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
 
 class TasksKanbanBoard extends KanbanBoardPage
 {
@@ -346,18 +399,35 @@ class TasksKanbanBoard extends KanbanBoardPage
     
     public function mount(): void
     {
-        $this->adapter(Task::kanban(
+        parent::mount();
+        
+        // Direct configuration approach
+        $this->adapter = new DefaultKanbanAdapter(
+            Task::class,
             'status',
-            Task::getStatusOptions(),
+            [
+                'backlog' => 'Backlog',
+                'todo' => 'To Do',
+                'in_progress' => 'In Progress',
+                'review' => 'In Review',
+                'testing' => 'Testing',
+                'done' => 'Done',
+            ],
             'title',
             'description',
             [
                 'priority' => 'Priority',
                 'due_date' => 'Due Date',
+            ],
+            [
+                'backlog' => 'gray',
+                'todo' => 'blue',
+                'in_progress' => 'yellow',
+                'review' => 'purple',
+                'testing' => 'cyan',
+                'done' => 'green',
             ]
-        ));
-        
-        parent::mount();
+        );
     }
 }
 ```
