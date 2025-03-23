@@ -69,6 +69,21 @@ class Task extends Model
             'done' => 'Done',
         ];
     }
+
+    /**
+     * Get the status colors for the Kanban board.
+     *
+     * @return array<string, string>
+     */
+    public function kanbanStatusColors(): array
+    {
+        return [
+            'todo' => 'blue',
+            'in_progress' => 'yellow',
+            'in_review' => 'purple',
+            'done' => 'green',
+        ];
+    }
 }
 ```
 
@@ -93,12 +108,14 @@ class TaskKanbanBoard extends KanbanBoard
         
         $this->statusField('status')
             ->statusValues(Task::getStatusOptions())
+            ->statusColors([
+                'todo' => 'blue',
+                'in_progress' => 'yellow',
+                'in_review' => 'purple',
+                'done' => 'green',
+            ])
             ->titleAttribute('title')
-            ->descriptionAttribute('description')
-            ->cardAttributes([
-                'priority' => 'Priority',
-                'due_date' => 'Due Date',
-            ]);
+            ->descriptionAttribute('description');
     }
     
     protected function getHeaderActions(): array
@@ -146,6 +163,168 @@ protected function getHeaderActions(): array
     ];
 }
 ```
+
+### Customizing Column Colors
+
+Flowforge allows you to customize the colors of your Kanban board columns. You can choose from a predefined set of Tailwind colors:
+
+- default
+- slate
+- gray
+- zinc
+- neutral
+- stone
+- red
+- orange
+- amber
+- yellow
+- lime
+- green
+- emerald
+- teal
+- cyan
+- sky
+- blue
+- indigo
+- violet
+- purple
+- fuchsia
+- pink
+- rose
+
+The colors are defined in the CSS file and can be easily customized by publishing the assets:
+
+```bash
+php artisan vendor:publish --tag="flowforge-assets"
+```
+
+Then you can modify the CSS classes in `resources/css/vendor/flowforge/flowforge.css`.
+
+To customize column colors, you can use one of the following methods:
+
+### Method 1: Using DefaultKanbanAdapter
+
+```php
+use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
+
+// With custom colors
+$adapter = new DefaultKanbanAdapter(
+    Task::class,
+    'status',
+    [
+        'todo' => 'To Do',
+        'in_progress' => 'In Progress',
+        'in_review' => 'In Review',
+        'done' => 'Done',
+    ],
+    'title',
+    'description',
+    [], // card attributes
+    [
+        'todo' => 'blue',
+        'in_progress' => 'yellow',
+        'in_review' => 'purple',
+        'done' => 'green',
+    ]
+);
+```
+
+### Method 2: Custom Adapter Implementation
+
+If you're creating a custom adapter, implement the `getStatusColors()` method:
+
+```php
+public function getStatusColors(): ?array
+{
+    return [
+        'todo' => 'indigo',
+        'in_progress' => 'amber', 
+        'in_review' => 'violet',
+        'done' => 'emerald',
+    ];
+}
+```
+
+### Method 3: Model-based Configuration
+
+Define a `kanbanStatusColors` method in your model:
+
+```php
+/**
+ * Get the status colors for the Kanban board.
+ *
+ * @return array<string, string>
+ */
+public function kanbanStatusColors(): array
+{
+    return [
+        'todo' => 'blue',
+        'in_progress' => 'yellow',
+        'in_review' => 'purple',
+        'done' => 'green',
+    ];
+}
+```
+
+### Method 4: Filament Resource Page
+
+Set the colors directly in your Filament page:
+
+```php
+public function mount(): void
+{
+    parent::mount();
+    
+    $this->statusField('status')
+        ->statusValues(Task::getStatusOptions())
+        ->statusColors([
+            'todo' => 'blue',
+            'in_progress' => 'yellow',
+            'in_review' => 'purple',
+            'done' => 'green',
+        ])
+        ->titleAttribute('title')
+        ->descriptionAttribute('description');
+}
+```
+
+If a status doesn't have a color defined, it will use the default styling.
+
+### Customizing Column Status Badges
+
+Flowforge allows you to customize the colors of the count badges in your Kanban board columns. These are the small rounded indicators that show the number of cards in each column. You can choose from a predefined set of Tailwind colors:
+
+- default
+- slate
+- gray
+- zinc
+- neutral
+- stone
+- red
+- orange
+- amber
+- yellow
+- lime
+- green
+- emerald
+- teal
+- cyan
+- sky
+- blue
+- indigo
+- violet
+- purple
+- fuchsia
+- pink
+- rose
+
+The badge colors are defined in the CSS file and can be easily customized by publishing the assets:
+
+```bash
+php artisan vendor:publish --tag="flowforge-assets"
+```
+
+Then you can modify the CSS classes in `resources/css/vendor/flowforge/flowforge.css`.
 
 ## Advanced Usage
 

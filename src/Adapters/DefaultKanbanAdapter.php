@@ -56,6 +56,13 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     protected array $cardAttributes = [];
 
     /**
+     * The status colors for the model.
+     *
+     * @var array<string, string>|null
+     */
+    protected ?array $statusColors = null;
+
+    /**
      * The order field for the model.
      *
      * @var string|null
@@ -100,6 +107,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
      * @param string $titleAttribute The title attribute
      * @param string|null $descriptionAttribute The description attribute
      * @param array<string> $cardAttributes The card attributes
+     * @param array<string, string>|null $statusColors The status colors
      * @param string|null $orderField The order field
      * @param string|null $recordLabel The singular label for the model
      * @param string|null $pluralRecordLabel The plural label for the model
@@ -111,6 +119,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         string  $titleAttribute,
         ?string $descriptionAttribute = null,
         array   $cardAttributes = [],
+        ?array  $statusColors = null,
         ?string $orderField = null,
         ?callable $createFormCallable = null,
         ?string $recordLabel = null,
@@ -123,6 +132,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         $this->titleAttribute = $titleAttribute;
         $this->descriptionAttribute = $descriptionAttribute;
         $this->cardAttributes = $cardAttributes;
+        $this->statusColors = $statusColors;
         $this->orderField = $orderField;
 
         $this->createFormCallable = $createFormCallable;
@@ -232,6 +242,17 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     public function getPluralRecordLabel(): string
     {
         return $this->pluralRecordLabel;
+    }
+
+    /**
+     * Get the color for each status.
+     * If not implemented or null is returned for a status, DEFAULT will be used.
+     *
+     * @return array<string, string>|null
+     */
+    public function getStatusColors(): ?array
+    {
+        return $this->statusColors;
     }
 
     /**
@@ -527,7 +548,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Convert the adapter to a Livewire-compatible array.
      *
-     * @return array<string, mixed>
+     * @return array
      */
     public function toLivewire(): array
     {
@@ -538,6 +559,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             'titleAttribute' => $this->getTitleAttribute(),
             'descriptionAttribute' => $this->getDescriptionAttribute(),
             'cardAttributes' => $this->getCardAttributes(),
+            'statusColors' => $this->getStatusColors(),
             'orderField' => $this->getOrderField(),
             'createFormCallable' => $this->createFormCallable,
             'recordLabel' => $this->getRecordLabel(),
@@ -560,6 +582,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             $value['titleAttribute'],
             $value['descriptionAttribute'] ?? null,
             $value['cardAttributes'] ?? [],
+            $value['statusColors'] ?? null,
             $value['orderField'] ?? null,
              $value['createFormCallable'] ?? null,
             $value['recordLabel'] ?? null,

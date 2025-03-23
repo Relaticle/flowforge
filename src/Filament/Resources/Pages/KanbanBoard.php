@@ -36,6 +36,11 @@ class KanbanBoard extends Page
     protected array $cardAttributes = [];
 
     /**
+     * @var array<string, string>|null
+     */
+    protected ?array $statusColors = null;
+
+    /**
      * @var string|null
      */
     protected ?string $orderField = null;
@@ -131,6 +136,19 @@ class KanbanBoard extends Page
     public function cardAttributes(array $attributes): static
     {
         $this->cardAttributes = $attributes;
+
+        return $this;
+    }
+
+    /**
+     * Set the status colors for the Kanban board columns.
+     *
+     * @param array<string, string> $colors
+     * @return static
+     */
+    public function statusColors(array $colors): static
+    {
+        $this->statusColors = $colors;
 
         return $this;
     }
@@ -232,6 +250,10 @@ class KanbanBoard extends Page
 
             if (method_exists($instance, 'setKanbanCardAttributes') && $this->cardAttributes) {
                 $instance->setKanbanCardAttributes($this->cardAttributes);
+            }
+
+            if (method_exists($instance, 'setKanbanStatusColors') && $this->statusColors) {
+                $instance->setKanbanStatusColors($this->statusColors);
             }
 
             if (method_exists($instance, 'setKanbanOrderField') && $this->orderField) {

@@ -15,6 +15,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
+use Relaticle\Flowforge\Enums\KanbanColor;
 
 class KanbanBoard extends Component implements HasForms
 {
@@ -93,6 +94,7 @@ class KanbanBoard extends Component implements HasForms
         $this->config = [
             'statusField' => $adapter->getStatusField(),
             'statusValues' => $adapter->getStatusValues(),
+            'statusColors' => $this->resolveStatusColors(),
             'titleAttribute' => $adapter->getTitleAttribute(),
             'descriptionAttribute' => $adapter->getDescriptionAttribute(),
             'cardAttributes' => $adapter->getCardAttributes(),
@@ -113,6 +115,35 @@ class KanbanBoard extends Component implements HasForms
         }
 
         $this->loadColumnsData();
+    }
+
+    /**
+     * Resolve the status colors with fallback to default
+     * These are used for status count badges
+     *
+     * @return array<string, string>
+     */
+    protected function resolveStatusColors(): array
+    {
+        // Get custom colors from adapter if available
+        $customColors = method_exists($this->adapter, 'getStatusColors') 
+            ? $this->adapter->getStatusColors() ?? [] 
+            : [];
+        
+        // Ensure all statuses have a color
+        $statuses = array_keys($this->adapter->getStatusValues());
+        $statusColors = [];
+        
+        foreach ($statuses as $status) {
+            // Get the color name or default to 'default'
+            $colorName = $customColors[$status] ?? null;
+            
+            // Convert to KanbanColor enum and get CSS class for the badge
+            $color = KanbanColor::fromStringOrDefault($colorName);
+            $statusColors[$status] = $color->classes();
+        }
+        
+        return $statusColors;
     }
 
     /**

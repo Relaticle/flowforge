@@ -24,6 +24,13 @@ trait HasKanbanBoard
     protected ?array $kanbanStatusValues = null;
 
     /**
+     * Status colors for Kanban board.
+     *
+     * @var array|null
+     */
+    protected ?array $kanbanStatusColors = null;
+
+    /**
      * Title attribute for Kanban board.
      *
      * @var string|null
@@ -95,6 +102,7 @@ trait HasKanbanBoard
         $titleAttribute = $this->getKanbanTitleAttribute();
         $descriptionAttribute = $this->getKanbanDescriptionAttribute();
         $cardAttributes = $this->getKanbanCardAttributes();
+        $statusColors = $this->getKanbanStatusColors();
         $orderField = $this->getKanbanOrderField();
         $createFormCallback = $this->getKanbanCreateFormCallback();
         $recordLabel = $this->getKanbanRecordLabel();
@@ -107,6 +115,7 @@ trait HasKanbanBoard
             $titleAttribute,
             $descriptionAttribute,
             $cardAttributes,
+            $statusColors,
             $orderField,
             $createFormCallback,
             $recordLabel,
@@ -167,6 +176,34 @@ trait HasKanbanBoard
     public function setKanbanStatusValues(array $values): self
     {
         $this->kanbanStatusValues = $values;
+        return $this;
+    }
+
+    /**
+     * Get the status colors for Kanban board.
+     *
+     * @return array<string, string>
+     */
+    public function getKanbanStatusColors(): array
+    {
+        if ($this->kanbanStatusColors !== null) {
+            return $this->kanbanStatusColors;
+        }
+
+        return method_exists($this, 'kanbanStatusColors')
+            ? $this->kanbanStatusColors()
+            : [];
+    }
+
+    /**
+     * Set the status colors for Kanban board.
+     *
+     * @param array<string, string> $colors
+     * @return self
+     */
+    public function setKanbanStatusColors(array $colors): self
+    {
+        $this->kanbanStatusColors = $colors;
         return $this;
     }
 

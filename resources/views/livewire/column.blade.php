@@ -1,7 +1,7 @@
 @props(['columnId', 'column', 'config'])
 
 <div
-    class="kanban-column w-[300px] min-w-[300px] flex-shrink-0 bg-kanban-column-bg dark:bg-kanban-column-bg border border-kanban-column-border dark:border-gray-700 shadow-kanban-column dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden">
+    class="kanban-column w-[300px] min-w-[300px] flex-shrink-0 border border-kanban-column-border dark:border-gray-700 shadow-kanban-column dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden">
     <!-- Column Header -->
     <div
         class="kanban-column-header flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700">
@@ -10,7 +10,7 @@
                 {{ $column['name'] }}
             </h3>
             <div
-                class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium kanban-status-{{ str_replace('_', '-', $columnId) }}">
+                class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium {{ $config['statusColors'][$columnId] ?? 'kanban-status-' . str_replace('_', '-', $columnId) }}">
                 {{ $column['total'] ?? count($column['items']) }}
             </div>
         </div>

@@ -155,4 +155,12 @@ interface IKanbanAdapter
      * @return bool
      */
     public function updateColumnCards(string|int $columnId, array $cards): bool;
+
+    /**
+     * Get the color for each status.
+     * If not implemented or null is returned for a status, default colors from config will be used.
+     *
+     * @return array<string, string>|null
+     */
+    public function getStatusColors(): ?array;
 }

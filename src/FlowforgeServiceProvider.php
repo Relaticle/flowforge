@@ -17,6 +17,7 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Relaticle\Flowforge\Commands\FlowforgeCommand;
+use Relaticle\Flowforge\Enums\KanbanColor;
 use Relaticle\Flowforge\Livewire\KanbanBoard;
 use Relaticle\Flowforge\Testing\TestsFlowforge;
 

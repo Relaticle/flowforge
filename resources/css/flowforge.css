@@ -294,7 +294,7 @@
     @apply animate-pulse rounded-md bg-gray-200 dark:bg-gray-700;
 }
 
-/* Add Status Color Classes */
+/* Add Status Color Classes for count badges */
 .kanban-status-todo {
     @apply bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200;
 }
@@ -309,6 +309,99 @@
 
 .kanban-status-done {
     @apply bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300;
+}
+
+/* Kanban badge color classes - used for count badges */
+.kanban-color-default {
+    @apply bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200;
+}
+
+.kanban-color-slate {
+    @apply bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200;
+}
+
+.kanban-color-gray {
+    @apply bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200;
+}
+
+.kanban-color-zinc {
+    @apply bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200;
+}
+
+.kanban-color-neutral {
+    @apply bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200;
+}
+
+.kanban-color-stone {
+    @apply bg-stone-200 text-stone-700 dark:bg-stone-700 dark:text-stone-200;
+}
+
+.kanban-color-red {
+    @apply bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300;
+}
+
+.kanban-color-orange {
+    @apply bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300;
+}
+
+.kanban-color-amber {
+    @apply bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300;
+}
+
+.kanban-color-yellow {
+    @apply bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300;
+}
+
+.kanban-color-lime {
+    @apply bg-lime-100 text-lime-700 dark:bg-lime-900/50 dark:text-lime-300;
+}
+
+.kanban-color-green {
+    @apply bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300;
+}
+
+.kanban-color-emerald {
+    @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300;
+}
+
+.kanban-color-teal {
+    @apply bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300;
+}
+
+.kanban-color-cyan {
+    @apply bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300;
+}
+
+.kanban-color-sky {
+    @apply bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300;
+}
+
+.kanban-color-blue {
+    @apply bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300;
+}
+
+.kanban-color-indigo {
+    @apply bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300;
+}
+
+.kanban-color-violet {
+    @apply bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300;
+}
+
+.kanban-color-purple {
+    @apply bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300;
+}
+
+.kanban-color-fuchsia {
+    @apply bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/50 dark:text-fuchsia-300;
+}
+
+.kanban-color-pink {
+    @apply bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300;
+}
+
+.kanban-color-rose {
+    @apply bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300;
 }
 
 /* Responsive Adaptations */
