@@ -17,7 +17,6 @@ use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Relaticle\Flowforge\Commands\FlowforgeCommand;
-use Relaticle\Flowforge\Http\Controllers\KanbanController;
 use Relaticle\Flowforge\Livewire\KanbanBoard;
 use Relaticle\Flowforge\Testing\TestsFlowforge;
 
