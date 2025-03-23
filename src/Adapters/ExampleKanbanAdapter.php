@@ -7,7 +7,6 @@ use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
@@ -16,8 +15,6 @@ class ExampleKanbanAdapter implements IKanbanAdapter
 {
     /**
      * Get the model class.
-     *
-     * @return string
      */
     public function getModel(): string
     {
@@ -27,8 +24,7 @@ class ExampleKanbanAdapter implements IKanbanAdapter
     /**
      * Find a model by its ID.
      *
-     * @param mixed $id The model ID
-     * @return Model|null
+     * @param  mixed  $id  The model ID
      */
     public function getModelById($id): ?Model
     {
@@ -37,8 +33,6 @@ class ExampleKanbanAdapter implements IKanbanAdapter
 
     /**
      * Get the status field name for the model.
-     *
-     * @return string
      */
     public function getStatusField(): string
     {
@@ -77,44 +71,44 @@ class ExampleKanbanAdapter implements IKanbanAdapter
     }
 
     // Other required interface methods would go here
-    
+
     /* Required interface methods implementation omitted for brevity */
-    
+
     public function getItems(): Collection
     {
-        return new Collection();
+        return new Collection;
     }
-    
+
     public function getItemsForStatus(string $status, int $limit = 10): Collection
     {
-        return new Collection();
+        return new Collection;
     }
-    
+
     public function getTotalItemsCount(string $status): int
     {
         return 0;
     }
-    
+
     public function updateStatus(Model $model, string $status): bool
     {
         return true;
     }
-    
+
     public function getCardAttributes(): array
     {
         return [];
     }
-    
+
     public function getTitleAttribute(): string
     {
         return 'title';
     }
-    
+
     public function getDescriptionAttribute(): ?string
     {
         return 'description';
     }
-    
+
     public function getCreateForm(Form $form, mixed $activeColumn): Form
     {
         return $form
@@ -128,7 +122,7 @@ class ExampleKanbanAdapter implements IKanbanAdapter
                     ->required(),
             ]);
     }
-    
+
     public function getEditForm(Form $form): Form
     {
         return $form
@@ -141,29 +135,29 @@ class ExampleKanbanAdapter implements IKanbanAdapter
                     ->required(),
             ]);
     }
-    
+
     public function createCard(array $attributes): ?Model
     {
         return Task::create($attributes);
     }
-    
+
     public function updateCard(Model $card, array $attributes): bool
     {
         return $card->update($attributes);
     }
-    
+
     public function deleteCard(Model $card): bool
     {
         return $card->delete();
     }
-    
+
     public function getOrderField(): ?string
     {
         return 'order';
     }
-    
-    public function updateColumnCards(string|int $columnId, array $cards): bool
+
+    public function updateColumnCards(string | int $columnId, array $cards): bool
     {
         return true;
     }
-} 
+}

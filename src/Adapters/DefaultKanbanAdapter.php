@@ -23,8 +23,6 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 {
     /**
      * The status field for the model.
-     *
-     * @var string
      */
     protected string $statusField;
 
@@ -37,15 +35,11 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * The title attribute for the model.
-     *
-     * @var string
      */
     protected string $titleAttribute;
 
     /**
      * The description attribute for the model.
-     *
-     * @var string|null
      */
     protected ?string $descriptionAttribute;
 
@@ -65,18 +59,13 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * The order field for the model.
-     *
-     * @var string|null
      */
     protected ?string $orderField = null;
 
     /**
      * The model class for the adapter.
-     *
-     * @var string
      */
     protected string $modelClass;
-
 
     /**
      * The create form callable for the model.
@@ -87,46 +76,41 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * The singular label for the model.
-     *
-     * @var string
      */
     protected string $recordLabel;
 
     /**
      * The plural label for the model.
-     *
-     * @var string
      */
     protected string $pluralRecordLabel;
 
     /**
      * Create a new adapter instance.
      *
-     * @param string $modelClass The model class
-     * @param string $statusField The status field
-     * @param array<string, string> $statusValues The status values
-     * @param string $titleAttribute The title attribute
-     * @param string|null $descriptionAttribute The description attribute
-     * @param array<string> $cardAttributes The card attributes
-     * @param array<string, string>|null $statusColors The status colors
-     * @param string|null $orderField The order field
-     * @param string|null $recordLabel The singular label for the model
-     * @param string|null $pluralRecordLabel The plural label for the model
+     * @param  string  $modelClass  The model class
+     * @param  string  $statusField  The status field
+     * @param  array<string, string>  $statusValues  The status values
+     * @param  string  $titleAttribute  The title attribute
+     * @param  string|null  $descriptionAttribute  The description attribute
+     * @param  array<string>  $cardAttributes  The card attributes
+     * @param  array<string, string>|null  $statusColors  The status colors
+     * @param  string|null  $orderField  The order field
+     * @param  string|null  $recordLabel  The singular label for the model
+     * @param  string|null  $pluralRecordLabel  The plural label for the model
      */
     public function __construct(
-        string  $modelClass,
-        string  $statusField,
-        array   $statusValues,
-        string  $titleAttribute,
+        string $modelClass,
+        string $statusField,
+        array $statusValues,
+        string $titleAttribute,
         ?string $descriptionAttribute = null,
-        array   $cardAttributes = [],
-        ?array  $statusColors = null,
+        array $cardAttributes = [],
+        ?array $statusColors = null,
         ?string $orderField = null,
         ?callable $createFormCallable = null,
         ?string $recordLabel = null,
         ?string $pluralRecordLabel = null
-    )
-    {
+    ) {
         $this->modelClass = $modelClass;
         $this->statusField = $statusField;
         $this->statusValues = $statusValues;
@@ -145,8 +129,6 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the model class for the adapter.
-     *
-     * @return string
      */
     public function getModel(): string
     {
@@ -156,19 +138,17 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Find a model by its ID.
      *
-     * @param mixed $id The model ID
-     * @return Model|null
+     * @param  mixed  $id  The model ID
      */
     public function getModelById($id): ?Model
     {
         $modelClass = $this->getModel();
+
         return $modelClass::find($id);
     }
 
     /**
      * Get the status field for the model.
-     *
-     * @return string
      */
     public function getStatusField(): string
     {
@@ -187,8 +167,6 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the title attribute for the model.
-     *
-     * @return string
      */
     public function getTitleAttribute(): string
     {
@@ -197,8 +175,6 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the description attribute for the model.
-     *
-     * @return string|null
      */
     public function getDescriptionAttribute(): ?string
     {
@@ -217,8 +193,6 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the order field for the model.
-     *
-     * @return string|null
      */
     public function getOrderField(): ?string
     {
@@ -227,8 +201,6 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the singular label for the model.
-     *
-     * @return string
      */
     public function getRecordLabel(): string
     {
@@ -237,8 +209,6 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the plural label for the model.
-     *
-     * @return string
      */
     public function getPluralRecordLabel(): string
     {
@@ -264,14 +234,15 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     public function getItems(): Collection
     {
         $modelClass = $this->getModel();
+
         return $modelClass::all();
     }
 
     /**
      * Get the items for a specific status with pagination.
      *
-     * @param string $status The status value
-     * @param int $limit The number of items to return
+     * @param  string  $status  The status value
+     * @param  int  $limit  The number of items to return
      * @return Collection<int, Model>
      */
     public function getItemsForStatus(string $status, int $limit = 10): Collection
@@ -290,46 +261,43 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Get the total count of items for a specific status.
      *
-     * @param string $status The status value
-     * @return int
+     * @param  string  $status  The status value
      */
     public function getTotalItemsCount(string $status): int
     {
         $modelClass = $this->getModel();
+
         return $modelClass::where($this->getStatusField(), $status)->count();
     }
 
     /**
      * Update the status of a model.
      *
-     * @param Model $model The model to update
-     * @param string $status The new status value
-     * @return bool
+     * @param  Model  $model  The model to update
+     * @param  string  $status  The new status value
      */
     public function updateStatus(Model $model, string $status): bool
     {
         $model->{$this->getStatusField()} = $status;
+
         return $model->save();
     }
 
     /**
      * Update the order of a model.
      *
-     * @param string|int $columnId
-     * @param array $cards
-     * @return bool
      * @throws \Throwable
      */
-    public function updateColumnCards(string|int $columnId, array $cards): bool
+    public function updateColumnCards(string | int $columnId, array $cards): bool
     {
-        if (!$this->getOrderField()) {
+        if (! $this->getOrderField()) {
             return false;
         }
 
         $model = app($this->getModel());
 
         // Validate column ID exists in status values
-        if (!array_key_exists((string)$columnId, $this->getStatusValues())) {
+        if (! array_key_exists((string) $columnId, $this->getStatusValues())) {
             return false;
         }
 
@@ -349,9 +317,6 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the form class for creating cards.
-     *
-     * @param Form $form
-     * @return Form
      */
     public function getEditForm(Form $form): Form
     {
@@ -381,13 +346,10 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the form class for creating cards.
-     *
-     * @param Form $form
-     * @param mixed $activeColumn
-     * @return Form
      */
-    public function getCreateForm(Form $form, mixed $activeColumn): Form {
-        if($this->createFormCallable) {
+    public function getCreateForm(Form $form, mixed $activeColumn): Form
+    {
+        if ($this->createFormCallable) {
             return call_user_func($this->createFormCallable, $form, $activeColumn);
         }
 
@@ -460,13 +422,12 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Create a new card with the given attributes.
      *
-     * @param array<string, mixed> $attributes The card attributes
-     * @return Model|null
+     * @param  array<string, mixed>  $attributes  The card attributes
      */
     public function createCard(array $attributes): ?Model
     {
         $modelClass = $this->getModel();
-        $card = new $modelClass();
+        $card = new $modelClass;
 
         // Set status if provided, otherwise use the first status as default
         $status = $attributes[$this->getStatusField()] ?? array_key_first($this->getStatusValues());
@@ -504,9 +465,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Update an existing card with the given attributes.
      *
-     * @param Model $card The card to update
-     * @param array<string, mixed> $attributes The card attributes to update
-     * @return bool
+     * @param  Model  $card  The card to update
+     * @param  array<string, mixed>  $attributes  The card attributes to update
      */
     public function updateCard(Model $card, array $attributes): bool
     {
@@ -538,8 +498,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Delete an existing card.
      *
-     * @param Model $card The card to delete
-     * @return bool
+     * @param  Model  $card  The card to delete
      */
     public function deleteCard(Model $card): bool
     {
@@ -548,8 +507,6 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Convert the adapter to a Livewire-compatible array.
-     *
-     * @return array
      */
     public function toLivewire(): array
     {
@@ -571,7 +528,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Create a new adapter instance from a Livewire-compatible array.
      *
-     * @param array<string, mixed> $value The Livewire-compatible array
+     * @param  array<string, mixed>  $value  The Livewire-compatible array
      * @return static
      */
     public static function fromLivewire($value)
@@ -585,7 +542,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             $value['cardAttributes'] ?? [],
             $value['statusColors'] ?? null,
             $value['orderField'] ?? null,
-             $value['createFormCallable'] ?? null,
+            $value['createFormCallable'] ?? null,
             $value['recordLabel'] ?? null,
             $value['pluralRecordLabel'] ?? null
         );

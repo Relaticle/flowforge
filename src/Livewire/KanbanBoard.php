@@ -30,31 +30,23 @@ class KanbanBoard extends Component implements HasForms
 
     /**
      * The Kanban board configuration.
-     *
-     * @var array
      */
     public array $config = [];
 
     /**
      * The columns data for the Kanban board.
-     *
-     * @var array
      */
     public array $columns = [];
 
     /**
      * The currently active column for creating a card.
-     *
-     * @var string|null
      */
     public ?string $activeColumn = null;
 
     /**
      * The currently selected card ID for editing.
-     *
-     * @var int|string|null
      */
-    public string|int|null $activeCardId = null;
+    public string | int | null $activeCardId = null;
 
     /**
      * Form data property for create form
@@ -76,39 +68,30 @@ class KanbanBoard extends Component implements HasForms
 
     /**
      * The number of cards to show per column.
-     *
-     * @var array
      */
     public array $perPage = [];
 
     /**
      * The columns currently being loaded.
-     *
-     * @var array
      */
     public array $loading = [];
 
     /**
      * The initial number of cards to show per column.
-     *
-     * @var int
      */
     public int $initialCardsCount = 10;
 
     /**
      * The number of cards to load when loading more.
-     *
-     * @var int
      */
     public int $cardsIncrement = 10;
 
     /**
      * Mount the component.
      *
-     * @param IKanbanAdapter $adapter The Kanban board adapter
-     * @param int|null $initialCardsCount Initial number of cards to show per column
-     * @param int|null $cardsIncrement Number of cards to load when loading more
-     * @return void
+     * @param  IKanbanAdapter  $adapter  The Kanban board adapter
+     * @param  int|null  $initialCardsCount  Initial number of cards to show per column
+     * @param  int|null  $cardsIncrement  Number of cards to load when loading more
      */
     public function mount(IKanbanAdapter $adapter, ?int $initialCardsCount = null, ?int $cardsIncrement = null): void
     {
@@ -209,8 +192,6 @@ class KanbanBoard extends Component implements HasForms
 
     /**
      * Load the columns data for the Kanban board.
-     *
-     * @return void
      */
     protected function loadColumnsData(): void
     {
@@ -229,21 +210,20 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Get the items for a specific status with pagination.
      *
-     * @param string $status The status value
-     * @return array
+     * @param  string  $status  The status value
      */
     public function getItemsForStatus(string $status): array
     {
         $perPage = $this->perPage[$status] ?? 10;
         $items = $this->adapter->getItemsForStatus($status, $perPage);
+
         return $this->formatItems($items);
     }
 
     /**
      * Get the total count of items for a specific status.
      *
-     * @param string $status The status value
-     * @return int
+     * @param  string  $status  The status value
      */
     public function getTotalItemsCount(string $status): int
     {
@@ -253,16 +233,15 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Load more items for a specific column.
      *
-     * @param string $columnId The column ID
-     * @param int|null $count Number of additional items to load (null = use configured increment)
-     * @return void
+     * @param  string  $columnId  The column ID
+     * @param  int|null  $count  Number of additional items to load (null = use configured increment)
      */
     public function loadMoreItems(string $columnId, ?int $count = null): void
     {
         $this->loading[$columnId] = true;
 
         // Increment only the specific column's perPage value
-        if (!isset($this->perPage[$columnId])) {
+        if (! isset($this->perPage[$columnId])) {
             $this->perPage[$columnId] = $this->initialCardsCount;
         }
 
@@ -280,8 +259,7 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Format the items for display in the Kanban board.
      *
-     * @param Collection $items The items to format
-     * @return array
+     * @param  Collection  $items  The items to format
      */
     protected function formatItems(Collection $items): array
     {
@@ -315,10 +293,6 @@ class KanbanBoard extends Component implements HasForms
 
     /**
      * Update the order of an item within the same column.
-     *
-     * @param $columnId
-     * @param $cards
-     * @return bool
      */
     public function updateColumnCards($columnId, $cards): bool
     {
@@ -332,17 +306,16 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Move a card from one column to another.
      *
-     * @param string|int $cardId The card ID
-     * @param string $fromColumn The source column ID
-     * @param string $toColumn The target column ID
-     * @param array $toColumnCards The ordered cards in the target column
-     * @return bool
+     * @param  string|int  $cardId  The card ID
+     * @param  string  $fromColumn  The source column ID
+     * @param  string  $toColumn  The target column ID
+     * @param  array  $toColumnCards  The ordered cards in the target column
      */
     public function moveCardBetweenColumns($cardId, $fromColumn, $toColumn, $toColumnCards): bool
     {
         $card = $this->adapter->getModelById($cardId);
 
-        if (!$card) {
+        if (! $card) {
             return false;
         }
 
@@ -361,8 +334,7 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Open the create card form modal.
      *
-     * @param string $columnId The column ID
-     * @return void
+     * @param  string  $columnId  The column ID
      */
     public function openCreateForm(string $columnId): void
     {
@@ -382,22 +354,22 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Open the edit card form modal.
      *
-     * @param string|int $cardId The card ID
-     * @param string $columnId The column ID
-     * @return void
+     * @param  string|int  $cardId  The card ID
+     * @param  string  $columnId  The column ID
      */
-    public function openEditForm(string|int $cardId, string $columnId): void
+    public function openEditForm(string | int $cardId, string $columnId): void
     {
         $this->activeCardId = $cardId;
         $this->activeColumn = $columnId;
 
         $card = $this->adapter->getModelById($cardId);
 
-        if (!$card) {
+        if (! $card) {
             Notification::make()
                 ->title(__('Card not found'))
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -421,8 +393,6 @@ class KanbanBoard extends Component implements HasForms
 
     /**
      * Create a new card with the given attributes.
-     *
-     * @return void
      */
     public function createCard(): void
     {
@@ -466,8 +436,6 @@ class KanbanBoard extends Component implements HasForms
 
     /**
      * Update an existing card with the given attributes.
-     *
-     * @return void
      */
     public function updateCard(): void
     {
@@ -476,11 +444,12 @@ class KanbanBoard extends Component implements HasForms
 
         $card = $this->adapter->getModelById($this->activeCardId);
 
-        if (!$card) {
+        if (! $card) {
             Notification::make()
                 ->title(__('Card not found'))
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -518,18 +487,17 @@ class KanbanBoard extends Component implements HasForms
 
     /**
      * Delete an existing card.
-     *
-     * @return void
      */
     public function deleteCard(): void
     {
         $card = $this->adapter->getModelById($this->activeCardId);
 
-        if (!$card) {
+        if (! $card) {
             Notification::make()
                 ->title(__('Card not found'))
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -561,8 +529,6 @@ class KanbanBoard extends Component implements HasForms
 
     /**
      * Render the component.
-     *
-     * @return View
      */
     public function render(): View
     {

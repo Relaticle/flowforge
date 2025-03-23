@@ -12,9 +12,6 @@ abstract class KanbanBoardPage extends Page
 
     protected string $model;
 
-    /**
-     * @var string
-     */
     protected string $statusField = 'status';
 
     /**
@@ -22,14 +19,8 @@ abstract class KanbanBoardPage extends Page
      */
     protected array $statusValues = [];
 
-    /**
-     * @var string
-     */
     protected string $titleAttribute = 'name';
 
-    /**
-     * @var string|null
-     */
     protected ?string $descriptionAttribute = null;
 
     /**
@@ -42,9 +33,6 @@ abstract class KanbanBoardPage extends Page
      */
     protected ?array $statusColors = null;
 
-    /**
-     * @var string|null
-     */
     protected ?string $orderField = null;
 
     /**
@@ -52,25 +40,14 @@ abstract class KanbanBoardPage extends Page
      */
     protected mixed $createFormCallback = null;
 
-    /**
-     * @var IKanbanAdapter|null
-     */
     protected ?IKanbanAdapter $adapter = null;
 
-    /**
-     * @var string|null
-     */
     protected ?string $recordLabel = null;
 
-    /**
-     * @var string|null
-     */
     protected ?string $pluralRecordLabel = null;
 
     /**
      * Mount the page.
-     *
-     * @return void
      */
     public function mount(): void
     {
@@ -86,9 +63,6 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the status field for the Kanban board.
-     *
-     * @param string $field
-     * @return static
      */
     public function statusField(string $field): static
     {
@@ -100,8 +74,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the status values for the Kanban board.
      *
-     * @param array<string, string> $values
-     * @return static
+     * @param  array<string, string>  $values
      */
     public function statusValues(array $values): static
     {
@@ -112,9 +85,6 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the title attribute for the Kanban cards.
-     *
-     * @param string $attribute
-     * @return static
      */
     public function titleAttribute(string $attribute): static
     {
@@ -125,9 +95,6 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the description attribute for the Kanban cards.
-     *
-     * @param string $attribute
-     * @return static
      */
     public function descriptionAttribute(string $attribute): static
     {
@@ -139,8 +106,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the card attributes for the Kanban cards.
      *
-     * @param array<string, string> $attributes
-     * @return static
+     * @param  array<string, string>  $attributes
      */
     public function cardAttributes(array $attributes): static
     {
@@ -152,8 +118,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the status colors for the Kanban board columns.
      *
-     * @param array<string, string> $colors
-     * @return static
+     * @param  array<string, string>  $colors
      */
     public function statusColors(array $colors): static
     {
@@ -164,9 +129,6 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the order field for the Kanban board.
-     *
-     * @param string $field
-     * @return static
      */
     public function orderField(string $field): static
     {
@@ -184,9 +146,6 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set a custom adapter for the Kanban board.
-     *
-     * @param IKanbanAdapter $adapter
-     * @return static
      */
     public function adapter(IKanbanAdapter $adapter): static
     {
@@ -197,9 +156,6 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the singular record label for the Kanban items.
-     *
-     * @param string $label
-     * @return static
      */
     public function recordLabel(string $label): static
     {
@@ -210,9 +166,6 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the plural record label for the Kanban items.
-     *
-     * @param string $label
-     * @return static
      */
     public function pluralRecordLabel(string $label): static
     {
@@ -224,7 +177,6 @@ abstract class KanbanBoardPage extends Page
     /**
      * Get the Kanban adapter.
      *
-     * @return IKanbanAdapter
      * @throws Exception
      */
     public function getAdapter(): IKanbanAdapter
@@ -235,14 +187,14 @@ abstract class KanbanBoardPage extends Page
 
         $model = $this->model;
 
-        if(!class_exists($model)) {
+        if (! class_exists($model)) {
             throw new Exception("Model class {$model} does not exist.");
         }
 
         // Check if the model uses the HasKanbanBoard trait
         if (method_exists($model, 'getKanbanAdapter')) {
             // Create an instance and configure it
-            $instance = new $model();
+            $instance = new $model;
 
             // Override default values if they are provided
             if (method_exists($instance, 'setKanbanStatusField') && $this->statusField) {

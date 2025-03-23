@@ -10,16 +10,14 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Route;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Relaticle\Flowforge\Commands\FlowforgeCommand;
+use Relaticle\Flowforge\Livewire\KanbanBoard;
+use Relaticle\Flowforge\Testing\TestsFlowforge;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Relaticle\Flowforge\Commands\FlowforgeCommand;
-use Relaticle\Flowforge\Enums\KanbanColor;
-use Relaticle\Flowforge\Livewire\KanbanBoard;
-use Relaticle\Flowforge\Testing\TestsFlowforge;
 
 class FlowforgeServiceProvider extends PackageServiceProvider
 {
@@ -76,11 +74,10 @@ class FlowforgeServiceProvider extends PackageServiceProvider
             $this->getAssetPackageName()
         );
 
-
         // Asset Registration
         FilamentAsset::register(
-            assets:[
-                AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js')
+            assets: [
+                AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js'),
             ],
             package: $this->getAssetPackageName()
         );
@@ -98,7 +95,7 @@ class FlowforgeServiceProvider extends PackageServiceProvider
 
         // Handle Stubs
         if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__.'/../stubs/') as $file) {
+            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
                 $this->publishes([
                     $file->getRealPath() => base_path("stubs/custom-fields/{$file->getFilename()}"),
                 ], 'custom-fields-stubs');
@@ -114,8 +111,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
 
     /**
      * Register the package Blade components.
-     *
-     * @return void
      */
     private function registerBladeComponents(): void
     {
@@ -144,8 +139,8 @@ class FlowforgeServiceProvider extends PackageServiceProvider
     {
         return [
             // AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/components/flowforge.js'),
-            Css::make('flowforge', __DIR__.'/../resources/dist/flowforge.css')->loadedOnRequest(),
-            Js::make('flowforge', __DIR__.'/../resources/dist/flowforge.js')->loadedOnRequest()
+            Css::make('flowforge', __DIR__ . '/../resources/dist/flowforge.css')->loadedOnRequest(),
+            Js::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js')->loadedOnRequest(),
         ];
     }
 
