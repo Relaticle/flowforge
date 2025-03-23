@@ -64,10 +64,9 @@ Create a new page that extends the `KanbanBoard` class and configure it with all
 ```php
 namespace App\Filament\Resources\TaskResource\Pages;
 
-use App\Filament\Resources\TaskResource;
-use Relaticle\Flowforge\Filament\Resources\Pages\KanbanBoard;
+use App\Filament\Resources\TaskResource;use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
 
-class TaskKanbanBoard extends KanbanBoard
+class TaskKanbanBoard extends KanbanBoardPage
 {
     protected static string $resource = TaskResource::class;
     
@@ -339,15 +338,9 @@ While it's possible to define configuration in the model, we recommend keeping a
 You can customize the forms used for creating and editing cards by implementing custom form methods in your Kanban board page:
 
 ```php
-use App\Filament\Resources\TaskResource;
-use Relaticle\Flowforge\Filament\Resources\Pages\KanbanBoard;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Form;
+use Filament\Forms\Components\DatePicker;use Filament\Forms\Components\RichEditor;use Filament\Forms\Components\Select;use Filament\Forms\Components\TextInput;use Filament\Forms\Form;use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
 
-class TaskKanbanBoard extends KanbanBoard
+class TaskKanbanBoard extends KanbanBoardPage
 {
     // ... other configurations
     
