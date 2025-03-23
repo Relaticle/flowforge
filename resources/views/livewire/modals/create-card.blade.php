@@ -1,9 +1,8 @@
 @props(['config'])
 
-<x-filament::modal id="create-card-modal" :heading="__('Create New :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card'])">
-    <x-filament::modal.description>
-        {{ __('Add a new :recordLabel to the board', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}
-    </x-filament::modal.description>
+<x-filament::modal id="create-card-modal" :heading="__('Create New :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card'])"
+:description="__('Add a new :recordLabel to the board', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')])"
+>
 
     {{ $this->createForm }}
 
