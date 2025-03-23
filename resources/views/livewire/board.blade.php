@@ -12,8 +12,9 @@
         }
     })"
 >
+
     <!-- Board Content -->
-    <div class="flex flex-row h-full w-full overflow-x-auto overflow-y-hidden py-4 px-2 gap-4">
+    <div class="flex flex-row h-full w-full overflow-x-auto overflow-y-hidden py-4 px-2 gap-4 kanban-board">
         @foreach($columns as $columnId => $column)
             <x-flowforge::kanban.column
                 :column-id="$columnId"

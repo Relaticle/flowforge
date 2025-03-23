@@ -1,11 +1,19 @@
-<div
-    class="inline-flex items-center text-xs px-2 py-0.5 rounded-full"
-    :class="{
-        'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': key === 'category',
-        'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300': key === 'assignee',
-        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': key === 'due_date',
-        'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300': !['category', 'assignee', 'due_date'].includes(key)
-    }"
->
-    <span x-text="value"></span>
+@props(['label' => null, 'value', 'color' => 'gray', 'icon' => null])
+
+<div @class([
+    "kanban-card-badge",
+    "bg-{$color}-100 text-{$color}-700 dark:bg-{$color}-900/40 dark:text-{$color}-400" => $color !== 'gray',
+    "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300" => $color === 'gray',
+])>
+    @if($icon)
+        <svg class="inline-block w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            {!! $icon !!}
+        </svg>
+    @endif
+
+    @if($label)
+        <span class="font-medium text-primary-600 dark:text-primary-400 mr-1">{{ $label }}:</span>
+    @endif
+
+    <span>{{ $value }}</span>
 </div>

@@ -35,3 +35,123 @@
         transform: translateX(0);
     }
 }
+
+@layer base {
+    :root {
+        --kanban-column-bg: theme('colors.gray.100');
+        --kanban-column-header: theme('colors.gray.700');
+        --kanban-column-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+        --kanban-card-bg: theme('colors.white');
+        --kanban-card-hover: theme('colors.gray.50');
+        --kanban-card-shadow-normal: 0 2px 4px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --kanban-card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.03);
+    }
+
+    .dark {
+        --kanban-column-bg: rgba(31, 41, 55, 0.8);
+        --kanban-column-header: theme('colors.gray.200');
+        --kanban-column-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+
+        --kanban-card-bg: rgba(43, 55, 73, 0.95);
+        --kanban-card-hover: rgba(55, 65, 81, 0.95);
+        --kanban-card-shadow-normal: 0 2px 4px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.3);
+        --kanban-card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+}
+
+/* Kanban Board Layout */
+.kanban-board {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.300') transparent;
+}
+
+.kanban-board::-webkit-scrollbar {
+    height: 6px;
+}
+
+.kanban-board::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.kanban-board::-webkit-scrollbar-thumb {
+    background-color: theme('colors.gray.300');
+    border-radius: 10px;
+}
+
+.dark .kanban-board::-webkit-scrollbar-thumb {
+    background-color: theme('colors.gray.600');
+}
+
+/* Column Styles */
+.kanban-column {
+    backdrop-filter: blur(3px);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.kanban-column-header {
+    position: relative;
+}
+
+.kanban-column-header::after {
+    content: '';
+    position: absolute;
+    height: 3px;
+    width: 40px;
+    left: 0.75rem;
+    bottom: -6px;
+    background: theme('colors.primary.500');
+    border-radius: 3px;
+    opacity: 0.7;
+}
+
+/* Card Styles */
+.kanban-card {
+    transition-property: box-shadow, transform, background-color;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    border-left: 3px solid transparent;
+}
+
+.kanban-card.priority-high {
+    border-left-color: theme('colors.red.500');
+}
+
+.kanban-card.priority-medium {
+    border-left-color: theme('colors.amber.500');
+}
+
+.kanban-card.priority-low {
+    border-left-color: theme('colors.green.500');
+}
+
+/* Card Badge Styles */
+.kanban-card-badge {
+    @apply text-xs font-medium px-2 py-0.5 rounded-full;
+}
+
+/* Empty States */
+.kanban-empty-column {
+    opacity: 0.7;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.kanban-empty-column:hover {
+    opacity: 1;
+}
+
+/* Drag Handle */
+.kanban-drag-handle {
+    @apply opacity-0 transition-opacity group-hover:opacity-70 hover:opacity-100;
+}
+
+/* Loading State */
+.kanban-loading-indicator {
+    @apply flex items-center justify-center h-full w-full;
+}
+
+.kanban-loading-shimmer {
+    @apply animate-pulse rounded-md bg-gray-200 dark:bg-gray-700;
+}
