@@ -1,7 +1,7 @@
 @props(['config'])
 
-<x-filament::modal id="create-card-modal" :heading="__('Create New :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card'])"
-:description="__('Add a new :recordLabel to the board', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')])"
+<x-filament::modal id="create-card-modal" :heading="__('Create New :cardLabel', ['cardLabel' => $config['cardLabel'] ?? 'Card'])"
+:description="__('Add a new :cardLabel to the board', ['cardLabel' => strtolower($config['cardLabel'] ?? 'card')])"
 >
 
     {{ $this->createForm }}
@@ -18,7 +18,7 @@
             <x-filament::button
                 wire:click="createCard"
             >
-                {{ __('Create :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card']) }}
+                {{ __('Create :cardLabel', ['cardLabel' => $config['cardLabel'] ?? 'Card']) }}
             </x-filament::button>
         </div>
     </x-slot>

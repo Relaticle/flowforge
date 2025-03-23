@@ -7,10 +7,10 @@
         class="kanban-column-header flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center">
             <h3 class="text-sm font-medium text-kanban-column-header dark:text-kanban-column-header">
-                {{ $column['name'] }}
+                {{ $column['label'] }}
             </h3>
             <div
-                class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium {{ $config['statusColors'][$columnId] ?? 'kanban-status-' . str_replace('_', '-', $columnId) }}">
+                class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium {{ $config['columnColors'][$columnId] ?? 'kanban-column-' . str_replace('_', '-', $columnId) }}">
                 {{ $column['total'] ?? count($column['items']) }}
             </div>
         </div>
@@ -33,7 +33,7 @@
         x-sortable
         x-sortable-group="cards"
         data-column-id="{{ $columnId }}"
-        @end.stop="$wire.updateColumnCards($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
+        @end.stop="$wire.reorderCardsInColumn($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
         class="p-3 flex-1 overflow-y-auto overflow-x-hidden"
         style="max-height: calc(100vh - 13rem);"
     >
@@ -67,7 +67,7 @@
                         </div>
                     </div>
                     <div wire:loading.remove wire:target="loadMoreItems('{{ $columnId }}')" class="text-xs text-gray-400">
-                        {{ count($column['items']) }} / {{ $column['total'] }} {{ $config['pluralRecordLabel'] }}
+                        {{ count($column['items']) }} / {{ $column['total'] }} {{ $config['pluralCardLabel'] }}
                     </div>
                 </div>
             @endif
