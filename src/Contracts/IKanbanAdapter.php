@@ -49,6 +49,23 @@ interface IKanbanAdapter
     public function getItems(): Collection;
 
     /**
+     * Get items for a specific status with pagination.
+     *
+     * @param string $status The status value
+     * @param int $limit The number of items to return
+     * @return Collection
+     */
+    public function getItemsForStatus(string $status, int $limit = 10): Collection;
+    
+    /**
+     * Get the total count of items for a specific status.
+     *
+     * @param string $status The status value
+     * @return int
+     */
+    public function getTotalItemsCount(string $status): int;
+
+    /**
      * Update the status of an item.
      *
      * @param Model $model

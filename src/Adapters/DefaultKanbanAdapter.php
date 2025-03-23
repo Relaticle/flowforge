@@ -228,12 +228,13 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     }
 
     /**
-     * Get the items for a specific status.
+     * Get the items for a specific status with pagination.
      *
      * @param string $status The status value
+     * @param int $limit The number of items to return
      * @return Collection<int, Model>
      */
-    public function getItemsForStatus(string $status): Collection
+    public function getItemsForStatus(string $status, int $limit = 10): Collection
     {
         $modelClass = $this->getModel();
         $query = $modelClass::where($this->getStatusField(), $status);
@@ -243,7 +244,19 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             $query->orderBy($this->getOrderField());
         }
 
-        return $query->get();
+        return $query->limit($limit)->get();
+    }
+
+    /**
+     * Get the total count of items for a specific status.
+     *
+     * @param string $status The status value
+     * @return int
+     */
+    public function getTotalItemsCount(string $status): int
+    {
+        $modelClass = $this->getModel();
+        return $modelClass::where($this->getStatusField(), $status)->count();
     }
 
     /**
@@ -329,7 +342,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         }
 
         // Set additional card attributes
-        foreach ($this->getCardAttributes() as $attribute) {
+        foreach ($this->getCardAttributes() as $attribute => $label) {
             if (isset($attributes[$attribute])) {
                 $card->{$attribute} = $attributes[$attribute];
             }
@@ -363,7 +376,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         }
 
         // Update additional card attributes
-        foreach ($this->getCardAttributes() as $attribute) {
+        foreach ($this->getCardAttributes() as $attribute => $label) {
             if (isset($attributes[$attribute])) {
                 $card->{$attribute} = $attributes[$attribute];
             }

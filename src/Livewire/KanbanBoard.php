@@ -4,15 +4,29 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Livewire;
 
-use Filament\Forms\Concerns\HasStateBindingModifiers;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
 
-class KanbanBoard extends Component
+class KanbanBoard extends Component implements HasForms
 {
+    use InteractsWithForms;
+    use WithPagination;
+
     /**
      * The Kanban board adapter.
      */
@@ -34,6 +48,45 @@ class KanbanBoard extends Component
     public array $columns = [];
 
     /**
+     * The currently active column for creating a card.
+     *
+     * @var string|null
+     */
+    public ?string $activeColumn = null;
+
+    /**
+     * The currently selected card ID for editing.
+     *
+     * @var int|string|null
+     */
+    public string|int|null $activeCardId = null;
+
+    /**
+     * Form data property for create form
+     */
+    #[Validate]
+    public array $createFormData = [
+        'title' => '',
+        'description' => '',
+    ];
+
+    /**
+     * Form data property for edit form
+     */
+    #[Validate]
+    public array $editFormData = [
+        'title' => '',
+        'description' => '',
+    ];
+
+    /**
+     * The number of cards to show per column.
+     *
+     * @var int
+     */
+    public int $perPage = 10;
+
+    /**
      * Mount the component.
      *
      * @param IKanbanAdapter $adapter The Kanban board adapter
@@ -53,7 +106,119 @@ class KanbanBoard extends Component
             'recordLabel' => method_exists($adapter, 'getRecordLabel') ? $adapter->getRecordLabel() : 'Card',
             'pluralRecordLabel' => method_exists($adapter, 'getPluralRecordLabel') ? $adapter->getPluralRecordLabel() : 'Cards',
         ];
+
+        // Ensure the status field is populated in both form data arrays
+        $statusField = $adapter->getStatusField();
+        $this->createFormData[$statusField] = array_key_first($adapter->getStatusValues());
+        $this->editFormData[$statusField] = array_key_first($adapter->getStatusValues());
+
+        // Initialize card attributes in form data
+        foreach ($adapter->getCardAttributes() as $attribute => $label) {
+            $this->createFormData[$attribute] = '';
+            $this->editFormData[$attribute] = '';
+        }
+
         $this->loadColumnsData();
+    }
+
+    /**
+     * Define the create form schema.
+     */
+    public function createForm(Form $form): Form
+    {
+        return $form
+            ->statePath('createFormData')
+            ->schema([
+                Hidden::make($this->adapter->getStatusField())
+                    ->default(fn () => $this->activeColumn),
+
+                TextInput::make('title')
+                    ->label(__('Title'))
+                    ->required()
+                    ->maxLength(255)
+                    ->placeholder(__('Enter :recordLabel title', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
+                    ->columnSpanFull(),
+
+                Textarea::make('description')
+                    ->label(__('Description'))
+                    ->placeholder(__('Enter :recordLabel description', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
+                    ->columnSpanFull(),
+
+                $this->getCardAttributesFields(),
+            ]);
+    }
+
+    /**
+     * Define the edit form schema.
+     */
+    public function editForm(Form $form): Form
+    {
+        return $form
+            ->statePath('editFormData')
+            ->schema([
+                Select::make($this->adapter->getStatusField())
+                    ->label(__('Status'))
+                    ->options($this->adapter->getStatusValues())
+                    ->required(),
+
+                TextInput::make('title')
+                    ->label(__('Title'))
+                    ->required()
+                    ->maxLength(255)
+                    ->placeholder(__('Enter :recordLabel title', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
+                    ->columnSpanFull(),
+
+                Textarea::make('description')
+                    ->label(__('Description'))
+                    ->placeholder(__('Enter :recordLabel description', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
+                    ->columnSpanFull(),
+
+                $this->getCardAttributesFields(),
+            ]);
+    }
+
+    /**
+     * Generate form fields for card attributes.
+     *
+     * @return Section|null
+     */
+    protected function getCardAttributesFields(): ?Section
+    {
+        $cardAttributes = $this->adapter->getCardAttributes();
+
+        if (empty($cardAttributes)) {
+            return null;
+        }
+
+        $fields = [];
+
+        foreach ($cardAttributes as $attribute => $label) {
+            // Determine field type based on attribute name
+            if (str_contains($attribute, 'date')) {
+                $fields[] = DatePicker::make($attribute)
+                    ->label($label);
+            } elseif (str_contains($attribute, 'priority')) {
+                $fields[] = Select::make($attribute)
+                    ->label($label)
+                    ->options([
+                        'Low' => __('Low'),
+                        'Medium' => __('Medium'),
+                        'High' => __('High'),
+                    ]);
+            } else {
+                $fields[] = TextInput::make($attribute)
+                    ->label($label)
+                    ->maxLength(255);
+            }
+        }
+
+        if (empty($fields)) {
+            return null;
+        }
+
+        return Section::make(__('Additional Details'))
+            ->schema($fields)
+            ->columns(2);
     }
 
     /**
@@ -69,21 +234,46 @@ class KanbanBoard extends Component
             $columns[$value] = [
                 'name' => $label,
                 'items' => $this->getItemsForStatus($value),
+                'total' => $this->getTotalItemsCount($value),
             ];
         }
         $this->columns = $columns;
     }
 
     /**
-     * Get the items for a specific status.
+     * Get the items for a specific status with pagination.
      *
      * @param string $status The status value
      * @return array
      */
     public function getItemsForStatus(string $status): array
     {
-        $items = $this->adapter->getItemsForStatus($status);
+        $items = $this->adapter->getItemsForStatus($status, $this->perPage);
         return $this->formatItems($items);
+    }
+
+    /**
+     * Get the total count of items for a specific status.
+     *
+     * @param string $status The status value
+     * @return int
+     */
+    public function getTotalItemsCount(string $status): int
+    {
+        return $this->adapter->getTotalItemsCount($status);
+    }
+
+    /**
+     * Load more items for a specific column.
+     *
+     * @param string $columnId The column ID
+     * @return void
+     */
+    public function loadMoreItems(string $columnId): void
+    {
+        $this->perPage += 10;
+        $this->loadColumnsData();
+        $this->dispatch('kanban-items-loaded');
     }
 
     /**
@@ -108,7 +298,7 @@ class KanbanBoard extends Component
                 $result['description'] = $item->{$descriptionAttribute};
             }
 
-            foreach ($cardAttributes as $attribute) {
+            foreach ($cardAttributes as $attribute => $label) {
                 $value = $item->{$attribute};
                 if ($value instanceof \DateTime) {
                     $value = $value->format('Y-m-d');
@@ -139,75 +329,236 @@ class KanbanBoard extends Component
     }
 
     /**
+     * Move a card from one column to another.
+     *
+     * @param string|int $cardId The card ID
+     * @param string $fromColumn The source column ID
+     * @param string $toColumn The target column ID
+     * @param array $toColumnCards The ordered cards in the target column
+     * @return bool
+     */
+    public function moveCardBetweenColumns($cardId, $fromColumn, $toColumn, $toColumnCards): bool
+    {
+        $card = $this->adapter->getModelById($cardId);
+        
+        if (!$card) {
+            return false;
+        }
+        
+        // First update the card's status
+        $card->{$this->adapter->getStatusField()} = $toColumn;
+        $card->save();
+        
+        // Then update the order of cards in the target column
+        $this->adapter->updateColumnCards($toColumn, $toColumnCards);
+        
+        $this->loadColumnsData();
+        
+        return true;
+    }
+
+    /**
+     * Open the create card form modal.
+     *
+     * @param string $columnId The column ID
+     * @return void
+     */
+    public function openCreateForm(string $columnId): void
+    {
+        $this->activeColumn = $columnId;
+        $this->createFormData = [
+            'title' => '',
+            'description' => '',
+            $this->adapter->getStatusField() => $columnId,
+        ];
+
+        // Initialize card attributes
+        foreach ($this->adapter->getCardAttributes() as $attribute => $label) {
+            $this->createFormData[$attribute] = '';
+        }
+    }
+
+    /**
+     * Open the edit card form modal.
+     *
+     * @param string|int $cardId The card ID
+     * @param string $columnId The column ID
+     * @return void
+     */
+    public function openEditForm(string|int $cardId, string $columnId): void
+    {
+        $this->activeCardId = $cardId;
+        $this->activeColumn = $columnId;
+
+        $card = $this->adapter->getModelById($cardId);
+
+        if (!$card) {
+            Notification::make()
+                ->title(__('Card not found'))
+                ->danger()
+                ->send();
+            return;
+        }
+
+        $data = [
+            $this->adapter->getStatusField() => $columnId,
+            'title' => $card->{$this->adapter->getTitleAttribute()},
+            'description' => '',
+        ];
+
+        if ($descriptionAttribute = $this->adapter->getDescriptionAttribute()) {
+            $data['description'] = $card->{$descriptionAttribute} ?? '';
+        }
+
+        // Initialize card attributes
+        foreach ($this->adapter->getCardAttributes() as $attribute => $label) {
+            $data[$attribute] = $card->{$attribute} ?? '';
+        }
+
+        $this->editFormData = $data;
+    }
+
+    /**
      * Create a new card with the given attributes.
      *
-     * @param array<string, mixed> $attributes The card attributes
-     * @return mixed|null The ID of the created card or null if creation failed
+     * @return void
      */
-    public function createCard(array $attributes): mixed
+    public function createCard(): void
     {
-        $card = $this->adapter->createCard($attributes);
+        $form = $this->createForm;
+        $data = $form->getState();
+
+        $card = $this->adapter->createCard($data);
 
         if ($card) {
             $this->loadColumnsData();
+            $this->resetCreateForm();
+
+            $this->dispatch('close-modal', ['id' => 'create-card-modal']);
             $this->dispatch('kanban-card-created', [
                 'id' => $card->getKey(),
                 'status' => $card->{$this->adapter->getStatusField()},
             ]);
 
-            return $card->getKey();
+            Notification::make()
+                ->title(__(':recordLabel created successfully', ['recordLabel' => $this->config['recordLabel']]))
+                ->success()
+                ->send();
         }
+    }
 
-        return null;
+    /**
+     * Reset the create form data.
+     */
+    private function resetCreateForm(): void
+    {
+        $this->createFormData = [
+            'title' => '',
+            'description' => '',
+            $this->adapter->getStatusField() => array_key_first($this->adapter->getStatusValues()),
+        ];
+
+        // Reset card attributes
+        foreach ($this->adapter->getCardAttributes() as $attribute => $label) {
+            $this->createFormData[$attribute] = '';
+        }
     }
 
     /**
      * Update an existing card with the given attributes.
      *
-     * @param string|int $id The ID of the card to update
-     * @param array<string, mixed> $attributes The card attributes to update
-     * @return bool
+     * @return void
      */
-    public function updateCard(string|int $id, array $attributes): bool
+    public function updateCard(): void
     {
-        $card = $this->adapter->getModelById($id);
+        $form = $this->editForm;
+        $data = $form->getState();
+
+        $card = $this->adapter->getModelById($this->activeCardId);
 
         if (!$card) {
-            return false;
+            Notification::make()
+                ->title(__('Card not found'))
+                ->danger()
+                ->send();
+            return;
         }
 
-        $result = $this->adapter->updateCard($card, $attributes);
+        $result = $this->adapter->updateCard($card, $data);
 
         if ($result) {
             $this->loadColumnsData();
-            $this->dispatch('kanban-card-updated', ['id' => $id]);
-        }
+            $this->resetEditForm();
 
-        return $result;
+            $this->dispatch('close-modal', ['id' => 'edit-card-modal']);
+            $this->dispatch('kanban-card-updated', ['id' => $this->activeCardId]);
+
+            Notification::make()
+                ->title(__(':recordLabel updated successfully', ['recordLabel' => $this->config['recordLabel']]))
+                ->success()
+                ->send();
+        }
+    }
+
+    /**
+     * Reset the edit form data.
+     */
+    private function resetEditForm(): void
+    {
+        $this->editFormData = [
+            'title' => '',
+            'description' => '',
+            $this->adapter->getStatusField() => array_key_first($this->adapter->getStatusValues()),
+        ];
+
+        // Reset card attributes
+        foreach ($this->adapter->getCardAttributes() as $attribute => $label) {
+            $this->editFormData[$attribute] = '';
+        }
     }
 
     /**
      * Delete an existing card.
      *
-     * @param string|int $id The ID of the card to delete
-     * @return bool
+     * @return void
      */
-    public function deleteCard(string|int $id): bool
+    public function deleteCard(): void
     {
-        $card = $this->adapter->getModelById($id);
+        $card = $this->adapter->getModelById($this->activeCardId);
 
         if (!$card) {
-            return false;
+            Notification::make()
+                ->title(__('Card not found'))
+                ->danger()
+                ->send();
+            return;
         }
 
         $result = $this->adapter->deleteCard($card);
 
         if ($result) {
             $this->loadColumnsData();
-            $this->dispatch('kanban-card-deleted', ['id' => $id]);
-        }
+            $this->resetEditForm();
 
-        return $result;
+            $this->dispatch('close-modal', ['id' => 'edit-card-modal']);
+            $this->dispatch('kanban-card-deleted', ['id' => $this->activeCardId]);
+
+            Notification::make()
+                ->title(__(':recordLabel deleted successfully', ['recordLabel' => $this->config['recordLabel']]))
+                ->success()
+                ->send();
+        }
+    }
+
+    /**
+     * Register the forms with Livewire.
+     */
+    protected function getForms(): array
+    {
+        return [
+            'createForm',
+            'editForm',
+        ];
     }
 
     /**
