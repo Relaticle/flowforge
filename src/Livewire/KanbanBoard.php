@@ -50,6 +50,8 @@ class KanbanBoard extends Component
             'descriptionAttribute' => $adapter->getDescriptionAttribute(),
             'cardAttributes' => $adapter->getCardAttributes(),
             'orderField' => $adapter->getOrderField(),
+            'recordLabel' => method_exists($adapter, 'getRecordLabel') ? $adapter->getRecordLabel() : 'Card',
+            'pluralRecordLabel' => method_exists($adapter, 'getPluralRecordLabel') ? $adapter->getPluralRecordLabel() : 'Cards',
         ];
         $this->loadColumnsData();
     }

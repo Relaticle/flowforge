@@ -34,7 +34,7 @@ class Card extends Component
     {
         return view('flowforge::components.card');
     }
-    
+
     /**
      * Get the priority border class.
      *
@@ -45,7 +45,7 @@ class Card extends Component
         if (!$this->priority) {
             return 'border-l-4 border-gray-300 dark:border-gray-600';
         }
-        
+
         return match (strtolower($this->priority)) {
             'high' => 'border-l-4 border-red-500',
             'medium' => 'border-l-4 border-yellow-500',

@@ -11,46 +11,60 @@ trait HasKanbanBoard
 {
     /**
      * Status field for Kanban board.
-     * 
+     *
      * @var string|null
      */
     protected ?string $kanbanStatusField = null;
-    
+
     /**
      * Status values for Kanban board.
-     * 
+     *
      * @var array|null
      */
     protected ?array $kanbanStatusValues = null;
-    
+
     /**
      * Title attribute for Kanban board.
-     * 
+     *
      * @var string|null
      */
     protected ?string $kanbanTitleAttribute = null;
-    
+
     /**
      * Description attribute for Kanban board.
-     * 
+     *
      * @var string|null
      */
     protected ?string $kanbanDescriptionAttribute = null;
-    
+
     /**
      * Card attributes for Kanban board.
-     * 
+     *
      * @var array|null
      */
     protected ?array $kanbanCardAttributes = null;
-    
+
     /**
      * Order field for Kanban board.
-     * 
+     *
      * @var string|null
      */
     protected ?string $kanbanOrderField = null;
-    
+
+    /**
+     * Record label for Kanban board.
+     *
+     * @var string|null
+     */
+    protected ?string $kanbanRecordLabel = null;
+
+    /**
+     * Plural record label for Kanban board.
+     *
+     * @var string|null
+     */
+    protected ?string $kanbanPluralRecordLabel = null;
+
     /**
      * Get the Kanban adapter for the model.
      *
@@ -75,6 +89,8 @@ trait HasKanbanBoard
         $descriptionAttribute = $this->getKanbanDescriptionAttribute();
         $cardAttributes = $this->getKanbanCardAttributes();
         $orderField = $this->getKanbanOrderField();
+        $recordLabel = $this->getKanbanRecordLabel();
+        $pluralRecordLabel = $this->getKanbanPluralRecordLabel();
 
         return new DefaultKanbanAdapter(
             static::class,
@@ -83,13 +99,15 @@ trait HasKanbanBoard
             $titleAttribute,
             $descriptionAttribute,
             $cardAttributes,
-            $orderField
+            $orderField,
+            $recordLabel,
+            $pluralRecordLabel
         );
     }
 
     /**
      * Get the status field for Kanban board.
-     * 
+     *
      * @return string
      */
     public function getKanbanStatusField(): string
@@ -97,15 +115,15 @@ trait HasKanbanBoard
         if ($this->kanbanStatusField !== null) {
             return $this->kanbanStatusField;
         }
-        
+
         return method_exists($this, 'kanbanStatusField')
             ? $this->kanbanStatusField()
             : 'status';
     }
-    
+
     /**
      * Set the status field for Kanban board.
-     * 
+     *
      * @param string $field
      * @return self
      */
@@ -114,10 +132,10 @@ trait HasKanbanBoard
         $this->kanbanStatusField = $field;
         return $this;
     }
-    
+
     /**
      * Get the status values for Kanban board.
-     * 
+     *
      * @return array<string, string>
      */
     public function getKanbanStatusValues(): array
@@ -125,15 +143,15 @@ trait HasKanbanBoard
         if ($this->kanbanStatusValues !== null) {
             return $this->kanbanStatusValues;
         }
-        
+
         return method_exists($this, 'kanbanStatusValues')
             ? $this->kanbanStatusValues()
             : $this->getDefaultStatusValues($this->getKanbanStatusField());
     }
-    
+
     /**
      * Set the status values for Kanban board.
-     * 
+     *
      * @param array<string, string> $values
      * @return self
      */
@@ -142,10 +160,10 @@ trait HasKanbanBoard
         $this->kanbanStatusValues = $values;
         return $this;
     }
-    
+
     /**
      * Get the title attribute for Kanban board.
-     * 
+     *
      * @return string
      */
     public function getKanbanTitleAttribute(): string
@@ -153,15 +171,15 @@ trait HasKanbanBoard
         if ($this->kanbanTitleAttribute !== null) {
             return $this->kanbanTitleAttribute;
         }
-        
+
         return method_exists($this, 'kanbanTitleAttribute')
             ? $this->kanbanTitleAttribute()
             : 'name';
     }
-    
+
     /**
      * Set the title attribute for Kanban board.
-     * 
+     *
      * @param string $attribute
      * @return self
      */
@@ -170,10 +188,10 @@ trait HasKanbanBoard
         $this->kanbanTitleAttribute = $attribute;
         return $this;
     }
-    
+
     /**
      * Get the description attribute for Kanban board.
-     * 
+     *
      * @return string|null
      */
     public function getKanbanDescriptionAttribute(): ?string
@@ -181,15 +199,15 @@ trait HasKanbanBoard
         if ($this->kanbanDescriptionAttribute !== null) {
             return $this->kanbanDescriptionAttribute;
         }
-        
+
         return method_exists($this, 'kanbanDescriptionAttribute')
             ? $this->kanbanDescriptionAttribute()
             : null;
     }
-    
+
     /**
      * Set the description attribute for Kanban board.
-     * 
+     *
      * @param string|null $attribute
      * @return self
      */
@@ -198,10 +216,10 @@ trait HasKanbanBoard
         $this->kanbanDescriptionAttribute = $attribute;
         return $this;
     }
-    
+
     /**
      * Get the card attributes for Kanban board.
-     * 
+     *
      * @return array<string>
      */
     public function getKanbanCardAttributes(): array
@@ -209,15 +227,15 @@ trait HasKanbanBoard
         if ($this->kanbanCardAttributes !== null) {
             return $this->kanbanCardAttributes;
         }
-        
+
         return method_exists($this, 'kanbanCardAttributes')
             ? $this->kanbanCardAttributes()
             : [];
     }
-    
+
     /**
      * Set the card attributes for Kanban board.
-     * 
+     *
      * @param array<string> $attributes
      * @return self
      */
@@ -226,10 +244,10 @@ trait HasKanbanBoard
         $this->kanbanCardAttributes = $attributes;
         return $this;
     }
-    
+
     /**
      * Get the order field for Kanban board.
-     * 
+     *
      * @return string|null
      */
     public function getKanbanOrderField(): ?string
@@ -237,15 +255,15 @@ trait HasKanbanBoard
         if ($this->kanbanOrderField !== null) {
             return $this->kanbanOrderField;
         }
-        
+
         return method_exists($this, 'kanbanOrderField')
             ? $this->kanbanOrderField()
             : null;
     }
-    
+
     /**
      * Set the order field for Kanban board.
-     * 
+     *
      * @param string|null $field
      * @return self
      */
@@ -253,6 +271,99 @@ trait HasKanbanBoard
     {
         $this->kanbanOrderField = $field;
         return $this;
+    }
+
+    /**
+     * Get the record label for Kanban board.
+     *
+     * @return string|null
+     */
+    public function getKanbanRecordLabel(): ?string
+    {
+        if ($this->kanbanRecordLabel !== null) {
+            return $this->kanbanRecordLabel;
+        }
+
+        return method_exists($this, 'kanbanRecordLabel')
+            ? $this->kanbanRecordLabel()
+            : $this->getModelLabelFromClass();
+    }
+
+    /**
+     * Set the record label for Kanban board.
+     *
+     * @param string $label
+     * @return self
+     */
+    public function setKanbanRecordLabel(string $label): self
+    {
+        $this->kanbanRecordLabel = $label;
+        return $this;
+    }
+
+    /**
+     * Get the plural record label for Kanban board.
+     *
+     * @return string|null
+     */
+    public function getKanbanPluralRecordLabel(): ?string
+    {
+        if ($this->kanbanPluralRecordLabel !== null) {
+            return $this->kanbanPluralRecordLabel;
+        }
+
+        return method_exists($this, 'kanbanPluralRecordLabel')
+            ? $this->kanbanPluralRecordLabel()
+            : $this->getPluralModelLabelFromClass();
+    }
+
+    /**
+     * Set the plural record label for Kanban board.
+     *
+     * @param string $label
+     * @return self
+     */
+    public function setKanbanPluralRecordLabel(string $label): self
+    {
+        $this->kanbanPluralRecordLabel = $label;
+        return $this;
+    }
+
+    /**
+     * Get model label from class name.
+     *
+     * @return string
+     */
+    protected function getModelLabelFromClass(): string
+    {
+        $reflection = new \ReflectionClass($this);
+        $className = $reflection->getShortName();
+
+        return $className;
+    }
+
+    /**
+     * Get plural model label from class name.
+     *
+     * @return string
+     */
+    protected function getPluralModelLabelFromClass(): string
+    {
+        $singular = $this->getModelLabelFromClass();
+
+        // Simple pluralization - this is a basic implementation
+        // You might want to use a more sophisticated pluralization method
+        $lastChar = substr($singular, -1);
+
+        if ($lastChar === 'y') {
+            return substr($singular, 0, -1) . 'ies';
+        }
+
+        if (in_array($lastChar, ['s', 'x', 'z']) || in_array(substr($singular, -2), ['ch', 'sh'])) {
+            return $singular . 'es';
+        }
+
+        return $singular . 's';
     }
 
     /**
@@ -268,7 +379,7 @@ trait HasKanbanBoard
             ->pluck($statusField)
             ->filter()
             ->toArray();
-            
+
         return array_combine($values, array_map(fn ($value) => ucfirst(str_replace('_', ' ', $value)), $values));
     }
 }

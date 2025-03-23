@@ -46,6 +46,16 @@ class KanbanBoard extends Page
     protected ?IKanbanAdapter $adapter = null;
 
     /**
+     * @var string|null
+     */
+    protected ?string $recordLabel = null;
+
+    /**
+     * @var string|null
+     */
+    protected ?string $pluralRecordLabel = null;
+
+    /**
      * Mount the page.
      *
      * @return void
@@ -147,6 +157,32 @@ class KanbanBoard extends Page
     }
 
     /**
+     * Set the singular record label for the Kanban items.
+     *
+     * @param string $label
+     * @return static
+     */
+    public function recordLabel(string $label): static
+    {
+        $this->recordLabel = $label;
+
+        return $this;
+    }
+
+    /**
+     * Set the plural record label for the Kanban items.
+     *
+     * @param string $label
+     * @return static
+     */
+    public function pluralRecordLabel(string $label): static
+    {
+        $this->pluralRecordLabel = $label;
+
+        return $this;
+    }
+
+    /**
      * Get the Kanban adapter.
      *
      * @return IKanbanAdapter
@@ -188,6 +224,14 @@ class KanbanBoard extends Page
 
             if (method_exists($instance, 'setKanbanOrderField') && $this->orderField) {
                 $instance->setKanbanOrderField($this->orderField);
+            }
+
+            if (method_exists($instance, 'setKanbanRecordLabel') && $this->recordLabel) {
+                $instance->setKanbanRecordLabel($this->recordLabel);
+            }
+
+            if (method_exists($instance, 'setKanbanPluralRecordLabel') && $this->pluralRecordLabel) {
+                $instance->setKanbanPluralRecordLabel($this->pluralRecordLabel);
             }
 
             return $instance->getKanbanAdapter();

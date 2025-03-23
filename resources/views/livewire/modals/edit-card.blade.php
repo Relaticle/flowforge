@@ -2,7 +2,7 @@
 
 <x-filament::modal
     id="edit-card-modal"
-    :heading="__('Edit Card')"
+    :heading="__('Edit :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card'])"
     width="md"
 >
     <form @submit.prevent="submitEditForm" class="space-y-4 relative">
@@ -10,7 +10,7 @@
             <div class="flex flex-col items-center gap-2">
                 <x-filament::loading-indicator class="h-8 w-8" />
                 <span wire:loading wire:target="updateCard" class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ __('Saving changes...') }}</span>
-                <span wire:loading wire:target="deleteCard" class="text-sm font-medium text-danger-600 dark:text-danger-400">{{ __('Deleting card...') }}</span>
+                <span wire:loading wire:target="deleteCard" class="text-sm font-medium text-danger-600 dark:text-danger-400">{{ __('Deleting :recordLabel...', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}</span>
             </div>
         </div>
 
@@ -27,7 +27,7 @@
                     x-model="formData.title"
                     required
                     autofocus
-                    placeholder="{{ __('Enter card title') }}"
+                    placeholder="{{ __('Enter :recordLabel title', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}"
                     wire:loading.attr="disabled"
                     wire:target="updateCard, deleteCard"
                 />
@@ -44,7 +44,7 @@
                 <x-filament::input
                     type="textarea"
                     x-model="formData.description"
-                    placeholder="{{ __('Enter card description') }}"
+                    placeholder="{{ __('Enter :recordLabel description', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}"
                     wire:loading.attr="disabled"
                     wire:target="updateCard, deleteCard"
                 />
@@ -70,7 +70,7 @@
                 </select>
 
                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {{ __('The column where this card will appear') }}
+                    {{ __('The column where this :recordLabel will appear', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}
                 </div>
             </x-filament::input.wrapper>
         </div>

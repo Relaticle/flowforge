@@ -2,8 +2,8 @@
 
 <x-filament::modal
     id="create-card-modal"
-    :heading="__('Create New Card')"
-    :description="__('Add a new card to the board')"
+    :heading="__('Create New :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card'])"
+    :description="__('Add a new :recordLabel to the board', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')])"
     icon="heroicon-o-plus-circle"
     icon-color="primary"
     width="md"
@@ -12,7 +12,7 @@
         <div wire:loading.delay.shorter wire:target="createCard" class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm">
             <div class="flex flex-col items-center gap-2">
                 <x-filament::loading-indicator class="h-8 w-8" />
-                <span class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ __('Creating card...') }}</span>
+                <span class="text-sm font-medium text-primary-600 dark:text-primary-400">{{ __('Creating :recordLabel...', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}</span>
             </div>
         </div>
 
@@ -29,13 +29,13 @@
                     x-model="formData.title"
                     required
                     autofocus
-                    placeholder="{{ __('Enter card title') }}"
+                    placeholder="{{ __('Enter :recordLabel title', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}"
                     wire:loading.attr="disabled"
                     wire:target="createCard"
                 />
 
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ __('A descriptive title for this card') }}
+                    {{ __('A descriptive title for this :recordLabel', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}
                 </div>
             </x-filament::input.wrapper>
         </div>
@@ -50,13 +50,13 @@
                 <x-filament::input
                     type="textarea"
                     x-model="formData.description"
-                    placeholder="{{ __('Enter card description') }}"
+                    placeholder="{{ __('Enter :recordLabel description', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}"
                     wire:loading.attr="disabled"
                     wire:target="createCard"
                 />
 
                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ __('Additional details about this card') }}
+                    {{ __('Additional details about this :recordLabel', ['recordLabel' => strtolower($config['recordLabel'] ?? 'card')]) }}
                 </div>
             </x-filament::input.wrapper>
         </div>
@@ -111,7 +111,7 @@
                 wire:loading.attr="disabled"
                 wire:target="createCard"
             >
-                <span wire:loading.remove wire:target="createCard">{{ __('Create Card') }}</span>
+                <span wire:loading.remove wire:target="createCard">{{ __('Create :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card']) }}</span>
                 <span wire:loading wire:target="createCard" class="flex items-center gap-1">
                     <x-filament::loading-indicator class="h-4 w-4" />
                     {{ __('Creating...') }}

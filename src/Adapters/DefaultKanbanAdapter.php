@@ -7,6 +7,7 @@ namespace Relaticle\Flowforge\Adapters;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Livewire\Wireable;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
 
@@ -62,6 +63,20 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     protected string $modelClass;
 
     /**
+     * The singular label for the model.
+     *
+     * @var string
+     */
+    protected string $recordLabel;
+
+    /**
+     * The plural label for the model.
+     *
+     * @var string
+     */
+    protected string $pluralRecordLabel;
+
+    /**
      * Create a new adapter instance.
      *
      * @param string $modelClass The model class
@@ -71,16 +86,21 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
      * @param string|null $descriptionAttribute The description attribute
      * @param array<string> $cardAttributes The card attributes
      * @param string|null $orderField The order field
+     * @param string|null $recordLabel The singular label for the model
+     * @param string|null $pluralRecordLabel The plural label for the model
      */
     public function __construct(
-        string $modelClass,
-        string $statusField,
-        array $statusValues,
-        string $titleAttribute,
+        string  $modelClass,
+        string  $statusField,
+        array   $statusValues,
+        string  $titleAttribute,
         ?string $descriptionAttribute = null,
-        array $cardAttributes = [],
-        ?string $orderField = null
-    ) {
+        array   $cardAttributes = [],
+        ?string $orderField = null,
+        ?string $recordLabel = null,
+        ?string $pluralRecordLabel = null
+    )
+    {
         $this->modelClass = $modelClass;
         $this->statusField = $statusField;
         $this->statusValues = $statusValues;
@@ -88,6 +108,10 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         $this->descriptionAttribute = $descriptionAttribute;
         $this->cardAttributes = $cardAttributes;
         $this->orderField = $orderField;
+
+        // Set model labels with defaults
+        $this->recordLabel = $recordLabel ?? Str::singular(class_basename($modelClass));
+        $this->pluralRecordLabel = $pluralRecordLabel ?? Str::singular(class_basename($modelClass));
     }
 
     /**
@@ -173,6 +197,26 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     }
 
     /**
+     * Get the singular label for the model.
+     *
+     * @return string
+     */
+    public function getRecordLabel(): string
+    {
+        return $this->recordLabel;
+    }
+
+    /**
+     * Get the plural label for the model.
+     *
+     * @return string
+     */
+    public function getPluralRecordLabel(): string
+    {
+        return $this->pluralRecordLabel;
+    }
+
+    /**
      * Get the items for all statuses.
      *
      * @return Collection<int, Model>
@@ -236,7 +280,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             return false;
         }
 
-        return DB::transaction(function() use ($model, $columnId, $cards) {
+        return DB::transaction(function () use ($model, $columnId, $cards) {
             foreach ($cards as $index => $id) {
                 $model->newQuery()
                     ->where($model->getQualifiedKeyName(), $id)
@@ -354,6 +398,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             'descriptionAttribute' => $this->getDescriptionAttribute(),
             'cardAttributes' => $this->getCardAttributes(),
             'orderField' => $this->getOrderField(),
+            'recordLabel' => $this->getRecordLabel(),
+            'pluralRecordLabel' => $this->getPluralRecordLabel(),
         ];
     }
 
@@ -372,7 +418,9 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             $value['titleAttribute'],
             $value['descriptionAttribute'] ?? null,
             $value['cardAttributes'] ?? [],
-            $value['orderField'] ?? null
+            $value['orderField'] ?? null,
+            $value['recordLabel'] ?? null,
+            $value['pluralRecordLabel'] ?? null
         );
     }
 }
