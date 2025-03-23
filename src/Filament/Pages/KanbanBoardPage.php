@@ -40,7 +40,6 @@ abstract class KanbanBoardPage extends Page
     public function __construct()
     {
         $this->config = new KanbanConfig();
-        parent::__construct();
     }
 
     /**
