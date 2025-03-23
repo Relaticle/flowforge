@@ -8,7 +8,7 @@
     x-data="flowforge({
         state: {
             columns: @js($columns),
-            statusField: '{{ $config['statusField'] }}',
+            columnField: '{{ $config['columnField'] }}',
             recordLabel: '{{ $config['recordLabel'] ?? 'Card' }}',
             pluralRecordLabel: '{{ $config['pluralRecordLabel'] ?? 'Cards' }}'
         }
