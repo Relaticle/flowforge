@@ -18,11 +18,22 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Wireable;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 {
     /**
+     * The model class for the adapter.
+     *
+     * @var EloquentBuilder|Relation
+     */
+    protected EloquentBuilder|Relation $subject;
+
+    /**
      * The status field for the model.
+     *
+     * @var string
      */
     protected string $statusField;
 
@@ -35,11 +46,15 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * The title attribute for the model.
+     *
+     * @var string
      */
     protected string $titleAttribute;
 
     /**
      * The description attribute for the model.
+     *
+     * @var string|null
      */
     protected ?string $descriptionAttribute;
 
@@ -59,13 +74,11 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * The order field for the model.
+     *
+     * @var string|null
      */
     protected ?string $orderField = null;
 
-    /**
-     * The model class for the adapter.
-     */
-    protected string $modelClass;
 
     /**
      * The create form callable for the model.
@@ -76,42 +89,48 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * The singular label for the model.
+     *
+     * @var string
      */
     protected string $recordLabel;
 
     /**
      * The plural label for the model.
+     *
+     * @var string
      */
     protected string $pluralRecordLabel;
 
     /**
      * Create a new adapter instance.
      *
-     * @param  string  $modelClass  The model class
-     * @param  string  $statusField  The status field
-     * @param  array<string, string>  $statusValues  The status values
-     * @param  string  $titleAttribute  The title attribute
-     * @param  string|null  $descriptionAttribute  The description attribute
-     * @param  array<string>  $cardAttributes  The card attributes
-     * @param  array<string, string>|null  $statusColors  The status colors
-     * @param  string|null  $orderField  The order field
-     * @param  string|null  $recordLabel  The singular label for the model
-     * @param  string|null  $pluralRecordLabel  The plural label for the model
+     * @param EloquentBuilder|Relation $subject The model class
+     * @param string $statusField The status field
+     * @param array<string, string> $statusValues The status values
+     * @param string $titleAttribute The title attribute
+     * @param string|null $descriptionAttribute The description attribute
+     * @param array<string> $cardAttributes The card attributes
+     * @param array<string, string>|null $statusColors The status colors
+     * @param string|null $orderField The order field
+     * @param callable|null $createFormCallable
+     * @param string|null $recordLabel The singular label for the model
+     * @param string|null $pluralRecordLabel The plural label for the model
      */
     public function __construct(
-        string $modelClass,
-        string $statusField,
-        array $statusValues,
-        string $titleAttribute,
+        EloquentBuilder|Relation  $subject,
+        string  $statusField,
+        array   $statusValues,
+        string  $titleAttribute,
         ?string $descriptionAttribute = null,
-        array $cardAttributes = [],
-        ?array $statusColors = null,
+        array   $cardAttributes = [],
+        ?array  $statusColors = null,
         ?string $orderField = null,
         ?callable $createFormCallable = null,
         ?string $recordLabel = null,
         ?string $pluralRecordLabel = null
-    ) {
-        $this->modelClass = $modelClass;
+    )
+    {
+        $this->subject = $subject;
         $this->statusField = $statusField;
         $this->statusValues = $statusValues;
         $this->titleAttribute = $titleAttribute;
@@ -123,32 +142,25 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         $this->createFormCallable = $createFormCallable;
 
         // Set model labels with defaults
-        $this->recordLabel = $recordLabel ?? Str::singular(class_basename($modelClass));
-        $this->pluralRecordLabel = $pluralRecordLabel ?? Str::singular(class_basename($modelClass));
-    }
-
-    /**
-     * Get the model class for the adapter.
-     */
-    public function getModel(): string
-    {
-        return $this->modelClass;
+        $this->recordLabel = $recordLabel ?? Str::singular(class_basename($subject->getModel()));
+        $this->pluralRecordLabel = $pluralRecordLabel ?? Str::singular(class_basename($subject->getModel()));
     }
 
     /**
      * Find a model by its ID.
      *
-     * @param  mixed  $id  The model ID
+     * @param mixed $id The model ID
+     * @return Model|null
      */
     public function getModelById($id): ?Model
     {
-        $modelClass = $this->getModel();
-
-        return $modelClass::find($id);
+        return $this->subject->find($id);
     }
 
     /**
      * Get the status field for the model.
+     *
+     * @return string
      */
     public function getStatusField(): string
     {
@@ -167,6 +179,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the title attribute for the model.
+     *
+     * @return string
      */
     public function getTitleAttribute(): string
     {
@@ -175,6 +189,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the description attribute for the model.
+     *
+     * @return string|null
      */
     public function getDescriptionAttribute(): ?string
     {
@@ -193,6 +209,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the order field for the model.
+     *
+     * @return string|null
      */
     public function getOrderField(): ?string
     {
@@ -201,6 +219,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the singular label for the model.
+     *
+     * @return string
      */
     public function getRecordLabel(): string
     {
@@ -209,6 +229,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the plural label for the model.
+     *
+     * @return string
      */
     public function getPluralRecordLabel(): string
     {
@@ -233,22 +255,19 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
      */
     public function getItems(): Collection
     {
-        $modelClass = $this->getModel();
-
-        return $modelClass::all();
+        return $this->subject->all();
     }
 
     /**
      * Get the items for a specific status with pagination.
      *
-     * @param  string  $status  The status value
-     * @param  int  $limit  The number of items to return
+     * @param string|int $status The status value
+     * @param int $limit The number of items to return
      * @return Collection<int, Model>
      */
-    public function getItemsForStatus(string $status, int $limit = 10): Collection
+    public function getItemsForStatus(string|int $status, int $limit = 10): Collection
     {
-        $modelClass = $this->getModel();
-        $query = $modelClass::where($this->getStatusField(), $status);
+        $query = $this->subject->where($this->getStatusField(), $status);
 
         // Add ordering if order field is set
         if ($this->getOrderField()) {
@@ -261,43 +280,45 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Get the total count of items for a specific status.
      *
-     * @param  string  $status  The status value
+     * @param string|int $status The status value
+     * @return int
      */
-    public function getTotalItemsCount(string $status): int
+    public function getTotalItemsCount(string|int $status): int
     {
-        $modelClass = $this->getModel();
-
-        return $modelClass::where($this->getStatusField(), $status)->count();
+        return $this->subject->where($this->getStatusField(), $status)->count();
     }
 
     /**
      * Update the status of a model.
      *
-     * @param  Model  $model  The model to update
-     * @param  string  $status  The new status value
+     * @param Model $model The model to update
+     * @param string $status The new status value
+     * @return bool
      */
     public function updateStatus(Model $model, string $status): bool
     {
         $model->{$this->getStatusField()} = $status;
-
         return $model->save();
     }
 
     /**
      * Update the order of a model.
      *
+     * @param string|int $columnId
+     * @param array $cards
+     * @return bool
      * @throws \Throwable
      */
-    public function updateColumnCards(string | int $columnId, array $cards): bool
+    public function updateColumnCards(string|int $columnId, array $cards): bool
     {
-        if (! $this->getOrderField()) {
+        if (!$this->getOrderField()) {
             return false;
         }
 
-        $model = app($this->getModel());
+        $model = app($this->subject->getModel());
 
         // Validate column ID exists in status values
-        if (! array_key_exists((string) $columnId, $this->getStatusValues())) {
+        if (!array_key_exists((string)$columnId, $this->getStatusValues())) {
             return false;
         }
 
@@ -317,6 +338,9 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the form class for creating cards.
+     *
+     * @param Form $form
+     * @return Form
      */
     public function getEditForm(Form $form): Form
     {
@@ -346,10 +370,13 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Get the form class for creating cards.
+     *
+     * @param Form $form
+     * @param mixed $activeColumn
+     * @return Form
      */
-    public function getCreateForm(Form $form, mixed $activeColumn): Form
-    {
-        if ($this->createFormCallable) {
+    public function getCreateForm(Form $form, mixed $activeColumn): Form {
+        if($this->createFormCallable) {
             return call_user_func($this->createFormCallable, $form, $activeColumn);
         }
 
@@ -422,12 +449,13 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Create a new card with the given attributes.
      *
-     * @param  array<string, mixed>  $attributes  The card attributes
+     * @param array<string, mixed> $attributes The card attributes
+     * @return Model|null
      */
     public function createCard(array $attributes): ?Model
     {
-        $modelClass = $this->getModel();
-        $card = new $modelClass;
+        $modelClass = $this->subject->getModel();
+        $card = new $modelClass();
 
         // Set status if provided, otherwise use the first status as default
         $status = $attributes[$this->getStatusField()] ?? array_key_first($this->getStatusValues());
@@ -443,21 +471,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         }
 
         // Set title
-        if (isset($attributes[$this->getTitleAttribute()])) {
-            $card->{$this->getTitleAttribute()} = $attributes[$this->getTitleAttribute()];
-        }
-
-        // Set description if the attribute exists
-        if ($this->getDescriptionAttribute() && isset($attributes[$this->getDescriptionAttribute()])) {
-            $card->{$this->getDescriptionAttribute()} = $attributes[$this->getDescriptionAttribute()];
-        }
-
-        // Set additional card attributes
-        foreach ($this->getCardAttributes() as $attribute => $label) {
-            if (isset($attributes[$attribute])) {
-                $card->{$attribute} = $attributes[$attribute];
-            }
-        }
+        $this->setTitle($attributes, $card);
 
         return $card->save() ? $card : null;
     }
@@ -465,8 +479,9 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Update an existing card with the given attributes.
      *
-     * @param  Model  $card  The card to update
-     * @param  array<string, mixed>  $attributes  The card attributes to update
+     * @param Model $card The card to update
+     * @param array<string, mixed> $attributes The card attributes to update
+     * @return bool
      */
     public function updateCard(Model $card, array $attributes): bool
     {
@@ -476,21 +491,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         }
 
         // Update title if provided
-        if (isset($attributes[$this->getTitleAttribute()])) {
-            $card->{$this->getTitleAttribute()} = $attributes[$this->getTitleAttribute()];
-        }
-
-        // Update description if provided and the attribute exists
-        if ($this->getDescriptionAttribute() && isset($attributes[$this->getDescriptionAttribute()])) {
-            $card->{$this->getDescriptionAttribute()} = $attributes[$this->getDescriptionAttribute()];
-        }
-
-        // Update additional card attributes
-        foreach ($this->getCardAttributes() as $attribute => $label) {
-            if (isset($attributes[$attribute])) {
-                $card->{$attribute} = $attributes[$attribute];
-            }
-        }
+        $this->setTitle($attributes, $card);
 
         return $card->save();
     }
@@ -498,7 +499,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Delete an existing card.
      *
-     * @param  Model  $card  The card to delete
+     * @param Model $card The card to delete
+     * @return bool
      */
     public function deleteCard(Model $card): bool
     {
@@ -507,11 +509,13 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
 
     /**
      * Convert the adapter to a Livewire-compatible array.
+     *
+     * @return array
      */
     public function toLivewire(): array
     {
         return [
-            'model' => $this->getModel(),
+            'subject' => $this->subject->toArray(),
             'statusField' => $this->getStatusField(),
             'statusValues' => $this->getStatusValues(),
             'titleAttribute' => $this->getTitleAttribute(),
@@ -528,13 +532,13 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     /**
      * Create a new adapter instance from a Livewire-compatible array.
      *
-     * @param  array<string, mixed>  $value  The Livewire-compatible array
+     * @param array<string, mixed> $value The Livewire-compatible array
      * @return static
      */
-    public static function fromLivewire($value)
+    public static function fromLivewire($value): static
     {
         return new static(
-            $value['model'],
+            $value['subject'],
             $value['statusField'],
             $value['statusValues'],
             $value['titleAttribute'],
@@ -542,9 +546,33 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             $value['cardAttributes'] ?? [],
             $value['statusColors'] ?? null,
             $value['orderField'] ?? null,
-            $value['createFormCallable'] ?? null,
+             $value['createFormCallable'] ?? null,
             $value['recordLabel'] ?? null,
             $value['pluralRecordLabel'] ?? null
         );
+    }
+
+    /**
+     * @param array $attributes
+     * @param mixed $card
+     * @return void
+     */
+    public function setTitle(array $attributes, mixed $card): void
+    {
+        if (isset($attributes[$this->getTitleAttribute()])) {
+            $card->{$this->getTitleAttribute()} = $attributes[$this->getTitleAttribute()];
+        }
+
+        // Set description if the attribute exists
+        if ($this->getDescriptionAttribute() && isset($attributes[$this->getDescriptionAttribute()])) {
+            $card->{$this->getDescriptionAttribute()} = $attributes[$this->getDescriptionAttribute()];
+        }
+
+        // Set additional card attributes
+        foreach ($this->getCardAttributes() as $attribute => $label) {
+            if (isset($attributes[$attribute])) {
+                $card->{$attribute} = $attributes[$attribute];
+            }
+        }
     }
 }

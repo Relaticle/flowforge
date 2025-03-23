@@ -212,7 +212,7 @@ class KanbanBoard extends Component implements HasForms
      *
      * @param  string  $status  The status value
      */
-    public function getItemsForStatus(string $status): array
+    public function getItemsForStatus(string|int $status): array
     {
         $perPage = $this->perPage[$status] ?? 10;
         $items = $this->adapter->getItemsForStatus($status, $perPage);
@@ -225,7 +225,7 @@ class KanbanBoard extends Component implements HasForms
      *
      * @param  string  $status  The status value
      */
-    public function getTotalItemsCount(string $status): int
+    public function getTotalItemsCount(string|int $status): int
     {
         return $this->adapter->getTotalItemsCount($status);
     }

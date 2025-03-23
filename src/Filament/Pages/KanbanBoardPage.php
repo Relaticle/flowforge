@@ -5,13 +5,19 @@ namespace Relaticle\Flowforge\Filament\Pages;
 use Exception;
 use Filament\Pages\Page;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Model;
 
 abstract class KanbanBoardPage extends Page
 {
     protected static string $view = 'flowforge::filament.pages.kanban-board-page';
 
-    protected string $model;
+    protected mixed $subject;
 
+    /**
+     * @var string
+     */
     protected string $statusField = 'status';
 
     /**
@@ -19,8 +25,14 @@ abstract class KanbanBoardPage extends Page
      */
     protected array $statusValues = [];
 
+    /**
+     * @var string
+     */
     protected string $titleAttribute = 'name';
 
+    /**
+     * @var string|null
+     */
     protected ?string $descriptionAttribute = null;
 
     /**
@@ -33,6 +45,9 @@ abstract class KanbanBoardPage extends Page
      */
     protected ?array $statusColors = null;
 
+    /**
+     * @var string|null
+     */
     protected ?string $orderField = null;
 
     /**
@@ -40,29 +55,47 @@ abstract class KanbanBoardPage extends Page
      */
     protected mixed $createFormCallback = null;
 
+    /**
+     * @var IKanbanAdapter|null
+     */
     protected ?IKanbanAdapter $adapter = null;
 
+    /**
+     * @var string|null
+     */
     protected ?string $recordLabel = null;
 
+    /**
+     * @var string|null
+     */
     protected ?string $pluralRecordLabel = null;
 
     /**
      * Mount the page.
+     *
+     * @return void
      */
     public function mount(): void
     {
         // This method can be overridden by child classes
     }
 
-    public function model(string $model): static
+    public function for(EloquentBuilder|Relation|string $subject,): static
     {
-        $this->model = $model;
+        if (is_subclass_of($subject, Model::class)) {
+            $subject = $subject::query();
+        }
+
+        $this->subject = $subject;
 
         return $this;
     }
 
     /**
      * Set the status field for the Kanban board.
+     *
+     * @param string $field
+     * @return static
      */
     public function statusField(string $field): static
     {
@@ -74,7 +107,8 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the status values for the Kanban board.
      *
-     * @param  array<string, string>  $values
+     * @param array<string, string> $values
+     * @return static
      */
     public function statusValues(array $values): static
     {
@@ -85,6 +119,9 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the title attribute for the Kanban cards.
+     *
+     * @param string $attribute
+     * @return static
      */
     public function titleAttribute(string $attribute): static
     {
@@ -95,6 +132,9 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the description attribute for the Kanban cards.
+     *
+     * @param string $attribute
+     * @return static
      */
     public function descriptionAttribute(string $attribute): static
     {
@@ -106,7 +146,8 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the card attributes for the Kanban cards.
      *
-     * @param  array<string, string>  $attributes
+     * @param array<string, string> $attributes
+     * @return static
      */
     public function cardAttributes(array $attributes): static
     {
@@ -118,7 +159,8 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the status colors for the Kanban board columns.
      *
-     * @param  array<string, string>  $colors
+     * @param array<string, string> $colors
+     * @return static
      */
     public function statusColors(array $colors): static
     {
@@ -129,6 +171,9 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the order field for the Kanban board.
+     *
+     * @param string $field
+     * @return static
      */
     public function orderField(string $field): static
     {
@@ -146,6 +191,9 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set a custom adapter for the Kanban board.
+     *
+     * @param IKanbanAdapter $adapter
+     * @return static
      */
     public function adapter(IKanbanAdapter $adapter): static
     {
@@ -156,6 +204,9 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the singular record label for the Kanban items.
+     *
+     * @param string $label
+     * @return static
      */
     public function recordLabel(string $label): static
     {
@@ -166,6 +217,9 @@ abstract class KanbanBoardPage extends Page
 
     /**
      * Set the plural record label for the Kanban items.
+     *
+     * @param string $label
+     * @return static
      */
     public function pluralRecordLabel(string $label): static
     {
@@ -177,6 +231,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Get the Kanban adapter.
      *
+     * @return IKanbanAdapter
      * @throws Exception
      */
     public function getAdapter(): IKanbanAdapter
@@ -185,16 +240,12 @@ abstract class KanbanBoardPage extends Page
             return $this->adapter;
         }
 
-        $model = $this->model;
-
-        if (! class_exists($model)) {
-            throw new Exception("Model class {$model} does not exist.");
-        }
+        $model = $this->subject->getModel();
 
         // Check if the model uses the HasKanbanBoard trait
         if (method_exists($model, 'getKanbanAdapter')) {
             // Create an instance and configure it
-            $instance = new $model;
+            $instance = new $model();
 
             // Override default values if they are provided
             if (method_exists($instance, 'setKanbanStatusField') && $this->statusField) {
