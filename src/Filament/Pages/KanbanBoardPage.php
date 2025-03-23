@@ -5,12 +5,15 @@ namespace Relaticle\Flowforge\Filament\Pages;
 use Exception;
 use Filament\Pages\Page;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Model;
 
 abstract class KanbanBoardPage extends Page
 {
     protected static string $view = 'flowforge::filament.pages.kanban-board-page';
 
-    protected string $model;
+    protected mixed $subject;
 
     /**
      * @var string
@@ -77,9 +80,13 @@ abstract class KanbanBoardPage extends Page
         // This method can be overridden by child classes
     }
 
-    public function model(string $model): static
+    public function for(EloquentBuilder|Relation|string $subject,): static
     {
-        $this->model = $model;
+        if (is_subclass_of($subject, Model::class)) {
+            $subject = $subject::query();
+        }
+
+        $this->subject = $subject;
 
         return $this;
     }
@@ -233,11 +240,7 @@ abstract class KanbanBoardPage extends Page
             return $this->adapter;
         }
 
-        $model = $this->model;
-
-        if(!class_exists($model)) {
-            throw new Exception("Model class {$model} does not exist.");
-        }
+        $model = $this->subject->getModel();
 
         // Check if the model uses the HasKanbanBoard trait
         if (method_exists($model, 'getKanbanAdapter')) {
