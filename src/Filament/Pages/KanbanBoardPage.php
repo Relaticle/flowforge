@@ -2,7 +2,6 @@
 
 namespace Relaticle\Flowforge\Filament\Pages;
 
-use App\Models\Task;
 use Exception;
 use Filament\Pages\Page;
 use Relaticle\Flowforge\Contracts\IKanbanAdapter;
@@ -10,6 +9,8 @@ use Relaticle\Flowforge\Contracts\IKanbanAdapter;
 abstract class KanbanBoardPage extends Page
 {
     protected static string $view = 'flowforge::filament.pages.kanban-board-page';
+
+    protected string $model;
 
     /**
      * @var string
@@ -74,6 +75,13 @@ abstract class KanbanBoardPage extends Page
     public function mount(): void
     {
         // This method can be overridden by child classes
+    }
+
+    public function model(string $model): static
+    {
+        $this->model = $model;
+
+        return $this;
     }
 
     /**
@@ -225,7 +233,11 @@ abstract class KanbanBoardPage extends Page
             return $this->adapter;
         }
 
-        $model = $this->getModel();
+        $model = $this->model;
+
+        if(!class_exists($model)) {
+            throw new Exception("Model class {$model} does not exist.");
+        }
 
         // Check if the model uses the HasKanbanBoard trait
         if (method_exists($model, 'getKanbanAdapter')) {
@@ -277,12 +289,5 @@ abstract class KanbanBoardPage extends Page
         }
 
         throw new Exception('Model does not use the HasKanbanBoard trait.');
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function getModel(): string {
-        throw new Exception('getModel() method not implemented.');
     }
 }
