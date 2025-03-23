@@ -6,6 +6,7 @@ namespace Relaticle\Flowforge\Adapters;
 
 use DB;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -417,7 +418,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
      *
      * @return Section|null
      */
-    protected function getCardAttributesFields(): ?Section
+    protected function getCardAttributesFields(): ?Grid
     {
         $cardAttributes = $this->getCardAttributes();
 
@@ -451,7 +452,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             return null;
         }
 
-        return Section::make(__('Additional Details'))
+        return Grid::make(__('Additional Details'))
             ->schema($fields)
             ->columns(2);
     }
