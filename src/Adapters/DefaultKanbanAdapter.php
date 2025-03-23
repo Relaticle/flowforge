@@ -5,6 +5,13 @@ declare(strict_types=1);
 namespace Relaticle\Flowforge\Adapters;
 
 use DB;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -62,6 +69,14 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
      */
     protected string $modelClass;
 
+
+    /**
+     * The create form callable for the model.
+     *
+     * @var callable|null
+     */
+    protected mixed $createFormCallable = null;
+
     /**
      * The singular label for the model.
      *
@@ -97,6 +112,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         ?string $descriptionAttribute = null,
         array   $cardAttributes = [],
         ?string $orderField = null,
+        ?callable $createFormCallable = null,
         ?string $recordLabel = null,
         ?string $pluralRecordLabel = null
     )
@@ -108,6 +124,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         $this->descriptionAttribute = $descriptionAttribute;
         $this->cardAttributes = $cardAttributes;
         $this->orderField = $orderField;
+
+        $this->createFormCallable = $createFormCallable;
 
         // Set model labels with defaults
         $this->recordLabel = $recordLabel ?? Str::singular(class_basename($modelClass));
@@ -308,6 +326,116 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     }
 
     /**
+     * Get the form class for creating cards.
+     *
+     * @param Form $form
+     * @return Form
+     */
+    public function getEditForm(Form $form): Form
+    {
+        return $form
+            ->statePath('editFormData')
+            ->schema([
+                Select::make($this->getStatusField())
+                    ->label(__('Status'))
+                    ->options($this->getStatusValues())
+                    ->required(),
+
+                TextInput::make('title')
+                    ->label(__('Title'))
+                    ->required()
+                    ->maxLength(255)
+                    ->placeholder(__('Enter :recordLabel title', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
+                    ->columnSpanFull(),
+
+                Textarea::make('description')
+                    ->label(__('Description'))
+                    ->placeholder(__('Enter :recordLabel description', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
+                    ->columnSpanFull(),
+
+                $this->getCardAttributesFields(),
+            ]);
+    }
+
+    /**
+     * Get the form class for creating cards.
+     *
+     * @param Form $form
+     * @param mixed $activeColumn
+     * @return Form
+     */
+    public function getCreateForm(Form $form, mixed $activeColumn): Form {
+        if($this->createFormCallable) {
+            return call_user_func($this->createFormCallable, $form, $activeColumn);
+        }
+
+        return $form
+            ->statePath('createFormData')
+            ->schema([
+                Hidden::make($this->getStatusField())
+                    ->default(fn () => $activeColumn),
+
+                TextInput::make('title')
+                    ->label(__('Title'))
+                    ->required()
+                    ->maxLength(255)
+                    ->placeholder(__('Enter :recordLabel title', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
+                    ->columnSpanFull(),
+
+                Textarea::make('description')
+                    ->label(__('Description'))
+                    ->placeholder(__('Enter :recordLabel description', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
+                    ->columnSpanFull(),
+
+                $this->getCardAttributesFields(),
+            ]);
+    }
+
+    /**
+     * Generate form fields for card attributes.
+     *
+     * @return Section|null
+     */
+    protected function getCardAttributesFields(): ?Section
+    {
+        $cardAttributes = $this->getCardAttributes();
+
+        if (empty($cardAttributes)) {
+            return null;
+        }
+
+        $fields = [];
+
+        foreach ($cardAttributes as $attribute => $label) {
+            // Determine field type based on attribute name
+            if (str_contains($attribute, 'date')) {
+                $fields[] = DatePicker::make($attribute)
+                    ->label($label);
+            } elseif (str_contains($attribute, 'priority')) {
+                $fields[] = Select::make($attribute)
+                    ->label($label)
+                    ->options([
+                        'Low' => __('Low'),
+                        'Medium' => __('Medium'),
+                        'High' => __('High'),
+                    ]);
+            } else {
+                $fields[] = TextInput::make($attribute)
+                    ->label($label)
+                    ->maxLength(255);
+            }
+        }
+
+        if (empty($fields)) {
+            return null;
+        }
+
+        return Section::make(__('Additional Details'))
+            ->schema($fields)
+            ->columns(2);
+    }
+
+    /**
      * Create a new card with the given attributes.
      *
      * @param array<string, mixed> $attributes The card attributes
@@ -411,6 +539,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             'descriptionAttribute' => $this->getDescriptionAttribute(),
             'cardAttributes' => $this->getCardAttributes(),
             'orderField' => $this->getOrderField(),
+            'createFormCallable' => $this->createFormCallable,
             'recordLabel' => $this->getRecordLabel(),
             'pluralRecordLabel' => $this->getPluralRecordLabel(),
         ];
@@ -432,6 +561,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             $value['descriptionAttribute'] ?? null,
             $value['cardAttributes'] ?? [],
             $value['orderField'] ?? null,
+             $value['createFormCallable'] ?? null,
             $value['recordLabel'] ?? null,
             $value['pluralRecordLabel'] ?? null
         );

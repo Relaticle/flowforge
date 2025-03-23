@@ -41,6 +41,11 @@ class KanbanBoard extends Page
     protected ?string $orderField = null;
 
     /**
+     * @var callable|null
+     */
+    protected mixed $createFormCallback = null;
+
+    /**
      * @var IKanbanAdapter|null
      */
     protected ?IKanbanAdapter $adapter = null;
@@ -143,6 +148,13 @@ class KanbanBoard extends Page
         return $this;
     }
 
+    public function createForm(callable $callback): static
+    {
+        $this->createFormCallback = $callback;
+
+        return $this;
+    }
+
     /**
      * Set a custom adapter for the Kanban board.
      *
@@ -224,6 +236,10 @@ class KanbanBoard extends Page
 
             if (method_exists($instance, 'setKanbanOrderField') && $this->orderField) {
                 $instance->setKanbanOrderField($this->orderField);
+            }
+
+            if(method_exists($instance, 'setKanbanCreateFormCallback') && $this->createFormCallback) {
+                $instance->setKanbanCreateFormCallback($this->createFormCallback);
             }
 
             if (method_exists($instance, 'setKanbanRecordLabel') && $this->recordLabel) {

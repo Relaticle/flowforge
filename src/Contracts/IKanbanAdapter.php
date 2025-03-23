@@ -2,6 +2,7 @@
 
 namespace Relaticle\Flowforge\Contracts;
 
+use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -56,7 +57,7 @@ interface IKanbanAdapter
      * @return Collection
      */
     public function getItemsForStatus(string $status, int $limit = 10): Collection;
-    
+
     /**
      * Get the total count of items for a specific status.
      *
@@ -95,6 +96,24 @@ interface IKanbanAdapter
      */
     public function getDescriptionAttribute(): ?string;
 
+
+    /**
+     * Get the form class for creating cards.
+     *
+     * @param Form $form
+     * @return Form
+     */
+    public function getCreateForm(Form $form, mixed $activeColumn): Form;
+
+    /**
+     * Get the form class for creating cards.
+     *
+     * @param Form $form
+     * @return Form
+     */
+    public function getEditForm(Form $form): Form;
+
+
     /**
      * Create a new card with the given attributes.
      *
@@ -102,6 +121,7 @@ interface IKanbanAdapter
      * @return Model|null
      */
     public function createCard(array $attributes): ?Model;
+
 
     /**
      * Update an existing card with the given attributes.

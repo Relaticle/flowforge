@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Livewire;
 
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -126,26 +120,7 @@ class KanbanBoard extends Component implements HasForms
      */
     public function createForm(Form $form): Form
     {
-        return $form
-            ->statePath('createFormData')
-            ->schema([
-                Hidden::make($this->adapter->getStatusField())
-                    ->default(fn () => $this->activeColumn),
-
-                TextInput::make('title')
-                    ->label(__('Title'))
-                    ->required()
-                    ->maxLength(255)
-                    ->placeholder(__('Enter :recordLabel title', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
-                    ->columnSpanFull(),
-
-                Textarea::make('description')
-                    ->label(__('Description'))
-                    ->placeholder(__('Enter :recordLabel description', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
-                    ->columnSpanFull(),
-
-                $this->getCardAttributesFields(),
-            ]);
+        return $this->adapter->getCreateForm($form, $this->activeColumn);
     }
 
     /**
@@ -153,72 +128,7 @@ class KanbanBoard extends Component implements HasForms
      */
     public function editForm(Form $form): Form
     {
-        return $form
-            ->statePath('editFormData')
-            ->schema([
-                Select::make($this->adapter->getStatusField())
-                    ->label(__('Status'))
-                    ->options($this->adapter->getStatusValues())
-                    ->required(),
-
-                TextInput::make('title')
-                    ->label(__('Title'))
-                    ->required()
-                    ->maxLength(255)
-                    ->placeholder(__('Enter :recordLabel title', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
-                    ->columnSpanFull(),
-
-                Textarea::make('description')
-                    ->label(__('Description'))
-                    ->placeholder(__('Enter :recordLabel description', ['recordLabel' => strtolower($this->config['recordLabel'] ?? 'card')]))
-                    ->columnSpanFull(),
-
-                $this->getCardAttributesFields(),
-            ]);
-    }
-
-    /**
-     * Generate form fields for card attributes.
-     *
-     * @return Section|null
-     */
-    protected function getCardAttributesFields(): ?Section
-    {
-        $cardAttributes = $this->adapter->getCardAttributes();
-
-        if (empty($cardAttributes)) {
-            return null;
-        }
-
-        $fields = [];
-
-        foreach ($cardAttributes as $attribute => $label) {
-            // Determine field type based on attribute name
-            if (str_contains($attribute, 'date')) {
-                $fields[] = DatePicker::make($attribute)
-                    ->label($label);
-            } elseif (str_contains($attribute, 'priority')) {
-                $fields[] = Select::make($attribute)
-                    ->label($label)
-                    ->options([
-                        'Low' => __('Low'),
-                        'Medium' => __('Medium'),
-                        'High' => __('High'),
-                    ]);
-            } else {
-                $fields[] = TextInput::make($attribute)
-                    ->label($label)
-                    ->maxLength(255);
-            }
-        }
-
-        if (empty($fields)) {
-            return null;
-        }
-
-        return Section::make(__('Additional Details'))
-            ->schema($fields)
-            ->columns(2);
+        return $this->adapter->getEditForm($form);
     }
 
     /**
@@ -340,20 +250,20 @@ class KanbanBoard extends Component implements HasForms
     public function moveCardBetweenColumns($cardId, $fromColumn, $toColumn, $toColumnCards): bool
     {
         $card = $this->adapter->getModelById($cardId);
-        
+
         if (!$card) {
             return false;
         }
-        
+
         // First update the card's status
         $card->{$this->adapter->getStatusField()} = $toColumn;
         $card->save();
-        
+
         // Then update the order of cards in the target column
         $this->adapter->updateColumnCards($toColumn, $toColumnCards);
-        
+
         $this->loadColumnsData();
-        
+
         return true;
     }
 

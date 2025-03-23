@@ -52,6 +52,13 @@ trait HasKanbanBoard
     protected ?string $kanbanOrderField = null;
 
     /**
+     * Create form callback for Kanban board.
+     *
+     * @var callable|null
+     */
+    protected mixed $kanbanCreateFormCallback = null;
+
+    /**
      * Record label for Kanban board.
      *
      * @var string|null
@@ -89,6 +96,7 @@ trait HasKanbanBoard
         $descriptionAttribute = $this->getKanbanDescriptionAttribute();
         $cardAttributes = $this->getKanbanCardAttributes();
         $orderField = $this->getKanbanOrderField();
+        $createFormCallback = $this->getKanbanCreateFormCallback();
         $recordLabel = $this->getKanbanRecordLabel();
         $pluralRecordLabel = $this->getKanbanPluralRecordLabel();
 
@@ -100,6 +108,7 @@ trait HasKanbanBoard
             $descriptionAttribute,
             $cardAttributes,
             $orderField,
+            $createFormCallback,
             $recordLabel,
             $pluralRecordLabel
         );
@@ -271,6 +280,28 @@ trait HasKanbanBoard
     {
         $this->kanbanOrderField = $field;
         return $this;
+    }
+
+    public function setKanbanCreateFormCallback(callable $callback): self
+    {
+        $this->kanbanCreateFormCallback = $callback;
+        return $this;
+    }
+
+    /**
+     * Get the create form callback for Kanban board.
+     *
+     * @return callable|null
+     */
+    public function getKanbanCreateFormCallback(): ?callable
+    {
+        if ($this->kanbanCreateFormCallback !== null) {
+            return $this->kanbanCreateFormCallback;
+        }
+
+        return method_exists($this, 'kanbanCreateFormCallback')
+            ? $this->kanbanCreateFormCallback()
+            : null;
     }
 
     /**
