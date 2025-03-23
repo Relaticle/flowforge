@@ -344,16 +344,15 @@ class KanbanBoard extends Component implements HasForms
             $this->loadColumnsData();
             $this->resetCreateForm();
 
-            $this->dispatch('close-modal', ['id' => 'create-card-modal']);
-            $this->dispatch('kanban-card-created', [
-                'id' => $card->getKey(),
-                'status' => $card->{$this->adapter->getStatusField()},
-            ]);
-
             Notification::make()
                 ->title(__(':recordLabel created successfully', ['recordLabel' => $this->config['recordLabel']]))
                 ->success()
                 ->send();
+
+            $this->dispatch('kanban-card-created', [
+                'id' => $card->getKey(),
+                'status' => $card->{$this->adapter->getStatusField()},
+            ]);
         }
     }
 
@@ -400,7 +399,6 @@ class KanbanBoard extends Component implements HasForms
             $this->loadColumnsData();
             $this->resetEditForm();
 
-            $this->dispatch('close-modal', ['id' => 'edit-card-modal']);
             $this->dispatch('kanban-card-updated', ['id' => $this->activeCardId]);
 
             Notification::make()
@@ -450,7 +448,6 @@ class KanbanBoard extends Component implements HasForms
             $this->loadColumnsData();
             $this->resetEditForm();
 
-            $this->dispatch('close-modal', ['id' => 'edit-card-modal']);
             $this->dispatch('kanban-card-deleted', ['id' => $this->activeCardId]);
 
             Notification::make()
