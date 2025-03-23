@@ -2,143 +2,111 @@
 
 namespace Relaticle\Flowforge\Filament\Pages;
 
-use Exception;
 use Filament\Pages\Page;
-use Relaticle\Flowforge\Contracts\IKanbanAdapter;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Relaticle\Flowforge\Adapters\KanbanAdapterFactory;
+use Relaticle\Flowforge\Config\KanbanConfig;
+use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 
 abstract class KanbanBoardPage extends Page
 {
     protected static string $view = 'flowforge::filament.pages.kanban-board-page';
 
+    /**
+     * The subject for the Kanban board (model class, query, or relation).
+     */
     protected mixed $subject;
 
     /**
-     * @var string
+     * The Kanban configuration object.
      */
-    protected string $statusField = 'status';
+    protected KanbanConfig $config;
 
     /**
-     * @var array<string, string>
+     * The Kanban adapter instance.
      */
-    protected array $statusValues = [];
+    protected ?KanbanAdapterInterface $adapter = null;
 
     /**
-     * @var string
+     * Custom adapter callback.
      */
-    protected string $titleAttribute = 'name';
+    protected mixed $adapterCallback = null;
 
     /**
-     * @var string|null
+     * Constructor
      */
-    protected ?string $descriptionAttribute = null;
-
-    /**
-     * @var array<string, string>
-     */
-    protected array $cardAttributes = [];
-
-    /**
-     * @var array<string, string>|null
-     */
-    protected ?array $statusColors = null;
-
-    /**
-     * @var string|null
-     */
-    protected ?string $orderField = null;
-
-    /**
-     * @var callable|null
-     */
-    protected mixed $createFormCallback = null;
-
-    /**
-     * @var IKanbanAdapter|null
-     */
-    protected ?IKanbanAdapter $adapter = null;
-
-    /**
-     * @var string|null
-     */
-    protected ?string $recordLabel = null;
-
-    /**
-     * @var string|null
-     */
-    protected ?string $pluralRecordLabel = null;
+    public function __construct()
+    {
+        $this->config = new KanbanConfig();
+        parent::__construct();
+    }
 
     /**
      * Mount the page.
-     *
-     * @return void
      */
     public function mount(): void
     {
         // This method can be overridden by child classes
     }
 
-    public function for(EloquentBuilder|Relation|string $subject,): static
+    /**
+     * Set the subject for the Kanban board.
+     *
+     * @param EloquentBuilder|Relation|string $subject
+     */
+    public function for(EloquentBuilder|Relation|string $subject): static
     {
-        if (is_subclass_of($subject, Model::class)) {
-            $subject = $subject::query();
-        }
-
         $this->subject = $subject;
 
         return $this;
     }
 
     /**
-     * Set the status field for the Kanban board.
+     * Set the field that stores the column value.
      *
      * @param string $field
-     * @return static
      */
-    public function statusField(string $field): static
+    public function columnField(string $field): static
     {
-        $this->statusField = $field;
+        $this->config = $this->config->withColumnField($field);
 
         return $this;
     }
 
     /**
-     * Set the status values for the Kanban board.
+     * Set the column statuses with labels for the Kanban board.
      *
-     * @param array<string, string> $values
-     * @return static
+     * @param array<string, string> $columns
      */
-    public function statusValues(array $values): static
+    public function columns(array $columns): static
     {
-        $this->statusValues = $values;
+        $this->config = $this->config->withColumnValues($columns);
 
         return $this;
     }
 
     /**
-     * Set the title attribute for the Kanban cards.
+     * Set the title field for the Kanban cards.
      *
-     * @param string $attribute
-     * @return static
+     * @param string $field
      */
-    public function titleAttribute(string $attribute): static
+    public function titleField(string $field): static
     {
-        $this->titleAttribute = $attribute;
+        $this->config = $this->config->withTitleField($field);
 
         return $this;
     }
 
     /**
-     * Set the description attribute for the Kanban cards.
+     * Set the description field for the Kanban cards.
      *
-     * @param string $attribute
-     * @return static
+     * @param string $field
      */
-    public function descriptionAttribute(string $attribute): static
+    public function descriptionField(string $field): static
     {
-        $this->descriptionAttribute = $attribute;
+        $this->config = $this->config->withDescriptionField($field);
 
         return $this;
     }
@@ -147,24 +115,22 @@ abstract class KanbanBoardPage extends Page
      * Set the card attributes for the Kanban cards.
      *
      * @param array<string, string> $attributes
-     * @return static
      */
     public function cardAttributes(array $attributes): static
     {
-        $this->cardAttributes = $attributes;
+        $this->config = $this->config->withCardAttributes($attributes);
 
         return $this;
     }
 
     /**
-     * Set the status colors for the Kanban board columns.
+     * Set the column colors for the Kanban board.
      *
      * @param array<string, string> $colors
-     * @return static
      */
-    public function statusColors(array $colors): static
+    public function columnColors(array $colors): static
     {
-        $this->statusColors = $colors;
+        $this->config = $this->config->withColumnColors($colors);
 
         return $this;
     }
@@ -173,18 +139,46 @@ abstract class KanbanBoardPage extends Page
      * Set the order field for the Kanban board.
      *
      * @param string $field
-     * @return static
      */
     public function orderField(string $field): static
     {
-        $this->orderField = $field;
+        $this->config = $this->config->withOrderField($field);
 
         return $this;
     }
 
+    /**
+     * Set the create form callback for the Kanban board.
+     *
+     * @param callable $callback
+     */
     public function createForm(callable $callback): static
     {
-        $this->createFormCallback = $callback;
+        $this->config = $this->config->withCreateFormCallback($callback);
+
+        return $this;
+    }
+
+    /**
+     * Set the label for individual cards.
+     *
+     * @param string $label
+     */
+    public function cardLabel(string $label): static
+    {
+        $this->config = $this->config->withCardLabel($label);
+
+        return $this;
+    }
+
+    /**
+     * Set the plural label for collection of cards.
+     *
+     * @param string $label
+     */
+    public function pluralCardLabel(string $label): static
+    {
+        $this->config = $this->config->withPluralCardLabel($label);
 
         return $this;
     }
@@ -192,10 +186,9 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set a custom adapter for the Kanban board.
      *
-     * @param IKanbanAdapter $adapter
-     * @return static
+     * @param KanbanAdapterInterface $adapter
      */
-    public function adapter(IKanbanAdapter $adapter): static
+    public function withCustomAdapter(KanbanAdapterInterface $adapter): static
     {
         $this->adapter = $adapter;
 
@@ -203,91 +196,67 @@ abstract class KanbanBoardPage extends Page
     }
 
     /**
-     * Set the singular record label for the Kanban items.
+     * Register a callback to modify the auto-created adapter.
      *
-     * @param string $label
-     * @return static
+     * @param callable $callback
      */
-    public function recordLabel(string $label): static
+    public function withAdapterCallback(callable $callback): static
     {
-        $this->recordLabel = $label;
+        $this->adapterCallback = $callback;
 
         return $this;
     }
 
     /**
-     * Set the plural record label for the Kanban items.
+     * Set multiple configuration values at once.
      *
-     * @param string $label
-     * @return static
+     * @param array<string, mixed> $config
      */
-    public function pluralRecordLabel(string $label): static
+    public function withConfiguration(array $config): static
     {
-        $this->pluralRecordLabel = $label;
+        $this->config = $this->config->with($config);
 
+        return $this;
+    }
+
+    /**
+     * Enable searchable for specific fields.
+     *
+     * @param array<int, string> $fields
+     */
+    public function withSearchable(array $fields): static
+    {
+        // This method would be implemented in the component
         return $this;
     }
 
     /**
      * Get the Kanban adapter.
      *
-     * @return IKanbanAdapter
-     * @throws Exception
+     * @throws \InvalidArgumentException If the subject is not set
      */
-    public function getAdapter(): IKanbanAdapter
+    public function getAdapter(): KanbanAdapterInterface
     {
-        if ($this->adapter) {
+        if ($this->adapter !== null) {
             return $this->adapter;
         }
 
-        $instance = $this->subject->getModel();
-
-        // Check if the model uses the HasKanbanBoard trait
-        if (method_exists($instance, 'getKanbanAdapter')) {
-            // Override default values if they are provided
-            if (method_exists($instance, 'setKanbanStatusField') && $this->statusField) {
-                $instance->setKanbanStatusField($this->statusField);
-            }
-
-            if (method_exists($instance, 'setKanbanStatusValues') && $this->statusValues) {
-                $instance->setKanbanStatusValues($this->statusValues);
-            }
-
-            if (method_exists($instance, 'setKanbanTitleAttribute') && $this->titleAttribute) {
-                $instance->setKanbanTitleAttribute($this->titleAttribute);
-            }
-
-            if (method_exists($instance, 'setKanbanDescriptionAttribute') && $this->descriptionAttribute) {
-                $instance->setKanbanDescriptionAttribute($this->descriptionAttribute);
-            }
-
-            if (method_exists($instance, 'setKanbanCardAttributes') && $this->cardAttributes) {
-                $instance->setKanbanCardAttributes($this->cardAttributes);
-            }
-
-            if (method_exists($instance, 'setKanbanStatusColors') && $this->statusColors) {
-                $instance->setKanbanStatusColors($this->statusColors);
-            }
-
-            if (method_exists($instance, 'setKanbanOrderField') && $this->orderField) {
-                $instance->setKanbanOrderField($this->orderField);
-            }
-
-            if (method_exists($instance, 'setKanbanCreateFormCallback') && $this->createFormCallback) {
-                $instance->setKanbanCreateFormCallback($this->createFormCallback);
-            }
-
-            if (method_exists($instance, 'setKanbanRecordLabel') && $this->recordLabel) {
-                $instance->setKanbanRecordLabel($this->recordLabel);
-            }
-
-            if (method_exists($instance, 'setKanbanPluralRecordLabel') && $this->pluralRecordLabel) {
-                $instance->setKanbanPluralRecordLabel($this->pluralRecordLabel);
-            }
-
-            return $instance->getKanbanAdapter();
+        if (!isset($this->subject)) {
+            throw new \InvalidArgumentException(
+                'You must specify a subject using the for() method before getting the adapter.'
+            );
         }
 
-        throw new Exception('Model does not use the HasKanbanBoard trait.');
+        // Create the adapter using the factory
+        $adapter = KanbanAdapterFactory::create($this->subject, $this->config);
+
+        // Apply any custom adapter modifications
+        if ($this->adapterCallback !== null && is_callable($this->adapterCallback)) {
+            $adapter = call_user_func($this->adapterCallback, $adapter);
+        }
+
+        $this->adapter = $adapter;
+
+        return $adapter;
     }
 }
