@@ -240,13 +240,10 @@ abstract class KanbanBoardPage extends Page
             return $this->adapter;
         }
 
-        $model = $this->subject->getModel();
+        $instance = $this->subject->getModel();
 
         // Check if the model uses the HasKanbanBoard trait
-        if (method_exists($model, 'getKanbanAdapter')) {
-            // Create an instance and configure it
-            $instance = new $model();
-
+        if (method_exists($instance, 'getKanbanAdapter')) {
             // Override default values if they are provided
             if (method_exists($instance, 'setKanbanStatusField') && $this->statusField) {
                 $instance->setKanbanStatusField($this->statusField);
