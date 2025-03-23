@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Adapters;
 
+use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Livewire\Wireable;
@@ -47,6 +48,13 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     protected array $cardAttributes = [];
 
     /**
+     * The order field for the model.
+     *
+     * @var string|null
+     */
+    protected ?string $orderField = null;
+
+    /**
      * The model class for the adapter.
      *
      * @var string
@@ -62,6 +70,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
      * @param string $titleAttribute The title attribute
      * @param string|null $descriptionAttribute The description attribute
      * @param array<string> $cardAttributes The card attributes
+     * @param string|null $orderField The order field
      */
     public function __construct(
         string $modelClass,
@@ -69,7 +78,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         array $statusValues,
         string $titleAttribute,
         ?string $descriptionAttribute = null,
-        array $cardAttributes = []
+        array $cardAttributes = [],
+        ?string $orderField = null
     ) {
         $this->modelClass = $modelClass;
         $this->statusField = $statusField;
@@ -77,6 +87,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         $this->titleAttribute = $titleAttribute;
         $this->descriptionAttribute = $descriptionAttribute;
         $this->cardAttributes = $cardAttributes;
+        $this->orderField = $orderField;
     }
 
     /**
@@ -152,6 +163,16 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     }
 
     /**
+     * Get the order field for the model.
+     *
+     * @return string|null
+     */
+    public function getOrderField(): ?string
+    {
+        return $this->orderField;
+    }
+
+    /**
      * Get the items for all statuses.
      *
      * @return Collection<int, Model>
@@ -171,7 +192,14 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     public function getItemsForStatus(string $status): Collection
     {
         $modelClass = $this->getModel();
-        return $modelClass::where($this->getStatusField(), $status)->get();
+        $query = $modelClass::where($this->getStatusField(), $status);
+
+        // Add ordering if order field is set
+        if ($this->getOrderField()) {
+            $query->orderBy($this->getOrderField());
+        }
+
+        return $query->get();
     }
 
     /**
@@ -188,6 +216,41 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
     }
 
     /**
+     * Update the order of a model.
+     *
+     * @param string|int $columnId
+     * @param array $cards
+     * @return bool
+     * @throws \Throwable
+     */
+    public function updateColumnCards(string|int $columnId, array $cards): bool
+    {
+        if (!$this->getOrderField()) {
+            return false;
+        }
+
+        $model = app($this->getModel());
+
+        // Validate column ID exists in status values
+        if (!array_key_exists((string)$columnId, $this->getStatusValues())) {
+            return false;
+        }
+
+        return DB::transaction(function() use ($model, $columnId, $cards) {
+            foreach ($cards as $index => $id) {
+                $model->newQuery()
+                    ->where($model->getQualifiedKeyName(), $id)
+                    ->update([
+                        $this->getStatusField() => $columnId,
+                        $this->getOrderField() => $index,
+                    ]);
+            }
+
+            return true;
+        });
+    }
+
+    /**
      * Create a new card with the given attributes.
      *
      * @param array<string, mixed> $attributes The card attributes
@@ -201,6 +264,15 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
         // Set status if provided, otherwise use the first status as default
         $status = $attributes[$this->getStatusField()] ?? array_key_first($this->getStatusValues());
         $card->{$this->getStatusField()} = $status;
+
+        // Set order if the field exists
+        if ($this->getOrderField()) {
+            // Set the highest order by default (add to the end of the column)
+            $maxOrder = $modelClass::where($this->getStatusField(), $status)
+                ->max($this->getOrderField()) ?? 0;
+
+            $card->{$this->getOrderField()} = $maxOrder + 1;
+        }
 
         // Set title
         if (isset($attributes[$this->getTitleAttribute()])) {
@@ -281,6 +353,7 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             'titleAttribute' => $this->getTitleAttribute(),
             'descriptionAttribute' => $this->getDescriptionAttribute(),
             'cardAttributes' => $this->getCardAttributes(),
+            'orderField' => $this->getOrderField(),
         ];
     }
 
@@ -298,7 +371,8 @@ class DefaultKanbanAdapter implements IKanbanAdapter, Wireable
             $value['statusValues'],
             $value['titleAttribute'],
             $value['descriptionAttribute'] ?? null,
-            $value['cardAttributes'] ?? []
+            $value['cardAttributes'] ?? [],
+            $value['orderField'] ?? null
         );
     }
 }

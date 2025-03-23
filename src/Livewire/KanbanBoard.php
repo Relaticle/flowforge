@@ -49,6 +49,7 @@ class KanbanBoard extends Component
             'titleAttribute' => $adapter->getTitleAttribute(),
             'descriptionAttribute' => $adapter->getDescriptionAttribute(),
             'cardAttributes' => $adapter->getCardAttributes(),
+            'orderField' => $adapter->getOrderField(),
         ];
         $this->loadColumnsData();
     }
@@ -120,39 +121,19 @@ class KanbanBoard extends Component
     }
 
     /**
-     * Update the status of an item.
+     * Update the order of an item within the same column.
      *
-     * @param mixed $id The ID of the item
-     * @param string $status The new status value
+     * @param $columnId
+     * @param $cards
      * @return bool
      */
-    public function updateStatus($id, $status): bool
+    public function updateColumnCards($columnId, $cards): bool
     {
-             $item = $this->adapter->getModelById($id);
+        $this->adapter->updateColumnCards($columnId, $cards);
 
-        if (!$item) {
-            return false;
-        }
-
-
-   $result = $this->adapter->updateStatus($item, $status);
-
-        if ($result) {
-            $this->loadColumnsData();
-            $this->dispatch('kanban-item-moved', ['id' => $id, 'status' => $status]);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Refresh the Kanban board.
-     *
-     * @return void
-     */
-    public function refreshBoard(): void
-    {
         $this->loadColumnsData();
+
+        return true;
     }
 
     /**

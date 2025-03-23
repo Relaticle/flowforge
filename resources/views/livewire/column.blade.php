@@ -22,10 +22,7 @@
          x-sortable
          x-sortable-group="cards"
          data-column-id="{{ $columnId }}"
-         @end.stop="
-
-         $wire.updateStatus($event.item.getAttribute('x-sortable-item'), $event.to.getAttribute('data-column-id'))"
-
+         @end.stop="$wire.updateColumnCards($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
     >
         @foreach($column['items'] as $card)
             <x-flowforge::kanban.card

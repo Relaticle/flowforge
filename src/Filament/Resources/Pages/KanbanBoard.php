@@ -36,6 +36,11 @@ class KanbanBoard extends Page
     protected array $cardAttributes = [];
 
     /**
+     * @var string|null
+     */
+    protected ?string $orderField = null;
+
+    /**
      * @var IKanbanAdapter|null
      */
     protected ?IKanbanAdapter $adapter = null;
@@ -116,6 +121,19 @@ class KanbanBoard extends Page
     }
 
     /**
+     * Set the order field for the Kanban board.
+     *
+     * @param string $field
+     * @return static
+     */
+    public function orderField(string $field): static
+    {
+        $this->orderField = $field;
+
+        return $this;
+    }
+
+    /**
      * Set a custom adapter for the Kanban board.
      *
      * @param IKanbanAdapter $adapter
@@ -166,6 +184,10 @@ class KanbanBoard extends Page
 
             if (method_exists($instance, 'setKanbanCardAttributes') && $this->cardAttributes) {
                 $instance->setKanbanCardAttributes($this->cardAttributes);
+            }
+
+            if (method_exists($instance, 'setKanbanOrderField') && $this->orderField) {
+                $instance->setKanbanOrderField($this->orderField);
             }
 
             return $instance->getKanbanAdapter();

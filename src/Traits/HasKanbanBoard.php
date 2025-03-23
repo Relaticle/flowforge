@@ -45,6 +45,13 @@ trait HasKanbanBoard
     protected ?array $kanbanCardAttributes = null;
     
     /**
+     * Order field for Kanban board.
+     * 
+     * @var string|null
+     */
+    protected ?string $kanbanOrderField = null;
+    
+    /**
      * Get the Kanban adapter for the model.
      *
      * @return IKanbanAdapter
@@ -67,6 +74,7 @@ trait HasKanbanBoard
         $titleAttribute = $this->getKanbanTitleAttribute();
         $descriptionAttribute = $this->getKanbanDescriptionAttribute();
         $cardAttributes = $this->getKanbanCardAttributes();
+        $orderField = $this->getKanbanOrderField();
 
         return new DefaultKanbanAdapter(
             static::class,
@@ -74,7 +82,8 @@ trait HasKanbanBoard
             $statusValues,
             $titleAttribute,
             $descriptionAttribute,
-            $cardAttributes
+            $cardAttributes,
+            $orderField
         );
     }
 
@@ -215,6 +224,34 @@ trait HasKanbanBoard
     public function setKanbanCardAttributes(array $attributes): self
     {
         $this->kanbanCardAttributes = $attributes;
+        return $this;
+    }
+    
+    /**
+     * Get the order field for Kanban board.
+     * 
+     * @return string|null
+     */
+    public function getKanbanOrderField(): ?string
+    {
+        if ($this->kanbanOrderField !== null) {
+            return $this->kanbanOrderField;
+        }
+        
+        return method_exists($this, 'kanbanOrderField')
+            ? $this->kanbanOrderField()
+            : null;
+    }
+    
+    /**
+     * Set the order field for Kanban board.
+     * 
+     * @param string|null $field
+     * @return self
+     */
+    public function setKanbanOrderField(?string $field): self
+    {
+        $this->kanbanOrderField = $field;
         return $this;
     }
 

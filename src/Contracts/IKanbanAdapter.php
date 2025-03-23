@@ -102,4 +102,20 @@ interface IKanbanAdapter
      * @return bool
      */
     public function deleteCard(Model $card): bool;
+
+    /**
+     * Get the order field name for the model.
+     *
+     * @return string|null
+     */
+    public function getOrderField(): ?string;
+
+    /**
+     * Update the status and order of an item.
+     *
+     * @param string|int $columnId
+     * @param array $cards
+     * @return bool
+     */
+    public function updateColumnCards(string|int $columnId, array $cards): bool;
 }
