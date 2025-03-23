@@ -77,19 +77,57 @@ class KanbanBoard extends Component implements HasForms
     /**
      * The number of cards to show per column.
      *
+     * @var array
+     */
+    public array $perPage = [];
+
+    /**
+     * The columns currently being loaded.
+     *
+     * @var array
+     */
+    public array $loading = [];
+
+    /**
+     * The initial number of cards to show per column.
+     *
      * @var int
      */
-    public int $perPage = 10;
+    public int $initialCardsCount = 10;
+
+    /**
+     * The number of cards to load when loading more.
+     *
+     * @var int
+     */
+    public int $cardsIncrement = 10;
 
     /**
      * Mount the component.
      *
      * @param IKanbanAdapter $adapter The Kanban board adapter
+     * @param int|null $initialCardsCount Initial number of cards to show per column
+     * @param int|null $cardsIncrement Number of cards to load when loading more
      * @return void
      */
-    public function mount(IKanbanAdapter $adapter): void
+    public function mount(IKanbanAdapter $adapter, ?int $initialCardsCount = null, ?int $cardsIncrement = null): void
     {
         $this->adapter = $adapter;
+
+        // Set configuration values
+        if ($initialCardsCount !== null) {
+            $this->initialCardsCount = $initialCardsCount;
+        } else {
+            // Try to get from config, otherwise use default
+            $this->initialCardsCount = config('flowforge.kanban.initial_cards_count', 20);
+        }
+
+        if ($cardsIncrement !== null) {
+            $this->cardsIncrement = $cardsIncrement;
+        } else {
+            // Try to get from config, otherwise use default
+            $this->cardsIncrement = config('flowforge.kanban.cards_increment', 10);
+        }
 
         $this->config = [
             'statusField' => $adapter->getStatusField(),
@@ -101,6 +139,8 @@ class KanbanBoard extends Component implements HasForms
             'orderField' => $adapter->getOrderField(),
             'recordLabel' => method_exists($adapter, 'getRecordLabel') ? $adapter->getRecordLabel() : 'Card',
             'pluralRecordLabel' => method_exists($adapter, 'getPluralRecordLabel') ? $adapter->getPluralRecordLabel() : 'Cards',
+            'initialCardsCount' => $this->initialCardsCount,
+            'cardsIncrement' => $this->cardsIncrement,
         ];
 
         // Ensure the status field is populated in both form data arrays
@@ -112,6 +152,11 @@ class KanbanBoard extends Component implements HasForms
         foreach ($adapter->getCardAttributes() as $attribute => $label) {
             $this->createFormData[$attribute] = '';
             $this->editFormData[$attribute] = '';
+        }
+
+        // Initialize per-column pagination with default value
+        foreach (array_keys($adapter->getStatusValues()) as $columnId) {
+            $this->perPage[$columnId] = $this->initialCardsCount;
         }
 
         $this->loadColumnsData();
@@ -126,23 +171,23 @@ class KanbanBoard extends Component implements HasForms
     protected function resolveStatusColors(): array
     {
         // Get custom colors from adapter if available
-        $customColors = method_exists($this->adapter, 'getStatusColors') 
-            ? $this->adapter->getStatusColors() ?? [] 
+        $customColors = method_exists($this->adapter, 'getStatusColors')
+            ? $this->adapter->getStatusColors() ?? []
             : [];
-        
+
         // Ensure all statuses have a color
         $statuses = array_keys($this->adapter->getStatusValues());
         $statusColors = [];
-        
+
         foreach ($statuses as $status) {
             // Get the color name or default to 'default'
             $colorName = $customColors[$status] ?? null;
-            
+
             // Convert to KanbanColor enum and get CSS class for the badge
             $color = KanbanColor::fromStringOrDefault($colorName);
             $statusColors[$status] = $color->classes();
         }
-        
+
         return $statusColors;
     }
 
@@ -189,7 +234,8 @@ class KanbanBoard extends Component implements HasForms
      */
     public function getItemsForStatus(string $status): array
     {
-        $items = $this->adapter->getItemsForStatus($status, $this->perPage);
+        $perPage = $this->perPage[$status] ?? 10;
+        $items = $this->adapter->getItemsForStatus($status, $perPage);
         return $this->formatItems($items);
     }
 
@@ -208,13 +254,27 @@ class KanbanBoard extends Component implements HasForms
      * Load more items for a specific column.
      *
      * @param string $columnId The column ID
+     * @param int|null $count Number of additional items to load (null = use configured increment)
      * @return void
      */
-    public function loadMoreItems(string $columnId): void
+    public function loadMoreItems(string $columnId, ?int $count = null): void
     {
-        $this->perPage += 10;
-        $this->loadColumnsData();
-        $this->dispatch('kanban-items-loaded');
+        $this->loading[$columnId] = true;
+
+        // Increment only the specific column's perPage value
+        if (!isset($this->perPage[$columnId])) {
+            $this->perPage[$columnId] = $this->initialCardsCount;
+        }
+
+        // Use passed count or default to configured increment
+        $increment = $count ?? $this->cardsIncrement;
+        $this->perPage[$columnId] += $increment;
+
+        // Only reload the specific column data
+        $this->columns[$columnId]['items'] = $this->getItemsForStatus($columnId);
+
+        $this->loading[$columnId] = false;
+        $this->dispatch('kanban-items-loaded', ['columnId' => $columnId]);
     }
 
     /**

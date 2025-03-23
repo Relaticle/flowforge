@@ -233,6 +233,49 @@ public function mount(): void
 }
 ```
 
+### Configuring Pagination
+
+You can customize how many cards are loaded initially and how many are loaded when scrolling to the bottom of a column:
+
+#### Option 1: Via constructor parameters
+
+Pass parameters directly when instantiating the board:
+
+```php
+// In your Filament page or Livewire component
+public function mount(): void
+{
+    parent::mount(initialCardsCount: 5, cardsIncrement: 5);
+    
+    // Rest of your configuration...
+}
+```
+
+#### Option 2: Via config file
+
+Update values in the `config/flowforge.php` file:
+
+```php
+// config/flowforge.php
+return [
+    // ...
+    
+    'kanban' => [
+        'initial_cards_count' => 5, // Initial number of cards to show per column
+        'cards_increment' => 10,    // Number of cards to load when loading more
+        'max_cards_per_column' => 100, // Maximum number of cards that can be loaded per column
+    ],
+    
+    // ...
+];
+```
+
+To publish the configuration file:
+
+```bash
+php artisan vendor:publish --tag="flowforge-config"
+```
+
 ### Customizing Badge Appearance
 
 The badge colors are defined in the CSS file and can be customized by publishing the assets:

@@ -5,11 +5,10 @@ export default function flowforge({state}) {
         currentColumn: null,
         currentCard: null,
         formData: {},
+        isLoading: {},
 
         init: function () {
-            console.log('FlowForge Alpine component initialized')
-
-            // Listen for form submission success/failure
+            // Listen for card creation
             this.$wire.$on('kanban-card-created', (data) => {
                 const id = data[0].id;
                 const status = data[0].status;
@@ -28,6 +27,7 @@ export default function flowforge({state}) {
                 }, 300);
             });
 
+            // Listen for card update
             this.$wire.$on('kanban-card-updated', (data) => {
 
                 const id = data[0].id;
@@ -46,6 +46,7 @@ export default function flowforge({state}) {
                 }, 300);
             });
 
+            // Listen for card deletion
             this.$wire.$on('kanban-card-deleted', (data) => {
                 const id = data[0].id;
 
@@ -64,39 +65,29 @@ export default function flowforge({state}) {
             })
 
             // Listen for when items are loaded
-            this.$wire.$on('kanban-items-loaded', () => {
-                // Initialize sortable for newly loaded items
-                this.initSortable();
+            this.$wire.$on('kanban-items-loaded', (data) => {
+                // Get the specific column that was updated
+                const columnId = data[0]?.columnId;
+
+                // Clear loading state for this column
+                if (columnId) {
+                    this.isLoading[columnId] = false;
+                }
             });
         },
 
-        initSortable() {
-            // Re-initialize sortable for all columns if needed
-            // This could be implemented if needed for dynamically loaded content
+        /**
+         * Check if we're loading items for a specific column
+         */
+        isLoadingColumn(columnId) {
+            return this.isLoading[columnId] || false;
         },
 
         /**
-         * Helper function for success notifications (maintained for backward compatibility)
+         * Begin loading more items for a column
          */
-        showSuccessNotification(message) {
-            // Trigger Filament notification if available
-            if (window.Filament && window.Filament.notify) {
-                window.Filament.notify.success(message);
-            } else {
-                console.log('Success:', message);
-            }
+        beginLoading(columnId) {
+            this.isLoading[columnId] = true;
         },
-
-        /**
-         * Helper function for error notifications (maintained for backward compatibility)
-         */
-        showErrorNotification(message) {
-            // Trigger Filament notification if available
-            if (window.Filament && window.Filament.notify) {
-                window.Filament.notify.error(message);
-            } else {
-                console.error('Error:', message);
-            }
-        }
     }
 }

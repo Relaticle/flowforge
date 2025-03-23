@@ -48,12 +48,28 @@
             @endforeach
 
             @if($column['total'] > count($column['items']))
-                <button
-                    wire:click="loadMoreItems('{{ $columnId }}')"
-                    class="w-full py-2 text-xs text-center text-primary-600 dark:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 rounded"
+                <div 
+                    x-intersect.full="
+                        if (!isLoadingColumn('{{ $columnId }}')) {
+                            beginLoading('{{ $columnId }}');
+                            $wire.loadMoreItems('{{ $columnId }}', {{ $config['cardsIncrement'] ?? 'null' }});
+                        }
+                    "
+                    class="py-3 text-center"
                 >
-                    {{ __('Load more') }} ({{ count($column['items']) }} / {{ $column['total'] }})
-                </button>
+                    <div wire:loading wire:target="loadMoreItems('{{ $columnId }}')" class="text-xs text-primary-600 dark:text-primary-400">
+                        {{ __('Loading more cards...') }}
+                        <div class="mt-1 flex justify-center">
+                            <svg class="animate-spin h-4 w-4 text-primary-600 dark:text-primary-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div wire:loading.remove wire:target="loadMoreItems('{{ $columnId }}')" class="text-xs text-gray-400">
+                        {{ count($column['items']) }} / {{ $column['total'] }} {{ $config['pluralRecordLabel'] }}
+                    </div>
+                </div>
             @endif
         @else
            <x-flowforge::empty-column

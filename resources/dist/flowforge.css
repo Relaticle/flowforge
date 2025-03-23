@@ -2503,6 +2503,14 @@ select {
   margin-top: auto;
 }
 
+.-ml-1 {
+  margin-left: -0.25rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
@@ -4210,6 +4218,14 @@ select {
 
 .opacity-70 {
   opacity: 0.7;
+}
+
+.opacity-25 {
+  opacity: 0.25;
+}
+
+.opacity-75 {
+  opacity: 0.75;
 }
 
 .shadow {
