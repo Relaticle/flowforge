@@ -11,7 +11,7 @@ export default function flowforge({state}) {
             // Listen for card creation
             this.$wire.$on('kanban-card-created', (data) => {
                 const id = data[0].id;
-                const status = data[0].status;
+                const column = data[0].column;
 
                 this.$dispatch('close-modal', { id: 'create-card-modal' });
 

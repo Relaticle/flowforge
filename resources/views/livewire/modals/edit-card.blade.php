@@ -1,6 +1,6 @@
 @props(['config'])
 
-<x-filament::modal id="edit-card-modal" :heading="__('Edit :recordLabel', ['recordLabel' => $config['recordLabel'] ?? 'Card'])">
+<x-filament::modal id="edit-card-modal" :heading="__('Edit :cardLabel', ['cardLabel' => $config['cardLabel'] ?? 'Card'])">
     {{ $this->editForm }}
 
     <x-slot name="footer">

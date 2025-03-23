@@ -9,8 +9,8 @@
         state: {
             columns: @js($columns),
             columnField: '{{ $config['columnField'] }}',
-            recordLabel: '{{ $config['recordLabel'] ?? 'Card' }}',
-            pluralRecordLabel: '{{ $config['pluralRecordLabel'] ?? 'Cards' }}'
+            cardLabel: '{{ $config['cardLabel'] ?? 'Card' }}',
+            pluralCardLabel: '{{ $config['pluralCardLabel'] ?? 'Cards' }}'
         }
     })"
 >
