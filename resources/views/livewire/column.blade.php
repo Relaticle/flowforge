@@ -48,7 +48,7 @@
             @endforeach
 
             @if(isset($column['total']) && $column['total'] > count($column['items']))
-                <div 
+                <div
                     x-intersect.full="
                         if (!isLoadingColumn('{{ $columnId }}')) {
                             beginLoading('{{ $columnId }}');

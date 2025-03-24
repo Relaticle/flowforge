@@ -3,9 +3,6 @@
 namespace Relaticle\Flowforge\Filament\Pages;
 
 use Filament\Pages\Page;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Relaticle\Flowforge\Adapters\KanbanAdapterFactory;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
@@ -51,21 +48,10 @@ abstract class KanbanBoardPage extends Page
     }
 
     /**
-     * Set the subject for the Kanban board.
-     *
-     * @param EloquentBuilder|Relation|string $subject
-     */
-    public function for(EloquentBuilder|Relation|string $subject): static
-    {
-        $this->subject = $subject;
-
-        return $this;
-    }
-
-    /**
      * Set the field that stores the column value.
      *
      * @param string $field
+     * @return KanbanBoardPage
      */
     public function columnField(string $field): static
     {
@@ -90,6 +76,7 @@ abstract class KanbanBoardPage extends Page
      * Set the title field for the Kanban cards.
      *
      * @param string $field
+     * @return KanbanBoardPage
      */
     public function titleField(string $field): static
     {
@@ -147,21 +134,10 @@ abstract class KanbanBoardPage extends Page
     }
 
     /**
-     * Set the create form callback for the Kanban board.
-     *
-     * @param callable $callback
-     */
-    public function createForm(callable $callback): static
-    {
-        $this->config = $this->config->withCreateFormCallback($callback);
-
-        return $this;
-    }
-
-    /**
      * Set the label for individual cards.
      *
      * @param string $label
+     * @return KanbanBoardPage
      */
     public function cardLabel(string $label): static
     {
@@ -171,21 +147,10 @@ abstract class KanbanBoardPage extends Page
     }
 
     /**
-     * Set the plural label for collection of cards.
-     *
-     * @param string $label
-     */
-    public function pluralCardLabel(string $label): static
-    {
-        $this->config = $this->config->withPluralCardLabel($label);
-
-        return $this;
-    }
-
-    /**
      * Set a custom adapter for the Kanban board.
      *
      * @param KanbanAdapterInterface $adapter
+     * @return KanbanBoardPage
      */
     public function withCustomAdapter(KanbanAdapterInterface $adapter): static
     {
@@ -198,6 +163,7 @@ abstract class KanbanBoardPage extends Page
      * Register a callback to modify the auto-created adapter.
      *
      * @param callable $callback
+     * @return KanbanBoardPage
      */
     public function withAdapterCallback(callable $callback): static
     {
@@ -240,14 +206,8 @@ abstract class KanbanBoardPage extends Page
             return $this->adapter;
         }
 
-        if (!isset($this->subject)) {
-            throw new \InvalidArgumentException(
-                'You must specify a subject using the for() method before getting the adapter.'
-            );
-        }
-
         // Create the adapter using the factory
-        $adapter = KanbanAdapterFactory::create($this->subject, $this->config);
+        $adapter = KanbanAdapterFactory::create($this->getSubject(), $this->config);
 
         // Apply any custom adapter modifications
         if ($this->adapterCallback !== null && is_callable($this->adapterCallback)) {
