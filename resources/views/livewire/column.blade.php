@@ -10,7 +10,7 @@
                 {{ $column['label'] }}
             </h3>
             <div
-                class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium {{ $config['columnColors'][$columnId] ?? 'kanban-column-' . str_replace('_', '-', $columnId) }}">
+                class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium kanban-color-{{ $config['columnColors'][$columnId] }}">
                 {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
             </div>
         </div>
