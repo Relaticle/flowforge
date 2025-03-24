@@ -11,28 +11,52 @@ use Illuminate\Support\Str;
  *
  * This class serves as the single source of truth for all Kanban board
  * configuration and prevents unintended configuration changes at runtime.
+ *
+ * @method self withColumnField(string $columnField) Set the field name that determines which column a card belongs to
+ * @method self withColumnValues(array<string, string> $columnValues) Set the available column values with their labels
+ * @method self withColumnColors(array<string, string>|null $columnColors) Set the color mappings for columns
+ * @method self withTitleField(string $titleField) Set the field name used for card titles
+ * @method self withDescriptionField(string|null $descriptionField) Set the field name for card descriptions
+ * @method self withCardAttributes(array<string, string> $cardAttributes) Set the additional fields to display on cards
+ * @method self withOrderField(string|null $orderField) Set the field name for maintaining card order
+ * @method self withCardLabel(string|null $cardLabel) Set the label for individual cards
+ * @method self withPluralCardLabel(string|null $pluralCardLabel) Set the plural label for collection of cards
+ * @method self withCreateFormCallback(callable|null $createFormCallback) Set the callback for customizing the card creation form
  */
-final class KanbanConfig
+final readonly class KanbanConfig
 {
     /**
      * Create a new Kanban configuration instance.
+     *
+     * @param string $columnField The field name that determines which column a card belongs to
+     * @param array<string, string> $columnValues Available column values with their labels
+     * @param array<string, string>|null $columnColors Optional color mappings for columns
+     * @param string $titleField The field name used for card titles
+     * @param string|null $descriptionField Optional field name for card descriptions
+     * @param array<string, string> $cardAttributes Additional fields to display on cards
+     * @param string|null $orderField Optional field name for maintaining card order
+     * @param string|null $cardLabel Optional label for individual cards
+     * @param string|null $pluralCardLabel Optional plural label for collection of cards
+     * @param callable|null $createFormCallback Optional callback for customizing the card creation form
      */
     public function __construct(
-        private readonly string $columnField = 'status',
-        private readonly array $columnValues = [],
-        private readonly ?array $columnColors = null,
-        private readonly string $titleField = 'title',
-        private readonly ?string $descriptionField = null,
-        private readonly array $cardAttributes = [],
-        private readonly ?string $orderField = null,
-        private readonly ?string $cardLabel = null,
-        private readonly ?string $pluralCardLabel = null,
-        private readonly mixed $createFormCallback = null,
+        private string  $columnField = 'status',
+        private array   $columnValues = [],
+        private ?array  $columnColors = null,
+        private string  $titleField = 'title',
+        private ?string $descriptionField = null,
+        private array   $cardAttributes = [],
+        private ?string $orderField = null,
+        private ?string $cardLabel = null,
+        private ?string $pluralCardLabel = null,
+        private mixed   $createFormCallback = null,
     ) {
     }
 
     /**
      * Get the field that stores the column value.
+     *
+     * @return string The column field name
      */
     public function getColumnField(): string
     {
@@ -42,7 +66,7 @@ final class KanbanConfig
     /**
      * Get the available column values with their labels.
      *
-     * @return array<string, string>
+     * @return array<string, string> Map of column values to their display labels
      */
     public function getColumnValues(): array
     {
@@ -52,7 +76,7 @@ final class KanbanConfig
     /**
      * Get the colors for each column.
      *
-     * @return array<string, string>|null
+     * @return array<string, string>|null Map of column values to color codes, or null if not set
      */
     public function getColumnColors(): ?array
     {
@@ -61,6 +85,8 @@ final class KanbanConfig
 
     /**
      * Get the field used for card titles.
+     *
+     * @return string The title field name
      */
     public function getTitleField(): string
     {
@@ -69,6 +95,8 @@ final class KanbanConfig
 
     /**
      * Get the field used for card descriptions.
+     *
+     * @return string|null The description field name, or null if not set
      */
     public function getDescriptionField(): ?string
     {
@@ -78,7 +106,7 @@ final class KanbanConfig
     /**
      * Get the additional fields to display on cards.
      *
-     * @return array<string, string>
+     * @return array<string, string> Map of attribute names to their display labels
      */
     public function getCardAttributes(): array
     {
@@ -87,6 +115,8 @@ final class KanbanConfig
 
     /**
      * Get the field used for maintaining card order.
+     *
+     * @return string|null The order field name, or null if ordering is not enabled
      */
     public function getOrderField(): ?string
     {
@@ -95,6 +125,8 @@ final class KanbanConfig
 
     /**
      * Get the label for individual cards.
+     *
+     * @return string|null The singular card label, or null to use default
      */
     public function getCardLabel(): ?string
     {
@@ -103,6 +135,8 @@ final class KanbanConfig
 
     /**
      * Get the plural label for collection of cards.
+     *
+     * @return string|null The plural card label, or null to use default
      */
     public function getPluralCardLabel(): ?string
     {
@@ -111,6 +145,8 @@ final class KanbanConfig
 
     /**
      * Get the form callback for creating cards.
+     *
+     * @return mixed The form creation callback, or null if not set
      */
     public function getCreateFormCallback(): mixed
     {
@@ -127,7 +163,7 @@ final class KanbanConfig
      * @param string $method The method name
      * @param array $arguments The method arguments
      * @return self A new instance with the updated property
-     * @throws \BadMethodCallException If the method is not a valid with* method
+     * @throws \BadMethodCallException If the method is not a valid with* method or targets a non-existent property
      */
     public function __call(string $method, array $arguments): self
     {
@@ -161,6 +197,11 @@ final class KanbanConfig
         return new self(...$config);
     }
 
+    /**
+     * Convert the configuration to an array.
+     *
+     * @return array<string, mixed> Array representation of the configuration
+     */
     public function toArray(): array
     {
         return [
