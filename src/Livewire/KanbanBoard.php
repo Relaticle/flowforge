@@ -129,9 +129,9 @@ class KanbanBoard extends Component implements HasForms
      * @param array<int, string> $searchable The searchable fields
      */
     public function mount(
-        KanbanAdapterInterface $adapter, 
-        ?int $initialCardsCount = null, 
-        ?int $cardsIncrement = null, 
+        KanbanAdapterInterface $adapter,
+        ?int $initialCardsCount = null,
+        ?int $cardsIncrement = null,
         array $searchable = []
     ): void {
         $this->adapter = $adapter;
@@ -184,7 +184,7 @@ class KanbanBoard extends Component implements HasForms
     protected function resolveColumnColors(): array
     {
         $adapterColors = $this->adapter->getConfig()->getColumnColors();
-        
+
         if ($adapterColors !== null) {
             return $adapterColors;
         }
@@ -213,7 +213,7 @@ class KanbanBoard extends Component implements HasForms
 
         $colors = [];
         $columnKeys = array_keys($this->adapter->getConfig()->getColumnValues());
-        
+
         foreach ($columnKeys as $index => $key) {
             $colorIndex = $index % count($defaultColors);
             $colors[$key] = $defaultColors[$colorIndex];
@@ -228,7 +228,7 @@ class KanbanBoard extends Component implements HasForms
     public function createCardForm(Form $form): Form
     {
         $form = $this->adapter->getCreateForm($form, $this->activeColumn);
-        
+
         return $form->statePath('cardData');
     }
 
@@ -238,7 +238,7 @@ class KanbanBoard extends Component implements HasForms
     public function editCardForm(Form $form): Form
     {
         $form = $this->adapter->getEditForm($form);
-        
+
         return $form->statePath('cardData');
     }
 
@@ -257,13 +257,13 @@ class KanbanBoard extends Component implements HasForms
     {
         foreach ($this->columns as $columnId => $column) {
             $limit = $this->columnCardLimits[$columnId] ?? 10;
-            
+
             $items = $this->adapter->getItemsForColumn($columnId, $limit);
             $this->columnCards[$columnId] = $this->formatItems($items);
-            
+
             // Ensure that items and total keys exist in columns data
             $this->columns[$columnId]['items'] = $this->columnCards[$columnId];
-            
+
             // Get the total count
             $this->columns[$columnId]['total'] = $this->adapter->getColumnItemsCount($columnId);
         }
@@ -302,9 +302,9 @@ class KanbanBoard extends Component implements HasForms
         $count = $count ?? $this->cardsIncrement;
         $currentLimit = $this->columnCardLimits[$columnId] ?? 10;
         $newLimit = $currentLimit + $count;
-        
+
         $this->columnCardLimits[$columnId] = $newLimit;
-        
+
         $items = $this->adapter->getItemsForColumn($columnId, $newLimit);
         $this->columnCards[$columnId] = $this->formatItems($items);
     }
@@ -330,11 +330,11 @@ class KanbanBoard extends Component implements HasForms
     public function reorderCardsInColumn($columnId, $cardIds): bool
     {
         $success = $this->adapter->reorderCardsInColumn($columnId, $cardIds);
-        
+
         if ($success) {
             $this->refreshBoard();
         }
-        
+
         return $success;
     }
 
@@ -350,21 +350,21 @@ class KanbanBoard extends Component implements HasForms
     public function moveCardToColumn($cardId, $fromColumn, $toColumn, $toColumnCardIds): bool
     {
         $card = $this->adapter->getModelById($cardId);
-        
+
         if (!$card) {
             return false;
         }
-        
+
         $success = $this->adapter->moveCardToColumn($card, $toColumn);
-        
+
         if ($success && $this->adapter->getConfig()->getOrderField() !== null) {
             $success = $this->adapter->reorderCardsInColumn($toColumn, $toColumnCardIds);
         }
-        
+
         if ($success) {
             $this->refreshBoard();
         }
-        
+
         return $success;
     }
 
@@ -377,18 +377,18 @@ class KanbanBoard extends Component implements HasForms
     {
         $this->activeColumn = $columnId;
         $this->resetCreateForm();
-        
+
         // Pre-set the column field
         $columnField = $this->config['columnField'];
         $this->cardData[$columnField] = $columnId;
-        
+
         // Apply any order field if needed
         $orderField = $this->config['orderField'];
         if ($orderField !== null) {
             $count = $this->getColumnItemsCount($columnId);
             $this->cardData[$orderField] = $count + 1;
         }
-        
+
         $this->isCreateModalOpen = true;
     }
 
@@ -402,24 +402,24 @@ class KanbanBoard extends Component implements HasForms
     {
         $this->activeColumn = $columnId;
         $this->activeCard = $cardId;
-        
+
         $card = $this->adapter->getModelById($cardId);
-        
+
         if (!$card) {
             Notification::make()
                 ->title('Card not found')
                 ->danger()
                 ->send();
-            
+
             return;
         }
-        
+
         $this->resetEditForm();
-        
+
         // Fill form with card data
         $this->editCardForm->fill($card->toArray());
         $this->cardData = $card->toArray();
-        
+
         $this->isEditModalOpen = true;
     }
 
@@ -429,20 +429,20 @@ class KanbanBoard extends Component implements HasForms
     public function createCard(): void
     {
         $data = $this->createCardForm->getState();
-        
+
         // Ensure column field is set
         $columnField = $this->config['columnField'];
         if (!isset($data[$columnField])) {
             $data[$columnField] = $this->activeColumn;
         }
-        
+
         $card = $this->adapter->createCard($data);
-        
+
         if ($card) {
             $this->refreshBoard();
             $this->resetCreateForm();
             $this->isCreateModalOpen = false;
-            
+
             Notification::make()
                 ->title('Card created')
                 ->success()
@@ -471,23 +471,23 @@ class KanbanBoard extends Component implements HasForms
     {
         $data = $this->editCardForm->getState();
         $card = $this->adapter->getModelById($this->activeCard);
-        
+
         if (!$card) {
             Notification::make()
                 ->title('Card not found')
                 ->danger()
                 ->send();
-            
+
             return;
         }
-        
+
         $success = $this->adapter->updateCard($card, $data);
-        
+
         if ($success) {
             $this->refreshBoard();
             $this->resetEditForm();
             $this->isEditModalOpen = false;
-            
+
             Notification::make()
                 ->title('Card updated')
                 ->success()
@@ -528,22 +528,22 @@ class KanbanBoard extends Component implements HasForms
     public function deleteCard(): void
     {
         $card = $this->adapter->getModelById($this->activeCard);
-        
+
         if (!$card) {
             Notification::make()
                 ->title('Card not found')
                 ->danger()
                 ->send();
-            
+
             return;
         }
-        
+
         $success = $this->adapter->deleteCard($card);
-        
+
         if ($success) {
             $this->refreshBoard();
             $this->isDeleteConfirmOpen = false;
-            
+
             Notification::make()
                 ->title('Card deleted')
                 ->success()
