@@ -11,7 +11,7 @@
             </h3>
             <div
                 class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium {{ $config['columnColors'][$columnId] ?? 'kanban-column-' . str_replace('_', '-', $columnId) }}">
-                {{ $column['total'] ?? count($column['items']) }}
+                {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
             </div>
         </div>
         <button
@@ -37,7 +37,7 @@
         class="p-3 flex-1 overflow-y-auto overflow-x-hidden"
         style="max-height: calc(100vh - 13rem);"
     >
-        @if (count($column['items']) > 0)
+        @if (isset($column['items']) && count($column['items']) > 0)
             @foreach ($column['items'] as $card)
                 <x-flowforge::card
                     :card="$card"
@@ -47,7 +47,7 @@
                 />
             @endforeach
 
-            @if($column['total'] > count($column['items']))
+            @if(isset($column['total']) && $column['total'] > count($column['items']))
                 <div 
                     x-intersect.full="
                         if (!isLoadingColumn('{{ $columnId }}')) {
@@ -67,7 +67,7 @@
                         </div>
                     </div>
                     <div wire:loading.remove wire:target="loadMoreItems('{{ $columnId }}')" class="text-xs text-gray-400">
-                        {{ count($column['items']) }} / {{ $column['total'] }} {{ $config['pluralCardLabel'] }}
+                        {{ count($column['items']) }} / {{ $column['total'] }} {{ $config['pluralCardLabel'] ?? 'Cards' }}
                     </div>
                 </div>
             @endif

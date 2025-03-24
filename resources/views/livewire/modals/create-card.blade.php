@@ -4,7 +4,7 @@
 :description="__('Add a new :cardLabel to the board', ['cardLabel' => strtolower($config['cardLabel'] ?? 'card')])"
 >
 
-    {{ $this->createForm }}
+    {{ $this->createCardForm }}
 
     <x-slot name="footer">
         <div class="flex justify-end gap-x-3">

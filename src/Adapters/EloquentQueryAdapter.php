@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Adapters;
 
+use App\Models\Task;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -165,5 +166,32 @@ class EloquentQueryAdapter extends AbstractKanbanAdapter
     public function deleteCard(Model $card): bool
     {
         return $card->delete();
+    }
+
+       /**
+     * Convert the adapter to a Livewire-compatible array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toLivewire(): array
+    {
+        return [
+            // 'baseQuery' => $this->baseQuery,
+            'config' => $this->config->toArray(),
+        ];
+    }
+
+    /**
+     * Create a new adapter instance from a Livewire-compatible array.
+     *
+     * @param array<string, mixed> $value The Livewire-compatible array
+     * @return static
+     */
+    public static function fromLivewire($value): static
+    {
+        $baseQuery = Task::query();
+        $config = new KanbanConfig(...$value['config']);
+
+        return new static($baseQuery, $config);
     }
 } 
