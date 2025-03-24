@@ -89,6 +89,7 @@ abstract class KanbanBoardPage extends Page
      * Set the description field for the Kanban cards.
      *
      * @param string $field
+     * @return KanbanBoardPage
      */
     public function descriptionField(string $field): static
     {
@@ -125,6 +126,7 @@ abstract class KanbanBoardPage extends Page
      * Set the order field for the Kanban board.
      *
      * @param string $field
+     * @return KanbanBoardPage
      */
     public function orderField(string $field): static
     {
