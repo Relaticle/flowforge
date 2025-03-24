@@ -168,7 +168,7 @@ class EloquentQueryAdapter extends AbstractKanbanAdapter
         return $card->delete();
     }
 
-       /**
+    /**
      * Convert the adapter to a Livewire-compatible array.
      *
      * @return array<string, mixed>
