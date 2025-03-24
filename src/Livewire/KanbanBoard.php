@@ -24,6 +24,8 @@ class KanbanBoard extends Component implements HasForms
 
     /**
      * The Kanban board adapter.
+     *
+     * @var KanbanAdapterInterface
      */
     #[Locked]
     public KanbanAdapterInterface $adapter;
@@ -111,6 +113,14 @@ class KanbanBoard extends Component implements HasForms
     public int $cardsIncrement;
 
     /**
+     * Get the Kanban board adapter.
+     */
+    public function getAdapter(): KanbanAdapterInterface
+    {
+        return $this->adapter;
+    }
+
+    /**
      * Initialize the Kanban board.
      *
      * @param KanbanAdapterInterface $adapter The Kanban adapter
@@ -129,15 +139,15 @@ class KanbanBoard extends Component implements HasForms
 
         // Extract config from adapter
         $this->config = [
-            'columnField' => $adapter->getConfig()->getColumnField(),
-            'columnValues' => $adapter->getConfig()->getColumnValues(),
-            'titleField' => $adapter->getConfig()->getTitleField(),
-            'descriptionField' => $adapter->getConfig()->getDescriptionField(),
-            'cardAttributes' => $adapter->getConfig()->getCardAttributes(),
+            'columnField' => $this->adapter->getConfig()->getColumnField(),
+            'columnValues' => $this->adapter->getConfig()->getColumnValues(),
+            'titleField' => $this->adapter->getConfig()->getTitleField(),
+            'descriptionField' => $this->adapter->getConfig()->getDescriptionField(),
+            'cardAttributes' => $this->adapter->getConfig()->getCardAttributes(),
             'columnColors' => $this->resolveColumnColors(),
-            'orderField' => $adapter->getConfig()->getOrderField(),
-            'cardLabel' => $adapter->getConfig()->getCardLabel(),
-            'pluralCardLabel' => $adapter->getConfig()->getPluralCardLabel(),
+            'orderField' => $this->adapter->getConfig()->getOrderField(),
+            'cardLabel' => $this->adapter->getConfig()->getCardLabel(),
+            'pluralCardLabel' => $this->adapter->getConfig()->getPluralCardLabel(),
         ];
 
         // Set default limits
@@ -150,6 +160,8 @@ class KanbanBoard extends Component implements HasForms
                 'id' => $value,
                 'label' => $label,
                 'color' => $this->config['columnColors'][$value] ?? null,
+                'items' => [],
+                'total' => 0,
             ])
             ->toArray();
 
@@ -157,6 +169,10 @@ class KanbanBoard extends Component implements HasForms
         foreach ($this->columns as $column) {
             $this->columnCardLimits[$column['id']] = $initialCardsCount;
         }
+
+        // Initialize forms
+        // $this->createCardForm->fill();
+        // $this->editCardForm->fill();
 
         // Load initial data
         $this->refreshBoard();
@@ -207,19 +223,23 @@ class KanbanBoard extends Component implements HasForms
     }
 
     /**
-     * Create form configuration.
+     * Create card form configuration.
      */
-    public function createForm(Form $form): Form
+    public function createCardForm(Form $form): Form
     {
-        return $this->adapter->getCreateForm($form, $this->activeColumn);
+        $form = $this->adapter->getCreateForm($form, $this->activeColumn);
+        
+        return $form->statePath('cardData');
     }
 
     /**
-     * Edit form configuration.
+     * Edit card form configuration.
      */
-    public function editForm(Form $form): Form
+    public function editCardForm(Form $form): Form
     {
-        return $this->adapter->getEditForm($form);
+        $form = $this->adapter->getEditForm($form);
+        
+        return $form->statePath('cardData');
     }
 
     /**
@@ -235,12 +255,17 @@ class KanbanBoard extends Component implements HasForms
      */
     protected function loadColumnsData(): void
     {
-        foreach ($this->columns as $column) {
-            $columnId = $column['id'];
+        foreach ($this->columns as $columnId => $column) {
             $limit = $this->columnCardLimits[$columnId] ?? 10;
             
             $items = $this->adapter->getItemsForColumn($columnId, $limit);
             $this->columnCards[$columnId] = $this->formatItems($items);
+            
+            // Ensure that items and total keys exist in columns data
+            $this->columns[$columnId]['items'] = $this->columnCards[$columnId];
+            
+            // Get the total count
+            $this->columns[$columnId]['total'] = $this->adapter->getColumnItemsCount($columnId);
         }
     }
 
@@ -392,7 +417,7 @@ class KanbanBoard extends Component implements HasForms
         $this->resetEditForm();
         
         // Fill form with card data
-        $this->form->fill($card->toArray());
+        $this->editCardForm->fill($card->toArray());
         $this->cardData = $card->toArray();
         
         $this->isEditModalOpen = true;
@@ -403,7 +428,7 @@ class KanbanBoard extends Component implements HasForms
      */
     public function createCard(): void
     {
-        $data = $this->form->getState();
+        $data = $this->createCardForm->getState();
         
         // Ensure column field is set
         $columnField = $this->config['columnField'];
@@ -436,7 +461,7 @@ class KanbanBoard extends Component implements HasForms
     private function resetCreateForm(): void
     {
         $this->cardData = [];
-        $this->createForm->fill();
+        $this->createCardForm->fill();
     }
 
     /**
@@ -444,7 +469,7 @@ class KanbanBoard extends Component implements HasForms
      */
     public function updateCard(): void
     {
-        $data = $this->form->getState();
+        $data = $this->editCardForm->getState();
         $card = $this->adapter->getModelById($this->activeCard);
         
         if (!$card) {
@@ -481,7 +506,7 @@ class KanbanBoard extends Component implements HasForms
     private function resetEditForm(): void
     {
         $this->cardData = [];
-        $this->editForm->fill();
+        $this->editCardForm->fill();
     }
 
     /**
@@ -532,18 +557,13 @@ class KanbanBoard extends Component implements HasForms
     }
 
     /**
-     * Get the forms for the component.
+     * Define the forms that are available in this component.
      */
     protected function getForms(): array
     {
         return [
-            'createForm' => $this->makeForm()
-                ->statePath('cardData')
-                ->schema(fn (Form $form) => $this->createForm($form)->getSchema()),
-            
-            'editForm' => $this->makeForm()
-                ->statePath('cardData')
-                ->schema(fn (Form $form) => $this->editForm($form)->getSchema()),
+            'createCardForm',
+            'editCardForm'
         ];
     }
 

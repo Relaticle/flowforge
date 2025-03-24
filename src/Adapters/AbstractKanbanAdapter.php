@@ -7,6 +7,7 @@ namespace Relaticle\Flowforge\Adapters;
 use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Livewire\Wireable;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 
@@ -16,7 +17,7 @@ use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
  * This class provides shared functionality for all Eloquent-based Kanban adapters,
  * including configuration management and common form building logic.
  */
-abstract class AbstractKanbanAdapter implements KanbanAdapterInterface
+abstract class AbstractKanbanAdapter implements KanbanAdapterInterface, Wireable
 {
     /**
      * Create a new abstract Kanban adapter instance.
@@ -158,5 +159,54 @@ abstract class AbstractKanbanAdapter implements KanbanAdapterInterface
         $card->{$columnField} = $columnId;
         
         return $card->save();
+    }
+
+    /**
+     * Convert the adapter to a Livewire-compatible array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toLivewire(): array
+    {
+        return [
+            'config' => [
+                'columnField' => $this->config->getColumnField(),
+                'columnValues' => $this->config->getColumnValues(),
+                'columnColors' => $this->config->getColumnColors(),
+                'titleField' => $this->config->getTitleField(),
+                'descriptionField' => $this->config->getDescriptionField(),
+                'cardAttributes' => $this->config->getCardAttributes(),
+                'orderField' => $this->config->getOrderField(),
+                'cardLabel' => $this->config->getCardLabel(),
+                'pluralCardLabel' => $this->config->getPluralCardLabel(),
+                // Note: createFormCallback cannot be serialized and must be reattached
+            ],
+        ];
+    }
+
+    /**
+     * Create a new adapter instance from a Livewire-compatible array.
+     *
+     * @param array<string, mixed> $value The Livewire-compatible array
+     * @return static
+     */
+    public static function fromLivewire($value): static
+    {
+        $configData = $value['config'];
+        
+        $config = new KanbanConfig(
+            columnField: $configData['columnField'],
+            columnValues: $configData['columnValues'],
+            columnColors: $configData['columnColors'],
+            titleField: $configData['titleField'],
+            descriptionField: $configData['descriptionField'],
+            cardAttributes: $configData['cardAttributes'],
+            orderField: $configData['orderField'],
+            cardLabel: $configData['cardLabel'],
+            pluralCardLabel: $configData['pluralCardLabel'],
+            // Note: createFormCallback is not serializable and must be reattached
+        );
+        
+        return new static($config);
     }
 } 

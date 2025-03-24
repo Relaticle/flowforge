@@ -21,7 +21,7 @@ final class KanbanConfig
         private readonly string $columnField = 'status',
         private readonly array $columnValues = [],
         private readonly ?array $columnColors = null,
-        private readonly string $titleField = 'name',
+        private readonly string $titleField = 'title',
         private readonly ?string $descriptionField = null,
         private readonly array $cardAttributes = [],
         private readonly ?string $orderField = null,
@@ -160,14 +160,20 @@ final class KanbanConfig
 
         return new self(...$config);
     }
-    
-    /**
-     * Legacy method for backward compatibility.
-     * 
-     * @deprecated Use getColumnField() instead
-     */
-    public function getStatusField(): string
+
+    public function toArray(): array
     {
-        return $this->columnField;
+        return [
+            'columnField' => $this->columnField,
+            'columnValues' => $this->columnValues,
+            'columnColors' => $this->columnColors,
+            'titleField' => $this->titleField,
+            'descriptionField' => $this->descriptionField,
+            'cardAttributes' => $this->cardAttributes,
+            'orderField' => $this->orderField,
+            'cardLabel' => $this->cardLabel,
+            'pluralCardLabel' => $this->pluralCardLabel,
+            'createFormCallback' => $this->createFormCallback,
+        ];
     }
 }
