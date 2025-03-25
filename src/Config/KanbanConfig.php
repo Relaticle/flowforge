@@ -22,6 +22,7 @@ use Illuminate\Support\Str;
  * @method self withCardLabel(string|null $cardLabel) Set the label for individual cards
  * @method self withPluralCardLabel(string|null $pluralCardLabel) Set the plural label for collection of cards
  * @method self withCreateFormCallback(callable|null $createFormCallback) Set the callback for customizing the card creation form
+ * @method self withEditFormCallback(callable|null $editFormCallback) Set the callback for customizing the card creation form
  */
 final readonly class KanbanConfig
 {
@@ -38,6 +39,7 @@ final readonly class KanbanConfig
      * @param string|null $cardLabel Optional label for individual cards
      * @param string|null $pluralCardLabel Optional plural label for collection of cards
      * @param callable|null $createFormCallback Optional callback for customizing the card creation form
+     * @param callable|null $editFormCallback Optional callback for customizing the card creation form
      */
     public function __construct(
         private string  $columnField = 'status',
@@ -50,6 +52,7 @@ final readonly class KanbanConfig
         private ?string $cardLabel = null,
         private ?string $pluralCardLabel = null,
         private mixed   $createFormCallback = null,
+        private mixed   $editFormCallback = null,
     ) {
     }
 
@@ -154,6 +157,72 @@ final readonly class KanbanConfig
     }
 
     /**
+     * Get the form callback for editing cards.
+     *
+     * @return mixed The form editing callback, or null if not set
+     */
+    public function getEditFormCallback(): mixed
+    {
+        return $this->editFormCallback;
+    }
+
+    /**
+     * Get the default form schema for creating cards.
+     *
+     * @param string $titleField The field name used for card titles
+     * @param string|null $descriptionField Optional field name for card descriptions
+     * @return array<\Filament\Forms\Components\Component> The default form schema
+     */
+    public static function getDefaultCreateFormSchema(string $titleField, ?string $descriptionField): array
+    {
+        $schema = [
+            \Filament\Forms\Components\TextInput::make($titleField)
+                ->required()
+                ->maxLength(255),
+        ];
+
+        if ($descriptionField !== null) {
+            $schema[] = \Filament\Forms\Components\Textarea::make($descriptionField)
+                ->rows(3);
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Get the default form schema for editing cards.
+     *
+     * @param string $titleField The field name used for card titles
+     * @param string|null $descriptionField Optional field name for card descriptions
+     * @param string $columnField The field name that determines which column a card belongs to
+     * @param array<string, string> $columnValues Available column values with their labels
+     * @return array<\Filament\Forms\Components\Component> The default form schema
+     */
+    public static function getDefaultEditFormSchema(
+        string $titleField,
+        ?string $descriptionField,
+        string $columnField,
+        array $columnValues
+    ): array {
+        $schema = [
+            \Filament\Forms\Components\TextInput::make($titleField)
+                ->required()
+                ->maxLength(255),
+        ];
+
+        if ($descriptionField !== null) {
+            $schema[] = \Filament\Forms\Components\Textarea::make($descriptionField)
+                ->rows(3);
+        }
+
+        $schema[] = \Filament\Forms\Components\Select::make($columnField)
+            ->options($columnValues)
+            ->required();
+
+        return $schema;
+    }
+
+    /**
      * Create a new configuration with the specified property updated.
      *
      * This method supports property modifications via the magic __call method.
@@ -215,6 +284,7 @@ final readonly class KanbanConfig
             'cardLabel' => $this->cardLabel,
             'pluralCardLabel' => $this->pluralCardLabel,
             'createFormCallback' => $this->createFormCallback,
+            'editFormCallback' => $this->editFormCallback,
         ];
     }
 }
