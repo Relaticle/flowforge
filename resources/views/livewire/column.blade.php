@@ -33,7 +33,7 @@
         x-sortable
         x-sortable-group="cards"
         data-column-id="{{ $columnId }}"
-        @end.stop="$wire.reorderCardsInColumn($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
+        @end.stop="$wire.updateCardsOrderAndColumn($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
         class="p-3 flex-1 overflow-y-auto overflow-x-hidden"
         style="max-height: calc(100vh - 13rem);"
     >

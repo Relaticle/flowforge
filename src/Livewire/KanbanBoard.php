@@ -113,14 +113,6 @@ class KanbanBoard extends Component implements HasForms
     public int $cardsIncrement;
 
     /**
-     * Get the Kanban board adapter.
-     */
-    public function getAdapter(): KanbanAdapterInterface
-    {
-        return $this->adapter;
-    }
-
-    /**
      * Initialize the Kanban board.
      *
      * @param KanbanAdapterInterface $adapter The Kanban adapter
@@ -151,7 +143,7 @@ class KanbanBoard extends Component implements HasForms
         ];
 
         // Set default limits
-        $initialCardsCount = $initialCardsCount ?? 10;
+        $initialCardsCount = $initialCardsCount ?? 5;
         $this->cardsIncrement = $cardsIncrement ?? 10;
 
         // Initialize columns
@@ -307,6 +299,7 @@ class KanbanBoard extends Component implements HasForms
 
         $items = $this->adapter->getItemsForColumn($columnId, $newLimit);
         $this->columnCards[$columnId] = $this->formatItems($items);
+        $this->refreshBoard();
     }
 
     /**
@@ -327,39 +320,9 @@ class KanbanBoard extends Component implements HasForms
      * @param array $cardIds The card IDs in their new order
      * @return bool Whether the operation was successful
      */
-    public function reorderCardsInColumn($columnId, $cardIds): bool
+    public function updateCardsOrderAndColumn($columnId, $cardIds): bool
     {
-        $success = $this->adapter->reorderCardsInColumn($columnId, $cardIds);
-
-        if ($success) {
-            $this->refreshBoard();
-        }
-
-        return $success;
-    }
-
-    /**
-     * Move a card between columns.
-     *
-     * @param string|int $cardId The card ID
-     * @param string|int $fromColumn The source column ID
-     * @param string|int $toColumn The target column ID
-     * @param array $toColumnCardIds The card IDs in the target column in their new order
-     * @return bool Whether the operation was successful
-     */
-    public function moveCardToColumn($cardId, $fromColumn, $toColumn, $toColumnCardIds): bool
-    {
-        $card = $this->adapter->getModelById($cardId);
-
-        if (!$card) {
-            return false;
-        }
-
-        $success = $this->adapter->moveCardToColumn($card, $toColumn);
-
-        if ($success && $this->adapter->getConfig()->getOrderField() !== null) {
-            $success = $this->adapter->reorderCardsInColumn($toColumn, $toColumnCardIds);
-        }
+        $success = $this->adapter->updateCardsOrderAndColumn($columnId, $cardIds);
 
         if ($success) {
             $this->refreshBoard();

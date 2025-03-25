@@ -3,6 +3,7 @@
 namespace Relaticle\Flowforge\Filament\Pages;
 
 use Filament\Pages\Page;
+use Livewire\Attributes\Renderless;
 use Relaticle\Flowforge\Adapters\KanbanAdapterFactory;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
@@ -10,11 +11,6 @@ use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 abstract class KanbanBoardPage extends Page
 {
     protected static string $view = 'flowforge::filament.pages.kanban-board-page';
-
-    /**
-     * The subject for the Kanban board (model class, query, or relation).
-     */
-    protected mixed $subject;
 
     /**
      * The Kanban configuration object.
@@ -39,12 +35,9 @@ abstract class KanbanBoardPage extends Page
         $this->config = new KanbanConfig();
     }
 
-    /**
-     * Mount the page.
-     */
-    public function mount(): void
+    public function updating()
     {
-        // This method can be overridden by child classes
+        info('update');
     }
 
     /**

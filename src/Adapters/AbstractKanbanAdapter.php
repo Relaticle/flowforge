@@ -117,14 +117,9 @@ abstract class AbstractKanbanAdapter implements KanbanAdapterInterface, Wireable
      * @param array<int, mixed> $cardIds The card IDs in their new order
      * @return bool Whether the operation was successful
      */
-    public function reorderCardsInColumn(string|int $columnId, array $cardIds): bool
+    public function updateCardsOrderAndColumn(string|int $columnId, array $cardIds): bool
     {
         $orderField = $this->config->getOrderField();
-
-        if ($orderField === null) {
-            return false;
-        }
-
         $columnField = $this->config->getColumnField();
         $success = true;
 
@@ -136,9 +131,11 @@ abstract class AbstractKanbanAdapter implements KanbanAdapterInterface, Wireable
                 continue;
             }
 
-            $model->{$orderField} = $index + 1;
+            if ($orderField !== null) {
+                $model->{$orderField} = $index + 1;
+            }
             $model->{$columnField} = $columnId;
-            
+
             if (!$model->save()) {
                 $success = false;
             }
@@ -146,19 +143,4 @@ abstract class AbstractKanbanAdapter implements KanbanAdapterInterface, Wireable
 
         return $success;
     }
-
-    /**
-     * Move a card to a different column.
-     *
-     * @param Model $card The card to move
-     * @param string|int $columnId The target column ID
-     * @return bool Whether the operation was successful
-     */
-    public function moveCardToColumn(Model $card, string|int $columnId): bool
-    {
-        $columnField = $this->config->getColumnField();
-        $card->{$columnField} = $columnId;
-        
-        return $card->save();
-    }
-} 
+}

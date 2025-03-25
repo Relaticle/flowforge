@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Adapters;
 
-use App\Models\Task;
+use EloquentSerialize;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -37,7 +37,7 @@ class EloquentQueryAdapter extends AbstractKanbanAdapter
         KanbanConfig $config
     ) {
         parent::__construct($config);
-        
+
         $this->baseQuery = $query;
     }
 
@@ -123,11 +123,11 @@ class EloquentQueryAdapter extends AbstractKanbanAdapter
     public function createCard(array $attributes): ?Model
     {
         $model = $this->baseQuery->getModel()->newInstance();
-        
+
         // Apply any scopes from the base query if applicable
         // For example, if the base query filters by user_id, we want to set that on the new model
         $wheres = $this->baseQuery->getQuery()->wheres;
-        
+
         foreach ($wheres as $where) {
             if (isset($where['column']) && isset($where['value']) && $where['type'] === 'Basic') {
                 // If the filter is a basic where clause, apply it to the new model
@@ -135,9 +135,9 @@ class EloquentQueryAdapter extends AbstractKanbanAdapter
                 $model->{$where['column']} = $where['value'];
             }
         }
-        
+
         $model->fill($attributes);
-        
+
         if ($model->save()) {
             return $model;
         }
@@ -154,7 +154,7 @@ class EloquentQueryAdapter extends AbstractKanbanAdapter
     public function updateCard(Model $card, array $attributes): bool
     {
         $card->fill($attributes);
-        
+
         return $card->save();
     }
 
@@ -176,7 +176,7 @@ class EloquentQueryAdapter extends AbstractKanbanAdapter
     public function toLivewire(): array
     {
         return [
-            // 'baseQuery' => $this->baseQuery,
+            'query' => EloquentSerialize::serialize($this->baseQuery),
             'config' => $this->config->toArray(),
         ];
     }
@@ -189,9 +189,9 @@ class EloquentQueryAdapter extends AbstractKanbanAdapter
      */
     public static function fromLivewire($value): static
     {
-        $baseQuery = Task::query();
+        $query = EloquentSerialize::unserialize($value['query']);
         $config = new KanbanConfig(...$value['config']);
 
-        return new static($baseQuery, $config);
+        return new static($query, $config);
     }
-} 
+}
