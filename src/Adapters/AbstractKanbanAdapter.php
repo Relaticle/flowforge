@@ -44,14 +44,27 @@ abstract class AbstractKanbanAdapter implements KanbanAdapterInterface, Wireable
      */
     public function getCreateForm(Form $form, mixed $activeColumn): Form
     {
-        $callback = $this->config->getCreateFormCallback();
+        // Check for custom create form callback
+        $createCallback = $this->config->getCreateFormCallback();
 
-        if ($callback !== null && is_callable($callback)) {
-            return $callback($form, $activeColumn);
+        if ($createCallback !== null && is_callable($createCallback)) {
+            return $createCallback($form, $activeColumn);
         }
 
-        // Default implementation can be overridden by child classes
-        return $form;
+        // Fall back to default create form implementation
+        $titleField = $this->config->getTitleField();
+        $descriptionField = $this->config->getDescriptionField();
+        $columnField = $this->config->getColumnField();
+
+        $schema = KanbanConfig::getDefaultCreateFormSchema($titleField, $descriptionField);
+
+        // For create form, set the column field value based on the active column
+        // but hide it from the form as it's determined by where the user clicked
+        if ($activeColumn) {
+            $form->statePath(null);
+        }
+
+        return $form->schema($schema);
     }
 
     /**
@@ -61,8 +74,34 @@ abstract class AbstractKanbanAdapter implements KanbanAdapterInterface, Wireable
      */
     public function getEditForm(Form $form): Form
     {
-        // By default, use the same form as create
-        return $this->getCreateForm($form, null);
+        // Check for custom edit form callback
+        $editCallback = $this->config->getEditFormCallback();
+
+        if ($editCallback !== null && is_callable($editCallback)) {
+            return $editCallback($form);
+        }
+
+        // Check for custom create form callback as a fallback
+        $createCallback = $this->config->getCreateFormCallback();
+
+        if ($createCallback !== null && is_callable($createCallback)) {
+            return $createCallback($form, null);
+        }
+
+        // Fall back to default edit form implementation
+        $titleField = $this->config->getTitleField();
+        $descriptionField = $this->config->getDescriptionField();
+        $columnField = $this->config->getColumnField();
+        $columnValues = $this->config->getColumnValues();
+
+        $schema = KanbanConfig::getDefaultEditFormSchema(
+            $titleField,
+            $descriptionField,
+            $columnField,
+            $columnValues
+        );
+
+        return $form->schema($schema);
     }
 
     /**
