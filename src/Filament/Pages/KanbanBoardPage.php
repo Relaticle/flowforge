@@ -3,8 +3,7 @@
 namespace Relaticle\Flowforge\Filament\Pages;
 
 use Filament\Pages\Page;
-use Livewire\Attributes\Renderless;
-use Relaticle\Flowforge\Adapters\KanbanAdapterFactory;
+use Relaticle\Flowforge\Adapters\EloquentQueryAdapter;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 
@@ -16,6 +15,8 @@ abstract class KanbanBoardPage extends Page
      * The Kanban configuration object.
      */
     protected KanbanConfig $config;
+
+    public array $createForm;
 
     /**
      * The Kanban adapter instance.
@@ -191,54 +192,12 @@ abstract class KanbanBoardPage extends Page
     }
 
     /**
-     * Set a custom form callback for creating cards.
-     *
-     * @param callable $callback The callback for customizing the card creation form with signature: function (Form $form): Form
-     * @return $this
-     */
-    public function withCreateForm(callable $callback): static
-    {
-        $this->config = $this->config->withCreateFormCallback($callback);
-
-//dd($this->config);
-
-        return $this;
-    }
-
-    /**
-     * Set a custom form callback for editing cards.
-     *
-     * @param callable $callback The callback for customizing the card editing form with signature: function (Form $form): Form
-     * @return $this
-     */
-    public function withEditForm(callable $callback): static
-    {
-        $this->config = $this->config->withEditFormCallback($callback);
-
-        return $this;
-    }
-
-    /**
      * Get the Kanban adapter.
      *
      * @throws \InvalidArgumentException If the subject is not set
      */
     public function getAdapter(): KanbanAdapterInterface
     {
-        if ($this->adapter !== null) {
-            return $this->adapter;
-        }
-
-        // Create the adapter using the factory
-        $adapter = KanbanAdapterFactory::create($this->getSubject(), $this->config);
-
-        // Apply any custom adapter modifications
-        if ($this->adapterCallback !== null && is_callable($this->adapterCallback)) {
-            $adapter = call_user_func($this->adapterCallback, $adapter);
-        }
-
-        $this->adapter = $adapter;
-
-        return $adapter;
+        return new EloquentQueryAdapter($this->getSubject(), $this->config);
     }
 }
