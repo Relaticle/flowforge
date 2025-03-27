@@ -16,9 +16,9 @@ trait FormHandlingTrait
      * Get the form for creating cards.
      *
      * @param Form $form The form instance
-     * @param mixed $activeColumn The active column
+     * @param mixed $currentColumn The current column
      */
-    public function getCreateForm(Form $form, mixed $activeColumn): Form
+    public function getCreateForm(Form $form, mixed $currentColumn): Form
     {
         // Fall back to default create form implementation
         $titleField = $this->config->getTitleField();
@@ -26,9 +26,9 @@ trait FormHandlingTrait
 
         $schema = KanbanConfig::getDefaultCreateFormSchema($titleField, $descriptionField);
 
-        // For create form, set the column field value based on the active column
+        // For create form, set the column field value based on the current column
         // but hide it from the form as it's determined by where the user clicked
-        if ($activeColumn) {
+        if ($currentColumn) {
             $form->statePath(null);
         }
 

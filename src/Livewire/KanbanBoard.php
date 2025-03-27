@@ -95,7 +95,7 @@ class KanbanBoard extends Component implements HasForms
      * @var array
      */
     #[Validate]
-    public array $cardData = [];
+    public array $recordData = [];
 
     /**
      * Number of cards to load when clicking "load more".
@@ -211,7 +211,7 @@ class KanbanBoard extends Component implements HasForms
     {
         $form = $this->adapter->getCreateForm($form, $this->currentColumn);
 
-        return $form->model($this->adapter->baseQuery->getModel())->statePath('cardData');
+        return $form->model($this->adapter->baseQuery->getModel())->statePath('recordData');
     }
 
     /**
@@ -221,7 +221,7 @@ class KanbanBoard extends Component implements HasForms
     {
         $form = $this->adapter->getEditForm($form);
 
-        return $form->model($this->adapter->baseQuery->getModel())->statePath('cardData');
+        return $form->model($this->adapter->baseQuery->getModel())->statePath('recordData');
     }
 
     /**
@@ -333,13 +333,13 @@ class KanbanBoard extends Component implements HasForms
 
         // Pre-set the column field
         $columnField = $this->config['columnField'];
-        $this->cardData[$columnField] = $columnId;
+        $this->recordData[$columnField] = $columnId;
 
         // Apply any order field if needed
         $orderField = $this->config['orderField'];
         if ($orderField !== null) {
             $count = $this->getColumnItemsCount($columnId);
-            $this->cardData[$orderField] = $count + 1;
+            $this->recordData[$orderField] = $count + 1;
         }
     }
 
@@ -369,7 +369,7 @@ class KanbanBoard extends Component implements HasForms
 
         // Fill form with card data
         $this->editRecordForm->fill($card->toArray());
-        $this->cardData = $card->toArray();
+        $this->recordData = $card->toArray();
     }
 
     /**
@@ -412,7 +412,7 @@ class KanbanBoard extends Component implements HasForms
      */
     private function resetCreateForm(): void
     {
-        $this->cardData = [];
+        $this->recordData = [];
         $this->createRecordForm->fill();
     }
 
@@ -460,7 +460,7 @@ class KanbanBoard extends Component implements HasForms
      */
     private function resetEditForm(): void
     {
-        $this->cardData = [];
+        $this->recordData = [];
         $this->editRecordForm->fill();
     }
 
