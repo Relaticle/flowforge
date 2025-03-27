@@ -13,16 +13,7 @@ use Relaticle\Flowforge\Concerns\CrudOperationsTrait;
 use Relaticle\Flowforge\Concerns\FormHandlingTrait;
 use Relaticle\Flowforge\Concerns\QueryHandlingTrait;
 
-/**
- * Abstract base class for Kanban adapters.
- *
- * This class has been refactored to use traits for better separation of concerns:
- * - QueryHandlingTrait: For database query operations
- * - CardFormattingTrait: For formatting models as cards
- * - CrudOperationsTrait: For card CRUD operations
- * - FormHandlingTrait: For form generation and handling
- */
-abstract class AbstractKanbanAdapter implements KanbanAdapterInterface, Wireable
+class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
 {
     use QueryHandlingTrait;
     use CardFormattingTrait;
