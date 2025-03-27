@@ -4,7 +4,7 @@
 :description="__('Add a new :cardLabel to the board', ['cardLabel' => strtolower($config['cardLabel'] ?? 'card')])"
 >
 
-    {{ $this->createCardForm }}
+    {{ $this->createRecordForm }}
 
     <x-slot name="footer">
         <div class="flex justify-end gap-x-3">
@@ -16,7 +16,7 @@
             </x-filament::button>
 
             <x-filament::button
-                wire:click="createCard"
+                wire:click="createRecord"
             >
                 {{ __('Create :cardLabel', ['cardLabel' => $config['cardLabel'] ?? 'Card']) }}
             </x-filament::button>

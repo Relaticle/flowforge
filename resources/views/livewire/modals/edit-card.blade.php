@@ -1,13 +1,13 @@
 @props(['config'])
 
 <x-filament::modal id="edit-card-modal" :heading="__('Edit :cardLabel', ['cardLabel' => $config['cardLabel'] ?? 'Card'])">
-    {{ $this->editCardForm }}
+    {{ $this->editRecordForm }}
 
     <x-slot name="footer">
         <div class="flex items-center justify-between">
             <x-filament::button
                 color="danger"
-                wire:click="deleteCard"
+                wire:click="deleteRecord"
             >
                 {{ __('Delete') }}
             </x-filament::button>
@@ -21,7 +21,7 @@
                 </x-filament::button>
 
                 <x-filament::button
-                    wire:click="updateCard"
+                    wire:click="updateRecord"
                 >
                     {{ __('Save Changes') }}
                 </x-filament::button>
