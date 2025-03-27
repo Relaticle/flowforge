@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Relaticle\Flowforge\Livewire\KanbanBoard;
 use Relaticle\Flowforge\Tests\TestCase;
-use Relaticle\Flowforge\Traits\HasKanbanBoard;
+use Relaticle\Flowforge\Concerns\HasKanbanBoard;
 
 // Mock Task model for testing
 class MockTask extends Model
