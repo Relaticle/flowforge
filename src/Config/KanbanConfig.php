@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Config;
 
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Str;
 
 /**
@@ -13,34 +16,17 @@ use Illuminate\Support\Str;
  * configuration and prevents unintended configuration changes at runtime.
  *
  * @method self withColumnField(string $columnField) Set the field name that determines which column a card belongs to
- * @method self withColumnValues(array<string, string> $columnValues) Set the available column values with their labels
- * @method self withColumnColors(array<string, string>|null $columnColors) Set the color mappings for columns
+ * @method self withColumnValues(array $columnValues) Set the available column values with their labels
+ * @method self withColumnColors(array $columnColors) Set the color mappings for columns
  * @method self withTitleField(string $titleField) Set the field name used for card titles
  * @method self withDescriptionField(string|null $descriptionField) Set the field name for card descriptions
- * @method self withCardAttributes(array<string, string> $cardAttributes) Set the additional fields to display on cards
+ * @method self withCardAttributes(array $cardAttributes) Set the additional fields to display on cards
  * @method self withOrderField(string|null $orderField) Set the field name for maintaining card order
  * @method self withCardLabel(string|null $cardLabel) Set the label for individual cards
  * @method self withPluralCardLabel(string|null $pluralCardLabel) Set the plural label for collection of cards
- * @method self withCreateFormCallback(callable|null $createFormCallback) Set the callback for customizing the card creation form
- * @method self withEditFormCallback(callable|null $editFormCallback) Set the callback for customizing the card creation form
  */
 final readonly class KanbanConfig
 {
-    /**
-     * Create a new Kanban configuration instance.
-     *
-     * @param string $columnField The field name that determines which column a card belongs to
-     * @param array<string, string> $columnValues Available column values with their labels
-     * @param array<string, string>|null $columnColors Optional color mappings for columns
-     * @param string $titleField The field name used for card titles
-     * @param string|null $descriptionField Optional field name for card descriptions
-     * @param array<string, string> $cardAttributes Additional fields to display on cards
-     * @param string|null $orderField Optional field name for maintaining card order
-     * @param string|null $cardLabel Optional label for individual cards
-     * @param string|null $pluralCardLabel Optional plural label for collection of cards
-     * @param callable|null $createFormCallback Optional callback for customizing the card creation form
-     * @param callable|null $editFormCallback Optional callback for customizing the card creation form
-     */
     public function __construct(
         private string  $columnField = 'status',
         private array   $columnValues = [],
@@ -51,8 +37,6 @@ final readonly class KanbanConfig
         private ?string $orderField = null,
         private ?string $cardLabel = null,
         private ?string $pluralCardLabel = null,
-        private mixed   $createFormCallback = null,
-        private mixed   $editFormCallback = null,
     ) {
     }
 
@@ -147,26 +131,6 @@ final readonly class KanbanConfig
     }
 
     /**
-     * Get the form callback for creating cards.
-     *
-     * @return mixed The form creation callback, or null if not set
-     */
-    public function getCreateFormCallback(): mixed
-    {
-        return $this->createFormCallback;
-    }
-
-    /**
-     * Get the form callback for editing cards.
-     *
-     * @return mixed The form editing callback, or null if not set
-     */
-    public function getEditFormCallback(): mixed
-    {
-        return $this->editFormCallback;
-    }
-
-    /**
      * Get the default form schema for creating cards.
      *
      * @param string $titleField The field name used for card titles
@@ -176,14 +140,13 @@ final readonly class KanbanConfig
     public static function getDefaultCreateFormSchema(string $titleField, ?string $descriptionField): array
     {
         $schema = [
-            \Filament\Forms\Components\TextInput::make($titleField)
+            TextInput::make($titleField)
                 ->required()
                 ->maxLength(255),
         ];
 
         if ($descriptionField !== null) {
-            $schema[] = \Filament\Forms\Components\Textarea::make($descriptionField)
-                ->rows(3);
+            $schema[] = Textarea::make($descriptionField)->rows(3);
         }
 
         return $schema;
@@ -205,13 +168,13 @@ final readonly class KanbanConfig
         array $columnValues
     ): array {
         $schema = [
-            \Filament\Forms\Components\TextInput::make($titleField)
+            TextInput::make($titleField)
                 ->required()
                 ->maxLength(255),
         ];
 
         if ($descriptionField !== null) {
-            $schema[] = \Filament\Forms\Components\Textarea::make($descriptionField)
+            $schema[] = Textarea::make($descriptionField)
                 ->rows(3);
         }
 
@@ -283,8 +246,6 @@ final readonly class KanbanConfig
             'orderField' => $this->orderField,
             'cardLabel' => $this->cardLabel,
             'pluralCardLabel' => $this->pluralCardLabel,
-            'createFormCallback' => $this->createFormCallback,
-            'editFormCallback' => $this->editFormCallback,
         ];
     }
 }

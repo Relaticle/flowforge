@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Livewire;
 
+use App\Models\Task;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -21,6 +22,11 @@ class KanbanBoard extends Component implements HasForms
 {
     use InteractsWithForms;
     use WithPagination;
+
+    /**
+     * The name of the kanban board page class.
+     */
+    public string $pageClass;
 
     /**
      * The Kanban board adapter.
@@ -163,8 +169,8 @@ class KanbanBoard extends Component implements HasForms
         }
 
         // Initialize forms
-        // $this->createCardForm->fill();
-        // $this->editCardForm->fill();
+         $this->createCardForm->fill();
+         $this->editCardForm->fill();
 
         // Load initial data
         $this->refreshBoard();
@@ -221,7 +227,7 @@ class KanbanBoard extends Component implements HasForms
     {
         $form = $this->adapter->getCreateForm($form, $this->activeColumn);
 
-        return $form->statePath('cardData');
+        return $form->model($this->adapter->baseQuery->getModel())->statePath('cardData');
     }
 
     /**
@@ -231,7 +237,7 @@ class KanbanBoard extends Component implements HasForms
     {
         $form = $this->adapter->getEditForm($form);
 
-        return $form->statePath('cardData');
+        return $form->model($this->adapter->baseQuery->getModel())->statePath('cardData');
     }
 
     /**
