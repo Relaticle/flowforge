@@ -8,6 +8,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Str;
+use Livewire\Wireable;
 
 /**
  * Immutable configuration for a Kanban board.
@@ -25,7 +26,7 @@ use Illuminate\Support\Str;
  * @method self withCardLabel(string|null $cardLabel) Set the label for individual cards
  * @method self withPluralCardLabel(string|null $pluralCardLabel) Set the plural label for collection of cards
  */
-final readonly class KanbanConfig
+final readonly class KanbanConfig implements Wireable
 {
     public function __construct(
         private string $columnField = 'status',
@@ -229,12 +230,7 @@ final readonly class KanbanConfig
         return new self(...$config);
     }
 
-    /**
-     * Convert the configuration to an array.
-     *
-     * @return array<string, mixed> Array representation of the configuration
-     */
-    public function toArray(): array
+    public function toLivewire(): array
     {
         return [
             'columnField' => $this->columnField,
@@ -247,5 +243,20 @@ final readonly class KanbanConfig
             'cardLabel' => $this->cardLabel,
             'pluralCardLabel' => $this->pluralCardLabel,
         ];
+    }
+
+    public static function fromLivewire($value): KanbanConfig
+    {
+        return new KanbanConfig(
+            $value['columnField'],
+            $value['columnValues'],
+            $value['columnColors'],
+            $value['titleField'],
+            $value['descriptionField'],
+            $value['cardAttributes'],
+            $value['orderField'],
+            $value['cardLabel'],
+            $value['pluralCardLabel']
+        );
     }
 }

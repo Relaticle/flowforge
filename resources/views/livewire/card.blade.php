@@ -14,15 +14,15 @@
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{{ $card['description'] }}</p>
         @endif
 
-        @if(!empty($config['cardAttributes']))
+        @if(!empty($config->cardAttributes))
             <div class="mt-2 flex flex-wrap gap-2">
-                @foreach($config['cardAttributes'] as $attribute => $label)
+                @foreach($config->cardAttributes as $attribute => $label)
                     @if(isset($card['attributes'][$attribute]) && !empty($card['attributes'][$attribute]['value']))
                         <x-flowforge::card-badge
                             :label="$card['attributes'][$attribute]['label']"
                             :value="$card['attributes'][$attribute]['value']"
-                            :color="$config['cardAttributeColors'][$attribute] ?? 'gray'"
-                            :icon="$config['cardAttributeIcons'][$attribute] ?? null"
+                            :color="$config->cardAttributeColors[$attribute] ?? 'gray'"
+                            :icon="$config->cardAttributeIcons[$attribute] ?? null"
                         />
                     @endif
                 @endforeach

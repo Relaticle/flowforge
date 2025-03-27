@@ -10,7 +10,7 @@
                 {{ $column['label'] }}
             </h3>
             <div
-                class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium kanban-color-{{ $config['columnColors'][$columnId] }}">
+                class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium kanban-color-{{ $column['color'] }}">
                 {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
             </div>
         </div>
@@ -52,7 +52,7 @@
                     x-intersect.full="
                         if (!isLoadingColumn('{{ $columnId }}')) {
                             beginLoading('{{ $columnId }}');
-                            $wire.loadMoreItems('{{ $columnId }}', {{ $config['cardsIncrement'] ?? 'null' }});
+                            $wire.loadMoreItems('{{ $columnId }}', {{ $config->cardsIncrement ?? 'null' }});
                         }
                     "
                     class="py-3 text-center"
@@ -67,7 +67,7 @@
                         </div>
                     </div>
                     <div wire:loading.remove wire:target="loadMoreItems('{{ $columnId }}')" class="text-xs text-gray-400">
-                        {{ count($column['items']) }} / {{ $column['total'] }} {{ $config['pluralCardLabel'] ?? 'Cards' }}
+                        {{ count($column['items']) }} / {{ $column['total'] }} {{ $config->pluralCardLabel ?? 'Records' }}
                     </div>
                 </div>
             @endif

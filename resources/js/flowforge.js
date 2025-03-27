@@ -3,8 +3,6 @@ export default function flowforge({state}) {
         state,
         columns: state.columns,
         currentColumn: null,
-        currentCard: null,
-        formData: {},
         isLoading: {},
 
         init: function () {
@@ -77,6 +75,10 @@ export default function flowforge({state}) {
                     this.isLoading[columnId] = false;
                 }
             });
+
+            this.$wire.$on('close-modal', (data) => {
+                this.$wire.resetEditForm()
+            })
         },
 
         /**

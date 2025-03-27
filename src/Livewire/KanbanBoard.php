@@ -14,6 +14,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 use Relaticle\Flowforge\Enums\KanbanColor;
 
@@ -36,7 +37,7 @@ class KanbanBoard extends Component implements HasForms
     /**
      * The Kanban board configuration from the adapter.
      */
-    public array $config = [];
+    public KanbanConfig $config;
 
     /**
      * The columns data for the Kanban board.
@@ -106,30 +107,18 @@ class KanbanBoard extends Component implements HasForms
     ): void {
         $this->adapter = $adapter;
         $this->searchable = $searchable;
-
-        // Extract config from adapter
-        $this->config = [
-            'columnField' => $this->adapter->getConfig()->getColumnField(),
-            'columnValues' => $this->adapter->getConfig()->getColumnValues(),
-            'titleField' => $this->adapter->getConfig()->getTitleField(),
-            'descriptionField' => $this->adapter->getConfig()->getDescriptionField(),
-            'cardAttributes' => $this->adapter->getConfig()->getCardAttributes(),
-            'columnColors' => $this->resolveColumnColors(),
-            'orderField' => $this->adapter->getConfig()->getOrderField(),
-            'cardLabel' => $this->adapter->getConfig()->getCardLabel(),
-            'pluralCardLabel' => $this->adapter->getConfig()->getPluralCardLabel(),
-        ];
+        $this->config = $this->adapter->getConfig();
 
         // Set default limits
         $initialCardsCount = $initialCardsCount ?? 5;
         $this->cardsIncrement = $cardsIncrement ?? 10;
 
         // Initialize columns
-        $this->columns = collect($this->config['columnValues'])
+        $this->columns = collect($this->config->getColumnValues())
             ->map(fn ($label, $value) => [
                 'id' => $value,
                 'label' => $label,
-                'color' => $this->config['columnColors'][$value] ?? null,
+                'color' => $this->config->getColumnColors()[$value] ?? null,
                 'items' => [],
                 'total' => 0,
             ])
@@ -320,11 +309,11 @@ class KanbanBoard extends Component implements HasForms
         $this->resetCreateForm();
 
         // Pre-set the column field
-        $columnField = $this->config['columnField'];
+        $columnField = $this->config->getColumnField();
         $this->recordData[$columnField] = $columnId;
 
         // Apply any order field if needed
-        $orderField = $this->config['orderField'];
+        $orderField = $this->config->getOrderField();
         if ($orderField !== null) {
             $count = $this->getColumnItemsCount($columnId);
             $this->recordData[$orderField] = $count + 1;
@@ -368,7 +357,7 @@ class KanbanBoard extends Component implements HasForms
         $data = $this->createRecordForm->getState();
 
         // Ensure column field is set
-        $columnField = $this->config['columnField'];
+        $columnField = $this->config->getColumnField();
         if (! isset($data[$columnField])) {
             $data[$columnField] = $this->currentColumn;
         }
@@ -446,7 +435,7 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Reset the edit form.
      */
-    private function resetEditForm(): void
+    public function resetEditForm(): void
     {
         $this->recordData = [];
         $this->editRecordForm->fill();

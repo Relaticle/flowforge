@@ -47,15 +47,14 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
     {
         return [
             'query' => \EloquentSerialize::serialize($this->baseQuery),
-            'config' => $this->config->toArray(),
+            'config' => $this->config
         ];
     }
 
     public static function fromLivewire($value): static
     {
         $query = \EloquentSerialize::unserialize($value['query']);
-        $config = new KanbanConfig(...$value['config']);
 
-        return new static($query, $config);
+        return new static($query, $value['config']);
     }
 }
