@@ -46,13 +46,13 @@ enum KanbanColor: string
 
     /**
      * Get all available colors as options array for select fields
-     * 
+     *
      * @return array<string, string>
      */
     public static function options(): array
     {
         return collect(self::cases())->mapWithKeys(fn ($color) => [
-            $color->value => $color->label()
+            $color->value => $color->label(),
         ])->toArray();
     }
 
@@ -64,7 +64,7 @@ enum KanbanColor: string
         if ($value === null) {
             return self::DEFAULT;
         }
-        
+
         return self::tryFrom($value) ?? self::DEFAULT;
     }
-} 
+}

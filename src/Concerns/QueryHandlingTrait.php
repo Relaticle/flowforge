@@ -24,7 +24,7 @@ trait QueryHandlingTrait
     /**
      * Find a model by its ID.
      *
-     * @param mixed $id The model ID
+     * @param  mixed  $id  The model ID
      */
     public function getModelById(mixed $id): ?Model
     {
@@ -53,10 +53,10 @@ trait QueryHandlingTrait
     /**
      * Get items for a specific column with pagination.
      *
-     * @param string|int $columnId The column ID
-     * @param int $limit The number of items to return
+     * @param  string|int  $columnId  The column ID
+     * @param  int  $limit  The number of items to return
      */
-    public function getItemsForColumn(string|int $columnId, int $limit = 10): Collection
+    public function getItemsForColumn(string | int $columnId, int $limit = 10): Collection
     {
         $columnField = $this->config->getColumnField();
         $orderField = $this->config->getOrderField();
@@ -75,9 +75,9 @@ trait QueryHandlingTrait
     /**
      * Get the total count of items for a specific column.
      *
-     * @param string|int $columnId The column ID
+     * @param  string|int  $columnId  The column ID
      */
-    public function getColumnItemsCount(string|int $columnId): int
+    public function getColumnItemsCount(string | int $columnId): int
     {
         $columnField = $this->config->getColumnField();
 

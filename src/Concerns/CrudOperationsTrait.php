@@ -14,7 +14,7 @@ trait CrudOperationsTrait
     /**
      * Create a new card with the given attributes.
      *
-     * @param array<string, mixed> $attributes The card attributes
+     * @param  array<string, mixed>  $attributes  The card attributes
      */
     public function createRecord(array $attributes): ?Model
     {
@@ -44,8 +44,8 @@ trait CrudOperationsTrait
     /**
      * Update an existing card with the given attributes.
      *
-     * @param Model $record The card to update
-     * @param array<string, mixed> $attributes The card attributes to update
+     * @param  Model  $record  The card to update
+     * @param  array<string, mixed>  $attributes  The card attributes to update
      */
     public function updateRecord(Model $record, array $attributes): bool
     {
@@ -57,7 +57,7 @@ trait CrudOperationsTrait
     /**
      * Delete an existing card.
      *
-     * @param Model $card The card to delete
+     * @param  Model  $card  The card to delete
      */
     public function deleteRecord(Model $card): bool
     {
@@ -67,11 +67,11 @@ trait CrudOperationsTrait
     /**
      * Update the order of cards in a column.
      *
-     * @param string|int $columnId The column ID
-     * @param array<int, mixed> $cardIds The card IDs in their new order
+     * @param  string|int  $columnId  The column ID
+     * @param  array<int, mixed>  $cardIds  The card IDs in their new order
      * @return bool Whether the operation was successful
      */
-    public function updateRecordsOrderAndColumn(string|int $columnId, array $cardIds): bool
+    public function updateRecordsOrderAndColumn(string | int $columnId, array $cardIds): bool
     {
         $orderField = $this->config->getOrderField();
         $columnField = $this->config->getColumnField();
@@ -82,6 +82,7 @@ trait CrudOperationsTrait
 
             if ($model === null) {
                 $success = false;
+
                 continue;
             }
 
@@ -90,7 +91,7 @@ trait CrudOperationsTrait
             }
             $model->{$columnField} = $columnId;
 
-            if (!$model->save()) {
+            if (! $model->save()) {
                 $success = false;
             }
         }

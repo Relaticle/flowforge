@@ -15,8 +15,8 @@ trait FormHandlingTrait
     /**
      * Get the form for creating cards.
      *
-     * @param Form $form The form instance
-     * @param mixed $currentColumn The current column
+     * @param  Form  $form  The form instance
+     * @param  mixed  $currentColumn  The current column
      */
     public function getCreateForm(Form $form, mixed $currentColumn): Form
     {
@@ -38,7 +38,7 @@ trait FormHandlingTrait
     /**
      * Get the form for editing cards.
      *
-     * @param Form $form The form instance
+     * @param  Form  $form  The form instance
      */
     public function getEditForm(Form $form): Form
     {

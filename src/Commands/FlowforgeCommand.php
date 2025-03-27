@@ -22,22 +22,20 @@ class FlowforgeCommand extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle(): int
     {
         $this->info('🔄 Installing Flowforge package...');
-        
+
         // Publish assets and resources
         $this->info('Publishing assets...');
         $this->call('vendor:publish', [
             '--tag' => 'flowforge-assets',
             '--force' => true,
         ]);
-        
+
         $this->info('✅ Flowforge installed successfully!');
-        
+
         return self::SUCCESS;
     }
 }

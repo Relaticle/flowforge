@@ -11,13 +11,8 @@ class Flowforge
     /**
      * Create a new Kanban adapter for the given model.
      *
-     * @param Model $model
-     * @param string $statusField
-     * @param array<string, string> $statusValues
-     * @param string $titleAttribute
-     * @param string|null $descriptionAttribute
-     * @param array<string, string> $cardAttributes
-     * @return IKanbanAdapter
+     * @param  array<string, string>  $statusValues
+     * @param  array<string, string>  $cardAttributes
      */
     public function createAdapter(
         Model $model,
