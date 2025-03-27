@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Livewire;
 
-use App\Models\Task;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;

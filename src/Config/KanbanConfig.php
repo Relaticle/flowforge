@@ -178,7 +178,7 @@ final readonly class KanbanConfig
                 ->rows(3);
         }
 
-        $schema[] = \Filament\Forms\Components\Select::make($columnField)
+        $schema[] = Select::make($columnField)
             ->options($columnValues)
             ->required();
 

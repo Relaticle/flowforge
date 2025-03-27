@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Relaticle\Flowforge\Filament\Pages;
 
 use Filament\Pages\Page;
-use Relaticle\Flowforge\Adapters\EloquentQueryAdapter;
+use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 
@@ -15,18 +17,6 @@ abstract class KanbanBoardPage extends Page
      * The Kanban configuration object.
      */
     protected KanbanConfig $config;
-
-    public array $createForm;
-
-    /**
-     * The Kanban adapter instance.
-     */
-    protected ?KanbanAdapterInterface $adapter = null;
-
-    /**
-     * Custom adapter callback.
-     */
-    protected mixed $adapterCallback = null;
 
     /**
      * Constructor
@@ -143,61 +133,12 @@ abstract class KanbanBoardPage extends Page
     }
 
     /**
-     * Set a custom adapter for the Kanban board.
-     *
-     * @param KanbanAdapterInterface $adapter
-     * @return KanbanBoardPage
-     */
-    public function withCustomAdapter(KanbanAdapterInterface $adapter): static
-    {
-        $this->adapter = $adapter;
-
-        return $this;
-    }
-
-    /**
-     * Register a callback to modify the auto-created adapter.
-     *
-     * @param callable $callback
-     * @return KanbanBoardPage
-     */
-    public function withAdapterCallback(callable $callback): static
-    {
-        $this->adapterCallback = $callback;
-
-        return $this;
-    }
-
-    /**
-     * Set multiple configuration values at once.
-     *
-     * @param array<string, mixed> $config
-     */
-    public function withConfiguration(array $config): static
-    {
-        $this->config = $this->config->with($config);
-
-        return $this;
-    }
-
-    /**
-     * Enable searchable for specific fields.
-     *
-     * @param array<int, string> $fields
-     */
-    public function withSearchable(array $fields): static
-    {
-        // This method would be implemented in the component
-        return $this;
-    }
-
-    /**
      * Get the Kanban adapter.
      *
      * @throws \InvalidArgumentException If the subject is not set
      */
     public function getAdapter(): KanbanAdapterInterface
     {
-        return new EloquentQueryAdapter($this->getSubject(), $this->config);
+        return new DefaultKanbanAdapter($this->getSubject(), $this->config);
     }
 }
