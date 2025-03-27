@@ -47,7 +47,7 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
     {
         return [
             'query' => \EloquentSerialize::serialize($this->baseQuery),
-            'config' => $this->config
+            'config' => $this->config,
         ];
     }
 
