@@ -9,7 +9,7 @@ export default function flowforge({state}) {
 
         init: function () {
             // Listen for card creation
-            this.$wire.$on('kanban-card-created', (data) => {
+            this.$wire.$on('kanban-record-created', (data) => {
                 const id = data[0].id;
                 const column = data[0].column;
 
@@ -28,26 +28,29 @@ export default function flowforge({state}) {
             });
 
             // Listen for card update
-            this.$wire.$on('kanban-card-updated', (data) => {
+            this.$wire.$on('kanban-record-updated', (data) => {
 
+                console.log({
+                    data
+                })
                 const id = data[0].id;
 
                 this.$dispatch('close-modal', { id: 'edit-card-modal' });
 
                 // Highlight the updated card
-                setTimeout(() => {
-                    const cardElement = document.querySelector(`[x-sortable-item="${id}"]`);
-                    if (cardElement) {
-                        cardElement.classList.add('animate-kanban-card-move');
-                        setTimeout(() => {
-                            cardElement.classList.remove('animate-kanban-card-move');
-                        }, 500);
-                    }
-                }, 300);
+                // setTimeout(() => {
+                //     const cardElement = document.querySelector(`[x-sortable-item="${id}"]`);
+                //     if (cardElement) {
+                //         cardElement.classList.add('animate-kanban-card-move');
+                //         setTimeout(() => {
+                //             cardElement.classList.remove('animate-kanban-card-move');
+                //         }, 500);
+                //     }
+                // }, 300);
             });
 
             // Listen for card deletion
-            this.$wire.$on('kanban-card-deleted', (data) => {
+            this.$wire.$on('kanban-record-deleted', (data) => {
                 const id = data[0].id;
 
                 this.$dispatch('close-modal', { id: 'edit-card-modal' });

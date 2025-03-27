@@ -69,29 +69,14 @@ class KanbanBoard extends Component implements HasForms
      *
      * @var string|null
      */
-    public ?string $activeColumn = null;
+    public ?string $currentColumn = null;
 
     /**
      * The active card for modal operations.
      *
      * @var string|int|null
      */
-    public string|int|null $activeCard = null;
-
-    /**
-     * Whether the create modal is open.
-     */
-    public bool $isCreateModalOpen = false;
-
-    /**
-     * Whether the edit modal is open.
-     */
-    public bool $isEditModalOpen = false;
-
-    /**
-     * Whether the delete confirm modal is open.
-     */
-    public bool $isDeleteConfirmOpen = false;
+    public string|int|null $currentRecord = null;
 
     /**
      * Search query for filtering cards.
@@ -169,8 +154,8 @@ class KanbanBoard extends Component implements HasForms
         }
 
         // Initialize forms
-         $this->createCardForm->fill();
-         $this->editCardForm->fill();
+         $this->createRecordForm->fill();
+         $this->editRecordForm->fill();
 
         // Load initial data
         $this->refreshBoard();
@@ -223,9 +208,9 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Create card form configuration.
      */
-    public function createCardForm(Form $form): Form
+    public function createRecordForm(Form $form): Form
     {
-        $form = $this->adapter->getCreateForm($form, $this->activeColumn);
+        $form = $this->adapter->getCreateForm($form, $this->currentColumn);
 
         return $form->model($this->adapter->baseQuery->getModel())->statePath('cardData');
     }
@@ -233,7 +218,7 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Edit card form configuration.
      */
-    public function editCardForm(Form $form): Form
+    public function editRecordForm(Form $form): Form
     {
         $form = $this->adapter->getEditForm($form);
 
@@ -326,9 +311,9 @@ class KanbanBoard extends Component implements HasForms
      * @param array $cardIds The card IDs in their new order
      * @return bool Whether the operation was successful
      */
-    public function updateCardsOrderAndColumn($columnId, $cardIds): bool
+    public function updateRecordsOrderAndColumn($columnId, $cardIds): bool
     {
-        $success = $this->adapter->updateCardsOrderAndColumn($columnId, $cardIds);
+        $success = $this->adapter->updateRecordsOrderAndColumn($columnId, $cardIds);
 
         if ($success) {
             $this->refreshBoard();
@@ -344,7 +329,7 @@ class KanbanBoard extends Component implements HasForms
      */
     public function openCreateForm(string $columnId): void
     {
-        $this->activeColumn = $columnId;
+        $this->currentColumn = $columnId;
         $this->resetCreateForm();
 
         // Pre-set the column field
@@ -357,8 +342,6 @@ class KanbanBoard extends Component implements HasForms
             $count = $this->getColumnItemsCount($columnId);
             $this->cardData[$orderField] = $count + 1;
         }
-
-        $this->isCreateModalOpen = true;
     }
 
     /**
@@ -369,8 +352,8 @@ class KanbanBoard extends Component implements HasForms
      */
     public function openEditForm(string|int $cardId, string $columnId): void
     {
-        $this->activeColumn = $columnId;
-        $this->activeCard = $cardId;
+        $this->currentColumn = $columnId;
+        $this->currentRecord = $cardId;
 
         $card = $this->adapter->getModelById($cardId);
 
@@ -386,31 +369,32 @@ class KanbanBoard extends Component implements HasForms
         $this->resetEditForm();
 
         // Fill form with card data
-        $this->editCardForm->fill($card->toArray());
+        $this->editRecordForm->fill($card->toArray());
         $this->cardData = $card->toArray();
-
-        $this->isEditModalOpen = true;
     }
 
     /**
      * Create a new card.
      */
-    public function createCard(): void
+    public function createRecord(): void
     {
-        $data = $this->createCardForm->getState();
+        $data = $this->createRecordForm->getState();
 
         // Ensure column field is set
         $columnField = $this->config['columnField'];
         if (!isset($data[$columnField])) {
-            $data[$columnField] = $this->activeColumn;
+            $data[$columnField] = $this->currentColumn;
         }
 
-        $card = $this->adapter->createCard($data);
+        $card = $this->adapter->createRecord($data);
 
         if ($card) {
             $this->refreshBoard();
             $this->resetCreateForm();
-            $this->isCreateModalOpen = false;
+
+            $this->dispatch('kanban-record-created', [
+                'record' => $card,
+            ]);
 
             Notification::make()
                 ->title('Card created')
@@ -430,18 +414,18 @@ class KanbanBoard extends Component implements HasForms
     private function resetCreateForm(): void
     {
         $this->cardData = [];
-        $this->createCardForm->fill();
+        $this->createRecordForm->fill();
     }
 
     /**
      * Update an existing card.
      */
-    public function updateCard(): void
+    public function updateRecord(): void
     {
-        $data = $this->editCardForm->getState();
-        $card = $this->adapter->getModelById($this->activeCard);
+        $data = $this->editRecordForm->getState();
+        $record = $this->adapter->getModelById($this->currentRecord);
 
-        if (!$card) {
+        if (!$record) {
             Notification::make()
                 ->title('Card not found')
                 ->danger()
@@ -450,12 +434,15 @@ class KanbanBoard extends Component implements HasForms
             return;
         }
 
-        $success = $this->adapter->updateCard($card, $data);
+        $success = $this->adapter->updateRecord($record, $data);
 
         if ($success) {
             $this->refreshBoard();
             $this->resetEditForm();
-            $this->isEditModalOpen = false;
+
+            $this->dispatch('kanban-record-updated', [
+                'record' => $record,
+            ]);
 
             Notification::make()
                 ->title('Card updated')
@@ -475,7 +462,7 @@ class KanbanBoard extends Component implements HasForms
     private function resetEditForm(): void
     {
         $this->cardData = [];
-        $this->editCardForm->fill();
+        $this->editRecordForm->fill();
     }
 
     /**
@@ -486,40 +473,42 @@ class KanbanBoard extends Component implements HasForms
      */
     public function confirmDelete(string|int $cardId, string $columnId): void
     {
-        $this->activeCard = $cardId;
-        $this->activeColumn = $columnId;
-        $this->isDeleteConfirmOpen = true;
+        $this->currentRecord = $cardId;
+        $this->currentColumn = $columnId;
     }
 
     /**
      * Delete a card.
      */
-    public function deleteCard(): void
+    public function deleteRecord(): void
     {
-        $card = $this->adapter->getModelById($this->activeCard);
+        $record = $this->adapter->getModelById($this->currentRecord);
 
-        if (!$card) {
+        if (!$record) {
             Notification::make()
-                ->title('Card not found')
+                ->title('Record not found')
                 ->danger()
                 ->send();
 
             return;
         }
 
-        $success = $this->adapter->deleteCard($card);
+        $success = $this->adapter->deleteRecord($record);
 
         if ($success) {
             $this->refreshBoard();
-            $this->isDeleteConfirmOpen = false;
+
+            $this->dispatch('kanban-record-deleted', [
+                'record' => $record,
+            ]);
 
             Notification::make()
-                ->title('Card deleted')
+                ->title('Record deleted')
                 ->success()
                 ->send();
         } else {
             Notification::make()
-                ->title('Failed to delete card')
+                ->title('Failed to delete record')
                 ->danger()
                 ->send();
         }
@@ -531,8 +520,8 @@ class KanbanBoard extends Component implements HasForms
     protected function getForms(): array
     {
         return [
-            'createCardForm',
-            'editCardForm'
+            'createRecordForm',
+            'editRecordForm'
         ];
     }
 

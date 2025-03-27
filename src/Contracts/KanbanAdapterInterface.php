@@ -69,7 +69,7 @@ interface KanbanAdapterInterface
      *
      * @param array<string, mixed> $attributes The card attributes
      */
-    public function createCard(array $attributes): ?Model;
+    public function createRecord(array $attributes): ?Model;
 
     /**
      * Update an existing card with the given attributes.
@@ -77,14 +77,14 @@ interface KanbanAdapterInterface
      * @param Model $card The card to update
      * @param array<string, mixed> $attributes The card attributes to update
      */
-    public function updateCard(Model $card, array $attributes): bool;
+    public function updateRecord(Model $card, array $attributes): bool;
 
     /**
      * Delete an existing card.
      *
      * @param Model $card The card to delete
      */
-    public function deleteCard(Model $card): bool;
+    public function deleteRecord(Model $card): bool;
 
     /**
      * Update the order of cards in a column.
@@ -92,5 +92,5 @@ interface KanbanAdapterInterface
      * @param string|int $columnId The column ID
      * @param array<int, mixed> $cardIds The card IDs in their new order
      */
-    public function updateCardsOrderAndColumn(string|int $columnId, array $cardIds): bool;
+    public function updateRecordsOrderAndColumn(string|int $columnId, array $cardIds): bool;
 }
