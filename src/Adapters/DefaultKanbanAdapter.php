@@ -6,24 +6,22 @@ namespace Relaticle\Flowforge\Adapters;
 
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Wireable;
-use Relaticle\Flowforge\Config\KanbanConfig;
-use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 use Relaticle\Flowforge\Concerns\CardFormattingTrait;
 use Relaticle\Flowforge\Concerns\CrudOperationsTrait;
 use Relaticle\Flowforge\Concerns\FormHandlingTrait;
 use Relaticle\Flowforge\Concerns\QueryHandlingTrait;
+use Relaticle\Flowforge\Config\KanbanConfig;
+use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 
 class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
 {
-    use QueryHandlingTrait;
     use CardFormattingTrait;
     use CrudOperationsTrait;
     use FormHandlingTrait;
+    use QueryHandlingTrait;
 
     /**
      * The base Eloquent query builder.
-     *
-     * @var Builder
      */
     public Builder $baseQuery;
 
@@ -45,9 +43,6 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
         return $this->config;
     }
 
-    /**
-     * @return array
-     */
     public function toLivewire(): array
     {
         return [
@@ -56,10 +51,6 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
         ];
     }
 
-    /**
-     * @param $value
-     * @return static
-     */
     public static function fromLivewire($value): static
     {
         $query = \EloquentSerialize::unserialize($value['query']);

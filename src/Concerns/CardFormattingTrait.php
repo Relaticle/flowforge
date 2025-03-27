@@ -15,7 +15,7 @@ trait CardFormattingTrait
     /**
      * Format a model as a card for display.
      *
-     * @param Model $model The model to format
+     * @param  Model  $model  The model to format
      * @return array<string, mixed> The formatted card
      */
     protected function formatCardForDisplay(Model $model): array
@@ -49,7 +49,7 @@ trait CardFormattingTrait
     /**
      * Format a collection of models as cards for display.
      *
-     * @param Collection $models The models to format
+     * @param  Collection  $models  The models to format
      * @return Collection The formatted cards
      */
     protected function formatCardsForDisplay(Collection $models): Collection

@@ -14,7 +14,7 @@ class EloquentSerializer
     /**
      * Serialize an Eloquent query builder.
      *
-     * @param Builder $query The query to serialize
+     * @param  Builder  $query  The query to serialize
      * @return string The serialized query
      */
     public function serialize(Builder $query): string
@@ -25,11 +25,11 @@ class EloquentSerializer
     /**
      * Unserialize an Eloquent query builder.
      *
-     * @param string $serialized The serialized query
+     * @param  string  $serialized  The serialized query
      * @return Builder The unserialized query
      */
     public function unserialize(string $serialized): Builder
     {
         return unserialize(base64_decode($serialized));
     }
-} 
+}

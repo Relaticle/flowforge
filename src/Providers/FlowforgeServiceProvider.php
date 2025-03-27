@@ -15,9 +15,9 @@ class FlowforgeServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton('eloquent.serialize', function () {
-            return new EloquentSerializer();
+            return new EloquentSerializer;
         });
-        
+
         $this->app->alias('eloquent.serialize', EloquentSerializer::class);
     }
 
@@ -28,4 +28,4 @@ class FlowforgeServiceProvider extends ServiceProvider
     {
         // Register any package views, assets, routes, etc. here if needed
     }
-} 
+}

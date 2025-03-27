@@ -5,9 +5,9 @@ namespace Relaticle\Flowforge\Tests\Feature;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Relaticle\Flowforge\Concerns\HasKanbanBoard;
 use Relaticle\Flowforge\Livewire\KanbanBoard;
 use Relaticle\Flowforge\Tests\TestCase;
-use Relaticle\Flowforge\Concerns\HasKanbanBoard;
 
 // Mock Task model for testing
 class MockTask extends Model

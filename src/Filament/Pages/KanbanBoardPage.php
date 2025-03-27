@@ -23,7 +23,7 @@ abstract class KanbanBoardPage extends Page
      */
     public function __construct()
     {
-        $this->config = new KanbanConfig();
+        $this->config = new KanbanConfig;
     }
 
     public function updating()
@@ -34,7 +34,6 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the field that stores the column value.
      *
-     * @param string $field
      * @return KanbanBoardPage
      */
     public function columnField(string $field): static
@@ -47,7 +46,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the column statuses with labels for the Kanban board.
      *
-     * @param array<string, string> $columns
+     * @param  array<string, string>  $columns
      */
     public function columns(array $columns): static
     {
@@ -59,7 +58,6 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the title field for the Kanban cards.
      *
-     * @param string $field
      * @return KanbanBoardPage
      */
     public function titleField(string $field): static
@@ -72,7 +70,6 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the description field for the Kanban cards.
      *
-     * @param string $field
      * @return KanbanBoardPage
      */
     public function descriptionField(string $field): static
@@ -85,7 +82,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the card attributes for the Kanban cards.
      *
-     * @param array<string, string> $attributes
+     * @param  array<string, string>  $attributes
      */
     public function cardAttributes(array $attributes): static
     {
@@ -97,7 +94,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the column colors for the Kanban board.
      *
-     * @param array<string, string> $colors
+     * @param  array<string, string>  $colors
      */
     public function columnColors(array $colors): static
     {
@@ -109,7 +106,6 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the order field for the Kanban board.
      *
-     * @param string $field
      * @return KanbanBoardPage
      */
     public function orderField(string $field): static
@@ -122,7 +118,6 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the label for individual cards.
      *
-     * @param string $label
      * @return KanbanBoardPage
      */
     public function cardLabel(string $label): static
