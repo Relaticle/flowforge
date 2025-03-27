@@ -53,9 +53,9 @@ interface KanbanAdapterInterface
      * Get the form for creating cards.
      *
      * @param Form $form The form instance
-     * @param mixed $activeColumn The active column
+     * @param mixed $currentColumn The current column
      */
-    public function getCreateForm(Form $form, mixed $activeColumn): Form;
+    public function getCreateForm(Form $form, mixed $currentColumn): Form;
 
     /**
      * Get the form for editing cards.
