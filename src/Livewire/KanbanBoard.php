@@ -311,7 +311,10 @@ class KanbanBoard extends Component implements HasForms
     public function openCreateForm(string $columnId): void
     {
         $this->currentColumn = $columnId;
-        $this->resetCreateForm();
+        $this->recordData = [];
+        
+        // Set the base model without filling yet
+        $this->createRecordForm->model($this->adapter->baseQuery->getModel());
 
         // Pre-set the column field
         $columnField = $this->config->getColumnField();
@@ -347,16 +350,18 @@ class KanbanBoard extends Component implements HasForms
             return;
         }
 
-
-        if(!$this->editRecordForm->model?->getKey()) {
-            info('openEditForm', [
-                'record' => $this->editRecordForm->model?->getKey()
-            ]);
-
-            $this->editRecordForm->model($record);
-        }
-        $this->editRecordForm->fill($record->toArray());
+        // Set recordData first
         $this->recordData = $record->toArray();
+        
+        // Clear form state to avoid reactivity issues
+        $this->editRecordForm->fill([]);
+        
+        // Set the model on the form - this is crucial for relationships in nested components
+        $this->editRecordForm->model($record);
+        
+        // Now fill the form, which will allow nested components to initialize with the model's relationships
+        // Using the model's data directly instead of recordData to avoid reactivity loops
+        $this->editRecordForm->fill($record->toArray());
     }
 
     /**
@@ -364,7 +369,8 @@ class KanbanBoard extends Component implements HasForms
      */
     public function createRecord(): void
     {
-        $data = $this->createRecordForm->getState();
+        // Use the combined recordData for creating the record
+        $data = $this->recordData;
 
         // Ensure column field is set
         $columnField = $this->config->getColumnField();
@@ -400,7 +406,10 @@ class KanbanBoard extends Component implements HasForms
     private function resetCreateForm(): void
     {
         $this->recordData = [];
-        $this->createRecordForm->fill();
+        $this->currentColumn = null;
+        
+        // Just clear the form without chaining methods
+        $this->createRecordForm->fill([]);
     }
 
     /**
@@ -408,6 +417,7 @@ class KanbanBoard extends Component implements HasForms
      */
     public function updateRecord(): void
     {
+        // Use form state to get data with any relationship handling applied
         $data = $this->editRecordForm->getState();
         $record = $this->adapter->getModelById($this->currentRecord);
 
@@ -448,7 +458,10 @@ class KanbanBoard extends Component implements HasForms
     public function resetEditForm(): void
     {
         $this->recordData = [];
-        $this->editRecordForm->fill();
+        $this->currentRecord = null;
+        
+        // Just clear the form without chaining methods
+        $this->editRecordForm->fill([]);
     }
 
     /**
