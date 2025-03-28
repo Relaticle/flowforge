@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Relaticle\Flowforge\Concerns;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 /**
  * Trait for handling CRUD operations in the Kanban adapter.
@@ -75,27 +76,26 @@ trait CrudOperationsTrait
     {
         $orderField = $this->config->getOrderField();
         $columnField = $this->config->getColumnField();
-        $success = true;
 
-        foreach ($recordIds as $index => $recordId) {
-            $model = $this->getModelById($recordId);
+        $startOrder = 1;
 
-            if ($model === null) {
-                $success = false;
+        foreach ($recordIds as $id) {
+            $model = $this->getModelById($id);
+            $primaryKeyColumn = $model->getQualifiedKeyName();
 
-                continue;
-            }
+            $attributes = [
+                $columnField => $columnId,
+            ];
 
             if ($orderField !== null) {
-                $model->{$orderField} = $index + 1;
+                $attributes[$orderField] = $startOrder++;
             }
-            $model->{$columnField} = $columnId;
 
-            if (! $model->save()) {
-                $success = false;
-            }
+            $model::withoutGlobalScope(SoftDeletingScope::class)
+                ->where($primaryKeyColumn, $id)
+                ->update($attributes);
         }
 
-        return $success;
+        return true;
     }
 }

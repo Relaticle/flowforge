@@ -22,7 +22,6 @@
     "require": {
         "php": "^8.1",
         "filament/filament": "^3.0",
-        "spatie/eloquent-sortable": "^4.4",
         "spatie/laravel-package-tools": "^1.15.0"
     },
     "require-dev": {
