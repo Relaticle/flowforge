@@ -96,9 +96,9 @@ abstract class KanbanBoardPage extends Page
      *
      * @param  array<string, string>  $colors
      */
-    public function columnColors(array $colors): static
+    public function columnColors(?array $colors = null): static
     {
-        $this->config = $this->config->withColumnColors($colors);
+        $this->config = $this->config->withColumnColors($colors === null ? true : $colors);
 
         return $this;
     }

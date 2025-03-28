@@ -66,7 +66,7 @@ class KanbanBoard extends Component implements HasForms
     /**
      * The active card for modal operations.
      */
-    public string | int | null $currentRecord = null;
+    public string|int|null $currentRecord = null;
 
     /**
      * Search query for filtering cards.
@@ -94,17 +94,18 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Initialize the Kanban board.
      *
-     * @param  KanbanAdapterInterface  $adapter  The Kanban adapter
-     * @param  int|null  $initialCardsCount  The initial number of cards to load per column
-     * @param  int|null  $cardsIncrement  The number of cards to load on "load more"
-     * @param  array<int, string>  $searchable  The searchable fields
+     * @param KanbanAdapterInterface $adapter The Kanban adapter
+     * @param int|null $initialCardsCount The initial number of cards to load per column
+     * @param int|null $cardsIncrement The number of cards to load on "load more"
+     * @param array<int, string> $searchable The searchable fields
      */
     public function mount(
         KanbanAdapterInterface $adapter,
-        ?int $initialCardsCount = null,
-        ?int $cardsIncrement = null,
-        array $searchable = []
-    ): void {
+        ?int                   $initialCardsCount = null,
+        ?int                   $cardsIncrement = null,
+        array                  $searchable = []
+    ): void
+    {
         $this->adapter = $adapter;
         $this->searchable = $searchable;
         $this->config = $this->adapter->getConfig();
@@ -115,10 +116,10 @@ class KanbanBoard extends Component implements HasForms
 
         // Initialize columns
         $this->columns = collect($this->config->getColumnValues())
-            ->map(fn ($label, $value) => [
+            ->map(fn($label, $value) => [
                 'id' => $value,
                 'label' => $label,
-                'color' => $this->config->getColumnColors()[$value] ?? null,
+                'color' => $this->resolveColumnColors()[$value] ?? null,
                 'items' => [],
                 'total' => 0,
             ])
@@ -144,8 +145,12 @@ class KanbanBoard extends Component implements HasForms
     {
         $adapterColors = $this->adapter->getConfig()->getColumnColors();
 
-        if ($adapterColors !== null) {
+        if (is_array($adapterColors)) {
             return $adapterColors;
+        }
+
+        if ($adapterColors === null) {
+            return [];
         }
 
         // Use default colors if none provided
@@ -231,10 +236,10 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Get items for a specific column.
      *
-     * @param  string|int  $columnId  The column ID
+     * @param string|int $columnId The column ID
      * @return array The formatted items
      */
-    public function getItemsForColumn(string | int $columnId): array
+    public function getItemsForColumn(string|int $columnId): array
     {
         return $this->columnCards[$columnId] ?? [];
     }
@@ -242,10 +247,10 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Get the total count of items for a specific column.
      *
-     * @param  string|int  $columnId  The column ID
+     * @param string|int $columnId The column ID
      * @return int The total count
      */
-    public function getColumnItemsCount(string | int $columnId): int
+    public function getColumnItemsCount(string|int $columnId): int
     {
         return $this->adapter->getColumnItemsCount($columnId);
     }
@@ -253,8 +258,8 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Load more items for a column.
      *
-     * @param  string  $columnId  The column ID
-     * @param  int|null  $count  The number of items to load
+     * @param string $columnId The column ID
+     * @param int|null $count The number of items to load
      */
     public function loadMoreItems(string $columnId, ?int $count = null): void
     {
@@ -272,7 +277,7 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Format items for display.
      *
-     * @param  Collection  $items  The items to format
+     * @param Collection $items The items to format
      * @return array The formatted items
      */
     protected function formatItems(Collection $items): array
@@ -283,8 +288,8 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Update the order of cards in a column.
      *
-     * @param  string|int  $columnId  The column ID
-     * @param  array  $cardIds  The card IDs in their new order
+     * @param string|int $columnId The column ID
+     * @param array $cardIds The card IDs in their new order
      * @return bool Whether the operation was successful
      */
     public function updateRecordsOrderAndColumn($columnId, $cardIds): bool
@@ -301,7 +306,7 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Open the create form modal.
      *
-     * @param  string  $columnId  The column ID for the new card
+     * @param string $columnId The column ID for the new card
      */
     public function openCreateForm(string $columnId): void
     {
@@ -323,17 +328,17 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Open the edit form modal.
      *
-     * @param  string|int  $cardId  The card ID to edit
-     * @param  string  $columnId  The column ID containing the card
+     * @param string|int $recordId The card ID to edit
+     * @param string|int $columnId The column ID containing the card
      */
-    public function openEditForm(string | int $cardId, string $columnId): void
+    public function openEditForm(string|int $recordId, string|int $columnId): void
     {
         $this->currentColumn = $columnId;
-        $this->currentRecord = $cardId;
+        $this->currentRecord = $recordId;
 
-        $card = $this->adapter->getModelById($cardId);
+        $record = $this->adapter->getModelById($recordId);
 
-        if (! $card) {
+        if (! $record) {
             Notification::make()
                 ->title('Card not found')
                 ->danger()
@@ -342,11 +347,16 @@ class KanbanBoard extends Component implements HasForms
             return;
         }
 
-        $this->resetEditForm();
 
-        // Fill form with card data
-        $this->editRecordForm->fill($card->toArray());
-        $this->recordData = $card->toArray();
+        if(!$this->editRecordForm->model?->getKey()) {
+            info('openEditForm', [
+                'record' => $this->editRecordForm->model?->getKey()
+            ]);
+
+            $this->editRecordForm->model($record);
+        }
+        $this->editRecordForm->fill($record->toArray());
+        $this->recordData = $record->toArray();
     }
 
     /**
@@ -358,7 +368,7 @@ class KanbanBoard extends Component implements HasForms
 
         // Ensure column field is set
         $columnField = $this->config->getColumnField();
-        if (! isset($data[$columnField])) {
+        if (!isset($data[$columnField])) {
             $data[$columnField] = $this->currentColumn;
         }
 
@@ -401,7 +411,7 @@ class KanbanBoard extends Component implements HasForms
         $data = $this->editRecordForm->getState();
         $record = $this->adapter->getModelById($this->currentRecord);
 
-        if (! $record) {
+        if (!$record) {
             Notification::make()
                 ->title('Card not found')
                 ->danger()
@@ -444,10 +454,10 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Open the delete confirmation modal.
      *
-     * @param  string|int  $cardId  The card ID to delete
-     * @param  string  $columnId  The column ID containing the card
+     * @param string|int $cardId The card ID to delete
+     * @param string $columnId The column ID containing the card
      */
-    public function confirmDelete(string | int $cardId, string $columnId): void
+    public function confirmDelete(string|int $cardId, string $columnId): void
     {
         $this->currentRecord = $cardId;
         $this->currentColumn = $columnId;
@@ -460,7 +470,7 @@ class KanbanBoard extends Component implements HasForms
     {
         $record = $this->adapter->getModelById($this->currentRecord);
 
-        if (! $record) {
+        if (!$record) {
             Notification::make()
                 ->title('Record not found')
                 ->danger()

@@ -29,16 +29,18 @@ use Livewire\Wireable;
 final readonly class KanbanConfig implements Wireable
 {
     public function __construct(
-        private string $columnField = 'status',
-        private array $columnValues = [],
-        private ?array $columnColors = null,
-        private string $titleField = 'title',
-        private ?string $descriptionField = null,
-        private array $cardAttributes = [],
-        private ?string $orderField = null,
-        private ?string $cardLabel = null,
-        private ?string $pluralCardLabel = null,
-    ) {}
+        private string          $columnField = 'status',
+        private array           $columnValues = [],
+        private array|bool|null $columnColors = null,
+        private string          $titleField = 'title',
+        private ?string         $descriptionField = null,
+        private array           $cardAttributes = [],
+        private ?string         $orderField = null,
+        private ?string         $cardLabel = null,
+        private ?string         $pluralCardLabel = null,
+    )
+    {
+    }
 
     /**
      * Get the field that stores the column value.
@@ -63,9 +65,9 @@ final readonly class KanbanConfig implements Wireable
     /**
      * Get the colors for each column.
      *
-     * @return array<string, string>|null Map of column values to color codes, or null if not set
+     * @return array|bool|null Map of column values to color codes, or null if not set
      */
-    public function getColumnColors(): ?array
+    public function getColumnColors(): array|bool|null
     {
         return $this->columnColors;
     }
@@ -133,8 +135,8 @@ final readonly class KanbanConfig implements Wireable
     /**
      * Get the default form schema for creating cards.
      *
-     * @param  string  $titleField  The field name used for card titles
-     * @param  string|null  $descriptionField  Optional field name for card descriptions
+     * @param string $titleField The field name used for card titles
+     * @param string|null $descriptionField Optional field name for card descriptions
      * @return array<\Filament\Forms\Components\Component> The default form schema
      */
     public static function getDefaultCreateFormSchema(string $titleField, ?string $descriptionField): array
@@ -155,18 +157,19 @@ final readonly class KanbanConfig implements Wireable
     /**
      * Get the default form schema for editing cards.
      *
-     * @param  string  $titleField  The field name used for card titles
-     * @param  string|null  $descriptionField  Optional field name for card descriptions
-     * @param  string  $columnField  The field name that determines which column a card belongs to
-     * @param  array<string, string>  $columnValues  Available column values with their labels
+     * @param string $titleField The field name used for card titles
+     * @param string|null $descriptionField Optional field name for card descriptions
+     * @param string $columnField The field name that determines which column a card belongs to
+     * @param array<string, string> $columnValues Available column values with their labels
      * @return array<\Filament\Forms\Components\Component> The default form schema
      */
     public static function getDefaultEditFormSchema(
-        string $titleField,
+        string  $titleField,
         ?string $descriptionField,
-        string $columnField,
-        array $columnValues
-    ): array {
+        string  $columnField,
+        array   $columnValues
+    ): array
+    {
         $schema = [
             TextInput::make($titleField)
                 ->required()
@@ -192,21 +195,21 @@ final readonly class KanbanConfig implements Wireable
      * For example, `withColumnField('status')` will create a new configuration
      * with the columnField property set to 'status'.
      *
-     * @param  string  $method  The method name
-     * @param  array  $arguments  The method arguments
+     * @param string $method The method name
+     * @param array $arguments The method arguments
      * @return self A new instance with the updated property
      *
      * @throws \BadMethodCallException If the method is not a valid with* method or targets a non-existent property
      */
     public function __call(string $method, array $arguments): self
     {
-        if (! Str::startsWith($method, 'with')) {
+        if (!Str::startsWith($method, 'with')) {
             throw new \BadMethodCallException("Method {$method} not found");
         }
 
         $property = lcfirst(Str::after($method, 'with'));
 
-        if (! property_exists($this, $property)) {
+        if (!property_exists($this, $property)) {
             throw new \BadMethodCallException("Property {$property} not found");
         }
 
@@ -216,7 +219,7 @@ final readonly class KanbanConfig implements Wireable
     /**
      * Create a new configuration with the specified properties updated.
      *
-     * @param  array<string, mixed>  $properties  The properties to update
+     * @param array<string, mixed> $properties The properties to update
      * @return self A new instance with the updated properties
      */
     public function with(array $properties): self

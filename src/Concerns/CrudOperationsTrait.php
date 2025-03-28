@@ -12,9 +12,9 @@ use Illuminate\Database\Eloquent\Model;
 trait CrudOperationsTrait
 {
     /**
-     * Create a new card with the given attributes.
+     * Create a new record with the given attributes.
      *
-     * @param  array<string, mixed>  $attributes  The card attributes
+     * @param  array<string, mixed>  $attributes  The record attributes
      */
     public function createRecord(array $attributes): ?Model
     {
@@ -42,10 +42,10 @@ trait CrudOperationsTrait
     }
 
     /**
-     * Update an existing card with the given attributes.
+     * Update an existing record with the given attributes.
      *
-     * @param  Model  $record  The card to update
-     * @param  array<string, mixed>  $attributes  The card attributes to update
+     * @param  Model  $record  The record to update
+     * @param  array<string, mixed>  $attributes  The record attributes to update
      */
     public function updateRecord(Model $record, array $attributes): bool
     {
@@ -55,30 +55,30 @@ trait CrudOperationsTrait
     }
 
     /**
-     * Delete an existing card.
+     * Delete an existing record.
      *
-     * @param  Model  $card  The card to delete
+     * @param  Model  $record  The record to delete
      */
-    public function deleteRecord(Model $card): bool
+    public function deleteRecord(Model $record): bool
     {
-        return $card->delete();
+        return $record->delete();
     }
 
     /**
-     * Update the order of cards in a column.
+     * Update the order of records in a column.
      *
      * @param  string|int  $columnId  The column ID
-     * @param  array<int, mixed>  $cardIds  The card IDs in their new order
+     * @param  array<int, mixed>  $recordIds  The record IDs in their new order
      * @return bool Whether the operation was successful
      */
-    public function updateRecordsOrderAndColumn(string | int $columnId, array $cardIds): bool
+    public function updateRecordsOrderAndColumn(string | int $columnId, array $recordIds): bool
     {
         $orderField = $this->config->getOrderField();
         $columnField = $this->config->getColumnField();
         $success = true;
 
-        foreach ($cardIds as $index => $cardId) {
-            $model = $this->getModelById($cardId);
+        foreach ($recordIds as $index => $recordId) {
+            $model = $this->getModelById($recordId);
 
             if ($model === null) {
                 $success = false;

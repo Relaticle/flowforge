@@ -50,7 +50,7 @@ interface KanbanAdapterInterface
     public function getColumnItemsCount(string | int $columnId): int;
 
     /**
-     * Get the form for creating cards.
+     * Get the form for creating records.
      *
      * @param  Form  $form  The form instance
      * @param  mixed  $currentColumn  The current column
@@ -58,39 +58,39 @@ interface KanbanAdapterInterface
     public function getCreateForm(Form $form, mixed $currentColumn): Form;
 
     /**
-     * Get the form for editing cards.
+     * Get the form for editing records.
      *
      * @param  Form  $form  The form instance
      */
     public function getEditForm(Form $form): Form;
 
     /**
-     * Create a new card with the given attributes.
+     * Create a new record with the given attributes.
      *
-     * @param  array<string, mixed>  $attributes  The card attributes
+     * @param  array<string, mixed>  $attributes  The record attributes
      */
     public function createRecord(array $attributes): ?Model;
 
     /**
-     * Update an existing card with the given attributes.
+     * Update an existing record with the given attributes.
      *
-     * @param  Model  $card  The card to update
-     * @param  array<string, mixed>  $attributes  The card attributes to update
+     * @param  Model  $record  The record to update
+     * @param  array<string, mixed>  $attributes  The record attributes to update
      */
-    public function updateRecord(Model $card, array $attributes): bool;
+    public function updateRecord(Model $record, array $attributes): bool;
 
     /**
-     * Delete an existing card.
+     * Delete an existing record.
      *
-     * @param  Model  $card  The card to delete
+     * @param  Model  $record  The record to delete
      */
-    public function deleteRecord(Model $card): bool;
+    public function deleteRecord(Model $record): bool;
 
     /**
-     * Update the order of cards in a column.
+     * Update the order of records in a column.
      *
      * @param  string|int  $columnId  The column ID
-     * @param  array<int, mixed>  $cardIds  The card IDs in their new order
+     * @param  array<int, mixed>  $recordIds  The record IDs in their new order
      */
-    public function updateRecordsOrderAndColumn(string | int $columnId, array $cardIds): bool;
+    public function updateRecordsOrderAndColumn(string | int $columnId, array $recordIds): bool;
 }
