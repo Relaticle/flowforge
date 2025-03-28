@@ -17,21 +17,9 @@ trait CrudOperationsTrait
      *
      * @param  array<string, mixed>  $attributes  The record attributes
      */
-    public function createRecord(array $attributes): ?Model
+    public function createRecord(array $attributes, mixed $currentColumn): ?Model
     {
         $model = $this->baseQuery->getModel()->newInstance();
-
-        // Apply any scopes from the base query if applicable
-        // For example, if the base query filters by user_id, we want to set that on the new model
-        $wheres = $this->baseQuery->getQuery()->wheres;
-
-        foreach ($wheres as $where) {
-            if (isset($where['column']) && isset($where['value']) && $where['type'] === 'Basic') {
-                // If the filter is a basic where clause, apply it to the new model
-                // This ensures models created through this adapter respect the base query conditions
-                $model->{$where['column']} = $where['value'];
-            }
-        }
 
         $model->fill($attributes);
 

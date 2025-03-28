@@ -69,7 +69,7 @@ interface KanbanAdapterInterface
      *
      * @param  array<string, mixed>  $attributes  The record attributes
      */
-    public function createRecord(array $attributes): ?Model;
+    public function createRecord(array $attributes, mixed $currentColumn): ?Model;
 
     /**
      * Update an existing record with the given attributes.
