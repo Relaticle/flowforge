@@ -362,8 +362,8 @@ class KanbanBoard extends Component implements HasForms
      */
     public function createRecord(): void
     {
-        // Use the combined recordData for creating the record
-        $data = $this->recordData;
+        // Use form state to get data with validation applied
+        $data = $this->createRecordForm->getState();
 
         // Ensure column field is set
         $columnField = $this->config->getColumnField();
