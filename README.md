@@ -2,6 +2,9 @@
 
 Flowforge is a lightweight Kanban board package for Filament 3 that works with existing Eloquent models. This package allows developers to transform any model into a Kanban board with minimal configuration, without requiring additional database tables.
 
+> [!IMPORTANT]
+> This package is a work in progress and is not yet ready for production use. It is currently in the alpha stage and may have bugs or incomplete features.
+
 ## Requirements
 
 - PHP 8.3+
