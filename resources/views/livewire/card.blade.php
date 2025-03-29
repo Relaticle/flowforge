@@ -10,7 +10,7 @@
     <div class="p-3">
         <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ $card['title'] }}</h4>
 
-        @if(isset($card['description']) && !empty($card['description']))
+        @if(!empty($card['description']))
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{{ $card['description'] }}</p>
         @endif
 

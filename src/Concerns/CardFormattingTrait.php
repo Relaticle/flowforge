@@ -22,7 +22,7 @@ trait CardFormattingTrait
     {
         $titleField = $this->config->getTitleField();
         $descriptionField = $this->config->getDescriptionField();
-        $recordAttributes = $this->config->getRecordAttributes();
+        $cardAttributes = $this->config->getcardAttributes();
         $columnField = $this->config->getColumnField();
 
         $card = [
@@ -35,7 +35,7 @@ trait CardFormattingTrait
             $card['description'] = $model->{$descriptionField};
         }
 
-        foreach ($recordAttributes as $key => $label) {
+        foreach ($cardAttributes as $key => $label) {
             $field = is_string($key) ? $key : $label;
             $card['attributes'][$field] = [
                 'label' => is_string($key) ? $label : $field,
