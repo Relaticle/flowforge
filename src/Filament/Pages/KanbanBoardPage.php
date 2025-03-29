@@ -84,9 +84,9 @@ abstract class KanbanBoardPage extends Page
      *
      * @param  array<string, string>  $attributes
      */
-    public function cardAttributes(array $attributes): static
+    public function recordAttributes(array $attributes): static
     {
-        $this->config = $this->config->withCardAttributes($attributes);
+        $this->config = $this->config->withRecordAttributes($attributes);
 
         return $this;
     }

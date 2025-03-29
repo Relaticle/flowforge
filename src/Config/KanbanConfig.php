@@ -21,7 +21,7 @@ use Livewire\Wireable;
  * @method self withColumnColors(array $columnColors) Set the color mappings for columns
  * @method self withTitleField(string $titleField) Set the field name used for card titles
  * @method self withDescriptionField(string|null $descriptionField) Set the field name for card descriptions
- * @method self withCardAttributes(array $cardAttributes) Set the additional fields to display on cards
+ * @method self withRecordAttributes(array $recordAttributes) Set the additional fields to display on cards
  * @method self withOrderField(string|null $orderField) Set the field name for maintaining card order
  * @method self withCardLabel(string|null $cardLabel) Set the label for individual cards
  * @method self withPluralCardLabel(string|null $pluralCardLabel) Set the plural label for collection of cards
@@ -34,7 +34,7 @@ final readonly class KanbanConfig implements Wireable
         private array|bool|null $columnColors = null,
         private string          $titleField = 'title',
         private ?string         $descriptionField = null,
-        private array           $cardAttributes = [],
+        private array           $recordAttributes = [],
         private ?string         $orderField = null,
         private ?string         $cardLabel = null,
         private ?string         $pluralCardLabel = null,
@@ -97,9 +97,9 @@ final readonly class KanbanConfig implements Wireable
      *
      * @return array<string, string> Map of attribute names to their display labels
      */
-    public function getCardAttributes(): array
+    public function getRecordAttributes(): array
     {
-        return $this->cardAttributes;
+        return $this->recordAttributes;
     }
 
     /**
@@ -241,7 +241,7 @@ final readonly class KanbanConfig implements Wireable
             'columnColors' => $this->columnColors,
             'titleField' => $this->titleField,
             'descriptionField' => $this->descriptionField,
-            'cardAttributes' => $this->cardAttributes,
+            'recordAttributes' => $this->recordAttributes,
             'orderField' => $this->orderField,
             'cardLabel' => $this->cardLabel,
             'pluralCardLabel' => $this->pluralCardLabel,
@@ -256,7 +256,7 @@ final readonly class KanbanConfig implements Wireable
             $value['columnColors'],
             $value['titleField'],
             $value['descriptionField'],
-            $value['cardAttributes'],
+            $value['recordAttributes'],
             $value['orderField'],
             $value['cardLabel'],
             $value['pluralCardLabel']

@@ -9,6 +9,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -91,6 +92,8 @@ class KanbanBoard extends Component implements HasForms
      */
     public int $cardsIncrement;
 
+    public array $permissions = [];
+
     /**
      * Initialize the Kanban board.
      *
@@ -109,6 +112,11 @@ class KanbanBoard extends Component implements HasForms
         $this->adapter = $adapter;
         $this->searchable = $searchable;
         $this->config = $this->adapter->getConfig();
+
+        // Check permissions
+        $this->permissions = [
+            'create' => Gate::check('create', $this->adapter->baseQuery->getModel())
+        ];
 
         // Set default limits
         $initialCardsCount = $initialCardsCount ?? 5;

@@ -22,6 +22,7 @@
                     :columnId="$columnId"
                     :column="$column"
                     :config="$config"
+                    :permissions="$this->permissions"
                     wire:key="column-{{ $columnId }}"
                 />
             @endforeach
