@@ -29,6 +29,6 @@
         </div>
     </div>
 
-    <x-flowforge::modals.create-card :config="$config" />
-    <x-flowforge::modals.edit-card :config="$config" />
+    <x-flowforge::modals.create-card :permissions="$this->permissions" :config="$config" />
+    <x-flowforge::modals.edit-card :permissions="$this->permissions" :config="$config" />
 </div>

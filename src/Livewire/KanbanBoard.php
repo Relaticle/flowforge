@@ -115,7 +115,8 @@ class KanbanBoard extends Component implements HasForms
 
         // Check permissions
         $this->permissions = [
-            'create' => Gate::check('create', $this->adapter->baseQuery->getModel())
+            'canCreate' => Gate::check('create', $this->adapter->baseQuery->getModel()),
+            'canDelete' => Gate::check('delete', $this->adapter->baseQuery->getModel()),
         ];
 
         // Set default limits
@@ -370,6 +371,15 @@ class KanbanBoard extends Component implements HasForms
      */
     public function createRecord(): void
     {
+        if(! $this->permissions['canCreate']) {
+            Notification::make()
+                ->title('You do not have permission to create records')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         // Use form state to get data with validation applied
         $data = $this->createRecordForm->getState();
 
@@ -482,6 +492,15 @@ class KanbanBoard extends Component implements HasForms
      */
     public function deleteRecord(): void
     {
+        if (! $this->permissions['canDelete']) {
+            Notification::make()
+                ->title('You do not have permission to delete records')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         $record = $this->adapter->getModelById($this->currentRecord);
 
         if (!$record) {

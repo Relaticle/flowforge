@@ -14,7 +14,7 @@
                 {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
             </div>
         </div>
-        @if($permissions['create'])
+        @if($permissions['canCreate'])
             <button
                 type="button"
                 wire:click="openCreateForm('{{ $columnId }}')"

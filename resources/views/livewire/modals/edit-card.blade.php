@@ -1,16 +1,20 @@
-@props(['config'])
+@props(['config', 'permissions'])
 
 <x-filament::modal id="edit-card-modal" :heading="__('Edit :cardLabel', ['cardLabel' => $config->cardLabel ?? 'Card'])">
     {{ $this->editRecordForm }}
 
     <x-slot name="footer">
         <div class="flex items-center justify-between">
-            <x-filament::button
-                color="danger"
-                wire:click="deleteRecord"
-            >
-                {{ __('Delete') }}
-            </x-filament::button>
+            @if($this->permissions['canDelete'])
+                <x-filament::button
+                    color="danger"
+                    wire:click="deleteRecord"
+                >
+                    {{ __('Delete') }}
+                </x-filament::button>
+            @endif
+
+
 
             <div class="flex gap-x-3">
                 <x-filament::button
