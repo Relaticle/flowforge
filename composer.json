@@ -1,6 +1,6 @@
 {
     "name": "relaticle/flowforge",
-    "description": "This is my package flowforge",
+    "description": "Flowforge is a lightweight Kanban board package for Filament that works with existing Eloquent models.",
     "keywords": [
         "Relaticle",
         "laravel",
