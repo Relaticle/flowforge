@@ -1,9 +1,10 @@
 # Flowforge - Laravel Filament Kanban Board
 
-Flowforge is a lightweight Kanban board package for Filament 3 that works with existing Eloquent models. This package allows developers to transform any model into a Kanban board with minimal configuration, without requiring additional database tables.
+Flowforge is a powerful Kanban board package for Laravel Filament 3 that works seamlessly with your existing Eloquent models. This package allows you to transform any model into a Kanban board with minimal configuration, without requiring additional database tables.
 
 > [!IMPORTANT]
-> This package is a work in progress and is not yet ready for production use. It is currently in the alpha stage and may have bugs or incomplete features.
+> This package is a work in progress and is not yet ready for production use. It is currently in the alpha stage and may have bugs or incomplete 
+features.
 
 ## Requirements
 
@@ -13,22 +14,22 @@ Flowforge is a lightweight Kanban board package for Filament 3 that works with e
 
 ## Installation
 
+You can install the package via composer:
+
 ```bash
 composer require relaticle/flowforge
 ```
 
-Then publish the configuration and assets:
+After installing the package, you should publish and run the migrations:
 
 ```bash
-php artisan vendor:publish --tag="flowforge-config"
-php artisan vendor:publish --tag="flowforge-assets"
+php artisan flowforge:install
+php artisan migrate
 ```
 
-## Usage
+## Basic Usage
 
-### Quick Start
-
-Create a Filament page that extends `KanbanBoardPage`:
+To create a Kanban board for your model, create a new Filament page that extends `KanbanBoardPage`:
 
 ```php
 <?php
@@ -36,131 +37,144 @@ Create a Filament page that extends `KanbanBoardPage`:
 namespace App\Filament\Pages;
 
 use App\Models\Task;
+use Illuminate\Database\Eloquent\Builder;
 use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
 
-class TaskBoard extends KanbanBoardPage
+class TasksBoardPage extends KanbanBoardPage
 {
+    protected static ?string $navigationIcon = 'heroicon-o-view-columns';
+    protected static ?string $navigationParentItem = 'Tasks';
+
     public function mount(): void
     {
         $this
-            ->for(Task::query()->where('user_id', auth()->id()))
+            ->titleField('title')
             ->columnField('status')
+            ->descriptionField('description')
+            ->orderField('order_column')
             ->columns([
                 'todo' => 'To Do',
                 'in_progress' => 'In Progress',
+                'review' => 'In Review',
                 'done' => 'Completed',
             ])
-            ->titleField('title')
-            ->descriptionField('description')
-            ->withSearchable(['title', 'description']);
+            ->columnColors([
+                'todo' => 'gray',
+                'in_progress' => 'blue',
+                'review' => 'yellow',
+                'done' => 'green',
+            ]);
+    }
+
+    protected function getSubject(): Builder
+    {
+        return Task::query();
     }
 }
 ```
 
-Register the page in your Filament panel:
+## Configuration Options
+
+You can customize your Kanban board using these configuration methods:
+
+- `titleField(string)`: Field used for card titles
+- `descriptionField(string)`: Field used for card descriptions
+- `columnField(string)`: Field used to determine which column a card belongs to
+- `orderField(string)`: Field used to maintain card order (requires a sortable model)
+- `columns(array)`: Key-value pairs defining columns (key as identifier, value as display label)
+- `columnColors(array)`: Key-value pairs defining colors for each column
+- `cardLabel(string)`: Custom label for cards (defaults to model name)
+
+## Custom Adapters
+
+For more complex scenarios, you can create a custom adapter by extending `DefaultKanbanAdapter`:
 
 ```php
-public function getPages(): array
+<?php
+
+namespace App\Adapters;
+
+use App\Models\Opportunity;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
+use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
+
+class OpportunitiesKanbanAdapter extends DefaultKanbanAdapter
 {
-    return [
-        'tasks' => \App\Filament\Pages\TaskBoard::class,
-    ];
+    // Customize forms
+    public function getCreateForm(Form $form, mixed $currentColumn): Form
+    {
+        return $form->schema([
+            Forms\Components\TextInput::make('title')
+                ->required()
+                ->placeholder('Enter opportunity title')
+                ->columnSpanFull(),
+            // Add more form fields as needed
+        ]);
+    }
+
+    // Custom create logic
+    public function createRecord(array $attributes, mixed $currentColumn): ?Model
+    {
+        // Custom creation logic
+        $opportunity = Opportunity::create($attributes);
+        
+        // Set the column/status value
+        $opportunity->status = $currentColumn;
+        $opportunity->save();
+        
+        return $opportunity;
+    }
 }
 ```
 
-### Advanced Configuration
-
-The Kanban board is fully configurable:
+Then in your page class, override the `getAdapter()` method:
 
 ```php
-$this
-    ->for(Task::query())
-    ->columnField('status')
-    ->columns([
-        'todo' => 'To Do',
-        'in_progress' => 'In Progress',
-        'done' => 'Completed',
-    ])
-    ->titleField('title')
-    ->descriptionField('description')
-    ->cardAttributes([
-        'due_date' => 'Due Date',
-        'priority' => 'Priority',
-    ])
-    ->columnColors([
-        'todo' => 'blue',
-        'in_progress' => 'yellow',
-        'done' => 'green',
-    ])
-    ->orderField('sort_order')
-    ->cardLabel('Task')
-    ->pluralCardLabel('Tasks')
-    ->createForm(function (Form $form, $activeColumn) {
-        return $form
-            ->schema([
-                TextInput::make('title')
-                    ->required(),
-                Textarea::make('description'),
-                Select::make('priority')
-                    ->options([
-                        'low' => 'Low',
-                        'medium' => 'Medium',
-                        'high' => 'High',
-                    ]),
-            ]);
-    });
+public function getAdapter(): KanbanAdapterInterface
+{
+    return new OpportunitiesKanbanAdapter($this->getSubject(), $this->config);
+}
 ```
 
-### Custom Adapter
+## Integration with Custom Fields
 
-You can provide a custom adapter for special use cases:
+Flowforge can be integrated with custom field systems, as shown in the Opportunities board example:
 
 ```php
-$this
-    ->for(Task::query())
-    ->withCustomAdapter(new MyCustomAdapter($config))
-    ->withAdapterCallback(function (KanbanAdapterInterface $adapter) {
-        // Modify the adapter here
-        return $adapter;
-    });
+class OpportunitiesBoardPage extends KanbanBoardPage
+{
+    public function mount(): void
+    {
+        $columns = $this->stageCustomField()->options->pluck('name', 'id');
+        $columnColors = OpportunityStage::getColors();
+
+        $this
+            ->titleField('title')
+            ->columnField('status')
+            ->descriptionField('description')
+            ->orderField('order_column')
+            ->cardLabel('Opportunity')
+            ->columns($columns->toArray())
+            ->columnColors($columns->map(fn($name) => $columnColors[$name] ?? 'gray')->toArray());
+    }
+
+    // Use a custom adapter
+    public function getAdapter(): KanbanAdapterInterface
+    {
+        return new OpportunitiesKanbanAdapter(Opportunity::query(), $this->config);
+    }
+}
 ```
 
-### Multiple Configuration
+## Contributing
 
-You can set multiple configuration values at once:
-
-```php
-$this
-    ->for(Task::query())
-    ->withConfiguration([
-        'columnField' => 'status',
-        'titleField' => 'title',
-        'descriptionField' => 'description',
-        'columnValues' => [
-            'todo' => 'To Do',
-            'in_progress' => 'In Progress',
-            'done' => 'Completed',
-        ],
-    ]);
-```
-
-## Architecture
-
-Flowforge uses a clean architecture with three main components:
-
-1. **KanbanConfig**: The immutable configuration object that stores all settings
-2. **KanbanAdapterInterface**: The interface that defines data operations
-3. **KanbanBoardPage**: The Filament page that provides the UI
-
-### Adapters
-
-The package provides two adapter implementations:
-
-- **EloquentModelAdapter**: For working with model class references (`Task::class`)
-- **EloquentQueryAdapter**: For working with query builders (`Task::query()->where(...)`)
-
-The appropriate adapter is automatically selected based on the subject type passed to the `for()` method.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This package is open-source software licensed under the MIT license. 
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
