@@ -13,7 +13,7 @@ Flowforge is a powerful Kanban board package for Laravel Filament 3 that works s
 
 > [!IMPORTANT]
 > This package is a work in progress and is not yet ready for production use. It is currently in the alpha stage and may have bugs or incomplete 
-features.
+features
 
 ## Features
 
