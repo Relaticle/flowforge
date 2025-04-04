@@ -12,7 +12,7 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Blade;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
-use Relaticle\Flowforge\Commands\FlowforgeCommand;
+use Relaticle\Flowforge\Commands\MakeKanbanBoardCommand;
 use Relaticle\Flowforge\Livewire\KanbanBoard;
 use Relaticle\Flowforge\Testing\TestsFlowforge;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -37,8 +37,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
-                    ->publishMigrations()
-                    ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('relaticle/flowforge');
             });
 
@@ -46,10 +44,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
 
         if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
             $package->hasConfigFile();
-        }
-
-        if (file_exists($package->basePath('/../database/migrations'))) {
-            $package->hasMigrations($this->getMigrations());
         }
 
         if (file_exists($package->basePath('/../resources/lang'))) {
@@ -92,15 +86,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
 
         // Register Blade Components
         $this->registerBladeComponents();
-
-        // Handle Stubs
-        if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
-                $this->publishes([
-                    $file->getRealPath() => base_path("stubs/custom-fields/{$file->getFilename()}"),
-                ], 'custom-fields-stubs');
-            }
-        }
 
         // Register Livewire Components
         Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
@@ -150,7 +135,7 @@ class FlowforgeServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
-            FlowforgeCommand::class,
+            MakeKanbanBoardCommand::class,
         ];
     }
 
@@ -182,16 +167,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
                     'updateStatus' => config('app.url') . '/flowforge/kanban/update-status',
                 ],
             ],
-        ];
-    }
-
-    /**
-     * @return array<string>
-     */
-    protected function getMigrations(): array
-    {
-        return [
-            'create_flowforge_table',
         ];
     }
 }

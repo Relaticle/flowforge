@@ -13,6 +13,18 @@ Flowforge is a powerful Kanban board package for Laravel Filament 3 that works s
 > This package is a work in progress and is not yet ready for production use. It is currently in the alpha stage and may have bugs or incomplete 
 features.
 
+## Features
+
+Flowforge offers several powerful features out of the box:
+
+- **Drag and Drop**: Move cards between columns or reorder them within a column
+- **Create Cards**: Add new cards directly from the board interface
+- **Edit Cards**: Modify existing cards with a simple click
+- **Responsive Design**: Works on all device sizes
+- **Real-time Updates**: Changes are reflected immediately
+- **Custom Card Actions**: Add your own actions to cards (coming soon)
+- **Filter and Search**: Find cards quickly (coming soon)
+
 ## Requirements
 
 - PHP 8.3+
@@ -27,12 +39,44 @@ You can install the package via composer:
 composer require relaticle/flowforge
 ```
 
-After installing the package, you should publish and run the migrations:
+After installation, the package should work without any additional configuration. However, for the drag-and-drop feature to persist order, your model should have a field for storing the order (typically an integer column).
+
+## Model Preparation
+
+To fully utilize Flowforge, your model should have:
+
+1. A field for the card title (e.g., `title`, `name`)
+2. A field for the column/status (e.g., `status`, `state`)
+3. Optionally, a field for description (e.g., `description`, `content`)
+4. Optionally, a field for order (e.g., `order_column`, `sort_order`)
+
+Example migration:
+
+```php
+Schema::create('tasks', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');
+    $table->text('description')->nullable();
+    $table->string('status')->default('todo');
+    $table->integer('order_column')->nullable();
+    $table->timestamps();
+});
+```
+
+## Board Generation
+
+You can easily create a new Kanban board page using the provided command:
 
 ```bash
-php artisan flowforge:install
-php artisan migrate
+php artisan flowforge:make-board TasksBoard --model=Task
 ```
+
+This will generate a new Filament page configured for your model. The command accepts the following options:
+- `name`: The name of the board page (required, can be provided as argument or prompted)
+- `--model` or `-m`: The model class to use (required, will be prompted if not provided)
+- `--panel` or `-p`: The Filament panel name (optional, leave empty for default Filament structure)
+
+By default, the command will create the board page in your default Filament structure (`app/Filament/Pages/`). If you're using a multi-panel setup, you can specify the panel name to place the board in the correct directory.
 
 ## Basic Usage
 
@@ -91,6 +135,20 @@ You can customize your Kanban board using these configuration methods:
 - `columns(array)`: Key-value pairs defining columns (key as identifier, value as display label)
 - `columnColors(array)`: Key-value pairs defining colors for each column
 - `cardLabel(string)`: Custom label for cards (defaults to model name)
+
+### Available Column Colors
+
+Flowforge uses Tailwind CSS color classes. The available color options are:
+- `gray`
+- `red`
+- `orange`
+- `yellow`
+- `green`
+- `teal`
+- `blue`
+- `indigo`
+- `purple`
+- `pink`
 
 ## Custom Adapters
 
@@ -177,6 +235,16 @@ class OpportunitiesBoardPage extends KanbanBoardPage
     }
 }
 ```
+
+## Troubleshooting
+
+### Common Issues
+
+- **Cards not draggable**: Ensure your model has an order field and you've specified it with `orderField()`
+- **Empty board**: Check that your model has records with the column values specified in your `columns()` configuration
+- **Column not showing**: Verify that your column keys in the `columns()` method match the values stored in your database
+
+If you encounter any bugs or have feature requests, please open an issue on the GitHub repository.
 
 ## Contributing
 

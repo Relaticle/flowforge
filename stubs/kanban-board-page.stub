@@ -1,0 +1,49 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ modelNamespace }};
+use Filament\Pages\Page;
+use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
+use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
+use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
+
+class {{ class }} extends KanbanBoardPage
+{
+    protected static ?string $navigationIcon = 'heroicon-o-view-columns';
+    
+    // Customize this based on your navigation structure
+    // protected static ?string $navigationGroup = 'Management';
+    
+    // Set a custom label for the navigation menu
+    protected static ?string $navigationLabel = '{{ navigationLabel }}';
+    
+    // Set a custom title for the page
+    protected static ?string $title = '{{ title }}';
+    
+    /**
+     * Get the model query for the board.
+     */
+    public function getSubject()
+    {
+        return {{ model }}::query();
+    }
+    
+    /**
+     * Mount the component.
+     */
+    public function mount(): void
+    {
+        // Configure your board
+        $this->columnField('status')
+            ->columns([
+                'pending' => 'Pending',
+                'in_progress' => 'In Progress',
+                'completed' => 'Completed',
+            ])
+            ->titleField('name') // Change to your title field
+            ->descriptionField('description') // Change to your description field (or remove if not needed)
+            ->orderField('sort_order') // Change to your order field (or remove if not needed)
+            ->columnColors(); // This will use default colors
+    }
+} 
