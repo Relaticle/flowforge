@@ -112,8 +112,6 @@ final readonly class KanbanConfig implements Wireable
 
     /**
      * Get the singular card label.
-     *
-     * @return string
      */
     public function getSingularCardLabel(): string
     {
@@ -122,8 +120,6 @@ final readonly class KanbanConfig implements Wireable
 
     /**
      * Get the plural card label.
-     *
-     * @return string
      */
     public function getPluralCardLabel(): string
     {
