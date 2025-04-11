@@ -1,6 +1,6 @@
 @props(['config', 'permissions'])
 
-<x-filament::modal id="edit-card-modal" :heading="__('Edit :cardLabel', ['cardLabel' => $config->cardLabel ?? 'Card'])">
+<x-filament::modal id="edit-record-modal" :heading="__('Edit :cardLabel', ['cardLabel' => $config->getCardLabel() ?? 'Record'])">
     {{ $this->editRecordForm }}
 
     <x-slot name="footer">
@@ -19,7 +19,7 @@
             <div class="flex gap-x-3">
                 <x-filament::button
                     color="gray"
-                    x-on:click="$dispatch('close-modal', { id: 'edit-card-modal' })"
+                    x-on:click="$dispatch('close-modal', { id: 'edit-record-modal' })"
                 >
                     {{ __('Cancel') }}
                 </x-filament::button>

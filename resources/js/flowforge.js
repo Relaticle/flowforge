@@ -11,7 +11,7 @@ export default function flowforge({state}) {
                 const id = data[0].id;
                 const column = data[0].column;
 
-                this.$dispatch('close-modal', { id: 'create-card-modal' });
+                this.$dispatch('close-modal', { id: 'create-record-modal' });
 
                 // Highlight the new card
                 setTimeout(() => {
@@ -33,7 +33,7 @@ export default function flowforge({state}) {
                 })
                 const id = data[0].id;
 
-                this.$dispatch('close-modal', { id: 'edit-card-modal' });
+                this.$dispatch('close-modal', { id: 'edit-record-modal' });
 
                 // Highlight the updated card
                 // setTimeout(() => {
@@ -51,7 +51,7 @@ export default function flowforge({state}) {
             this.$wire.$on('kanban-record-deleted', (data) => {
                 const id = data[0].id;
 
-                this.$dispatch('close-modal', { id: 'edit-card-modal' });
+                this.$dispatch('close-modal', { id: 'edit-record-modal' });
 
                 // Highlight the deleted card
                 setTimeout(() => {

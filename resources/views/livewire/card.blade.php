@@ -5,7 +5,7 @@
     x-sortable-handle
     x-sortable-item="{{ $card['id'] }}"
     wire:click="openEditForm('{{ $card['id'] }}', '{{ $columnId }}')"
-    x-on:click="$dispatch('open-modal', { id: 'edit-card-modal' })"
+    x-on:click="$dispatch('open-modal', { id: 'edit-record-modal' })"
 >
     <div class="p-3">
         <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ $card['title'] }}</h4>

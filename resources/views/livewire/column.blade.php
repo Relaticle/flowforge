@@ -18,7 +18,7 @@
             <button
                 type="button"
                 wire:click="openCreateForm('{{ $columnId }}')"
-                x-on:click="$dispatch('open-modal', { id: 'create-card-modal' })"
+                x-on:click="$dispatch('open-modal', { id: 'create-record-modal' })"
                 class="text-gray-400 hover:text-primary-500 dark:text-gray-500 dark:hover:text-primary-400"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
