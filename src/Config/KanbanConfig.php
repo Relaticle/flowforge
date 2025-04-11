@@ -111,23 +111,23 @@ final readonly class KanbanConfig implements Wireable
     }
 
     /**
-     * Get the label for individual cards.
+     * Get the singular card label.
      *
-     * @return string|null The singular card label, or null to use default
+     * @return string
      */
-    public function getCardLabel(): ?string
+    public function getSingularCardLabel(): string
     {
-        return $this->cardLabel;
+        return Str::singular($this->cardLabel ?? 'Record');
     }
 
     /**
-     * Get the plural label for collection of cards.
+     * Get the plural card label.
      *
-     * @return string|null The plural card label, or null to use default
+     * @return string
      */
-    public function getPluralCardLabel(): ?string
+    public function getPluralCardLabel(): string
     {
-        return $this->pluralCardLabel;
+        return $this->pluralCardLabel ?? Str::plural($this->getSingularCardLabel());
     }
 
     /**

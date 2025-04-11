@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Relaticle\Flowforge\Filament\Pages;
 
 use Filament\Pages\Page;
+use Illuminate\Support\Str;
 use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
@@ -24,11 +25,6 @@ abstract class KanbanBoardPage extends Page
     public function __construct()
     {
         $this->config = new KanbanConfig;
-    }
-
-    public function updating()
-    {
-        info('update');
     }
 
     /**
@@ -128,6 +124,26 @@ abstract class KanbanBoardPage extends Page
     public function cardLabel(string $label): static
     {
         $this->config = $this->config->withCardLabel($label);
+
+        // Auto-set the plural form if not already set
+        if ($this->config->getPluralCardLabel() === null) {
+            $this->config = $this->config->withPluralCardLabel(
+                (string) Str::of($label)->plural()
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the plural label for multiple cards.
+     *
+     * @param string $label
+     * @return KanbanBoardPage
+     */
+    public function pluralCardLabel(string $label): static
+    {
+        $this->config = $this->config->withPluralCardLabel($label);
 
         return $this;
     }

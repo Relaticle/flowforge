@@ -1,6 +1,6 @@
-@props(['config', 'permissions'])
+@props(['singularCardLabel', 'permissions'])
 
-<x-filament::modal id="edit-record-modal" :heading="__('Edit :cardLabel', ['cardLabel' => $config->getCardLabel() ?? 'Record'])">
+<x-filament::modal id="edit-record-modal" :heading="__('Edit :cardLabel', ['cardLabel' => $singularCardLabel])">
     {{ $this->editRecordForm }}
 
     <x-slot name="footer">

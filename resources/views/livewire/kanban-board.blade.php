@@ -9,8 +9,8 @@
         state: {
             columns: @js($columns),
             columnField: '{{ $config->getColumnField() }}',
-            cardLabel: '{{ $config->getCardLabel() ?? 'record' }}',
-            pluralCardLabel: '{{ $config->pluralCardLabel ?? 'Records' }}'
+            cardLabel: '{{ $config->getSingularCardLabel() }}',
+            pluralCardLabel: '{{ $config->getPluralCardLabel() }}'
         }
     })"
 >
@@ -29,6 +29,6 @@
         </div>
     </div>
 
-    <x-flowforge::modals.create-record :permissions="$this->permissions" :config="$config" />
-    <x-flowforge::modals.edit-record :permissions="$this->permissions" :config="$config" />
+    <x-flowforge::modals.create-record :permissions="$this->permissions" :singularCardLabel="$config->getSingularCardLabel()" />
+    <x-flowforge::modals.edit-record :permissions="$this->permissions" :singularCardLabel="$config->getSingularCardLabel()" />
 </div>

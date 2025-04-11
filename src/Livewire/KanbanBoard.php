@@ -405,12 +405,12 @@ class KanbanBoard extends Component implements HasForms
             ]);
 
             Notification::make()
-                ->title('Card created')
+                ->title(__(':Record created successfully', ['record' => $this->config->getSingularCardLabel()]))
                 ->success()
                 ->send();
         } else {
             Notification::make()
-                ->title('Failed to create card')
+                ->title('Failed to create record')
                 ->danger()
                 ->send();
         }
@@ -439,7 +439,7 @@ class KanbanBoard extends Component implements HasForms
 
         if (! $record) {
             Notification::make()
-                ->title('Card not found')
+                ->title(__(':Record not found', ['record' => $this->config->getSingularCardLabel()]))
                 ->danger()
                 ->send();
 
@@ -457,12 +457,12 @@ class KanbanBoard extends Component implements HasForms
             ]);
 
             Notification::make()
-                ->title('Card updated')
+                ->title(__(':Record updated successfully', ['record' => $this->config->getSingularCardLabel()]))
                 ->success()
                 ->send();
         } else {
             Notification::make()
-                ->title('Failed to update card')
+                ->title(__(':Record update failed', ['record' => $this->config->getSingularCardLabel()]))
                 ->danger()
                 ->send();
         }
@@ -499,7 +499,7 @@ class KanbanBoard extends Component implements HasForms
     {
         if (! $this->permissions['canDelete']) {
             Notification::make()
-                ->title('You do not have permission to delete records')
+                ->title(__('You do not have permission to delete :records', ['records' => $this->config->getPluralCardLabel()]))
                 ->danger()
                 ->send();
 
@@ -527,7 +527,7 @@ class KanbanBoard extends Component implements HasForms
             ]);
 
             Notification::make()
-                ->title('Record deleted')
+                ->title(__(':Record deleted successfully', ['record' => $this->config->getSingularCardLabel()]))
                 ->success()
                 ->send();
         } else {

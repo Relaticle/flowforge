@@ -75,13 +75,14 @@
                     <div wire:loading.remove wire:target="loadMoreItems('{{ $columnId }}')"
                          class="text-xs text-gray-400">
                         {{ count($column['items']) }}
-                        / {{ $column['total'] }} {{ $config->pluralCardLabel ?? 'Records' }}
+                        / {{ $column['total'] }} {{ $config->getPluralCardLabel() }}
                     </div>
                 </div>
             @endif
         @else
             <x-flowforge::empty-column
                 :columnId="$columnId"
+                :pluralCardLabel="$config->getPluralCardLabel()"
             />
         @endif
     </div>
