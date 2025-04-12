@@ -15,10 +15,6 @@ trait CrudOperationsTrait
 {
     /**
      * Create a new record with the given attributes.
-     *
-     * @param Form $form
-     * @param mixed $currentColumn
-     * @return Model|null
      */
     public function createRecord(Form $form, mixed $currentColumn): ?Model
     {
@@ -41,9 +37,7 @@ trait CrudOperationsTrait
     /**
      * Update an existing record with the given attributes.
      *
-     * @param Model $record The record to update
-     * @param Form $form
-     * @return bool
+     * @param  Model  $record  The record to update
      */
     public function updateRecord(Model $record, Form $form): bool
     {
@@ -57,7 +51,7 @@ trait CrudOperationsTrait
     /**
      * Delete an existing record.
      *
-     * @param Model $record The record to delete
+     * @param  Model  $record  The record to delete
      */
     public function deleteRecord(Model $record): bool
     {
@@ -67,11 +61,11 @@ trait CrudOperationsTrait
     /**
      * Update the order of records in a column.
      *
-     * @param string|int $columnId The column ID
-     * @param array<int, mixed> $recordIds The record IDs in their new order
+     * @param  string|int  $columnId  The column ID
+     * @param  array<int, mixed>  $recordIds  The record IDs in their new order
      * @return bool Whether the operation was successful
      */
-    public function updateRecordsOrderAndColumn(string|int $columnId, array $recordIds): bool
+    public function updateRecordsOrderAndColumn(string | int $columnId, array $recordIds): bool
     {
         $orderField = $this->config->getOrderField();
         $columnField = $this->config->getColumnField();

@@ -230,9 +230,6 @@ final readonly class KanbanConfig implements Wireable
         return new self(...$config);
     }
 
-    /**
-     * @return array
-     */
     public function toLivewire(): array
     {
         return [
@@ -248,10 +245,6 @@ final readonly class KanbanConfig implements Wireable
         ];
     }
 
-    /**
-     * @param $value
-     * @return KanbanConfig
-     */
     public static function fromLivewire($value): KanbanConfig
     {
         return new KanbanConfig(
