@@ -27,24 +27,10 @@ export default function flowforge({state}) {
 
             // Listen for card update
             this.$wire.$on('kanban-record-updated', (data) => {
-
-                console.log({
-                    data
-                })
-                const id = data[0].id;
-
-                this.$dispatch('close-modal', { id: 'edit-record-modal' });
-
-                // Highlight the updated card
-                // setTimeout(() => {
-                //     const cardElement = document.querySelector(`[x-sortable-item="${id}"]`);
-                //     if (cardElement) {
-                //         cardElement.classList.add('animate-kanban-card-move');
-                //         setTimeout(() => {
-                //             cardElement.classList.remove('animate-kanban-card-move');
-                //         }, 500);
-                //     }
-                // }, 300);
+                // const recordData = data[0].record;
+                // const id = recordData.id;
+                // const titleField = this.state.titleField;
+                // const descriptionField = this.state.descriptionField;
             });
 
             // Listen for card deletion
@@ -77,7 +63,7 @@ export default function flowforge({state}) {
             });
 
             this.$wire.$on('close-modal', (data) => {
-                this.$wire.resetEditForm()
+                // this.$wire.resetEditForm()
             })
         },
 

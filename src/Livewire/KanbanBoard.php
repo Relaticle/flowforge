@@ -4,30 +4,33 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Livewire;
 
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 use Relaticle\Flowforge\Enums\KanbanColor;
+use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
 
-class KanbanBoard extends Component implements HasForms
+class KanbanBoard extends Component implements HasForms, HasActions
 {
     use InteractsWithForms;
     use WithPagination;
+    use InteractsWithActions;
 
     /**
      * The name of the kanban board page class.
      */
-    public string $pageClass;
+    public KanbanBoardPage|string $pageClass;
 
     /**
      * The Kanban board adapter.
@@ -82,18 +85,6 @@ class KanbanBoard extends Component implements HasForms
     public array $searchable = [];
 
     /**
-     * Card data for create form operations.
-     */
-    #[Validate]
-    public array $createRecordData = [];
-
-    /**
-     * Card data for edit form operations.
-     */
-    #[Validate]
-    public array $editRecordData = [];
-
-    /**
      * Number of cards to load when clicking "load more".
      */
     public int $cardsIncrement;
@@ -126,7 +117,7 @@ class KanbanBoard extends Component implements HasForms
         ];
 
         // Set default limits
-        $initialCardsCount = $initialCardsCount ?? 5;
+        $initialCardsCount = $initialCardsCount ?? 50;
         $this->cardsIncrement = $cardsIncrement ?? 10;
 
         // Initialize columns
@@ -144,10 +135,6 @@ class KanbanBoard extends Component implements HasForms
         foreach ($this->columns as $column) {
             $this->columnCardLimits[$column['id']] = $initialCardsCount;
         }
-
-        // Initialize forms
-        $this->createRecordForm->fill();
-        $this->editRecordForm->fill();
 
         // Load initial data
         $this->refreshBoard();
@@ -201,24 +188,68 @@ class KanbanBoard extends Component implements HasForms
         return $colors;
     }
 
-    /**
-     * Create card form configuration.
-     */
-    public function createRecordForm(Form $form): Form
+    public function createAction(): ?Action
     {
-        $form = $this->adapter->getCreateForm($form, $this->currentColumn);
+        $boardPage = app($this->pageClass);
 
-        return $form->model($this->adapter->baseQuery->getModel())->statePath('createRecordData');
+        if (!method_exists($boardPage, 'createAction')) return null;
+
+        $action = Action::make('create')
+            ->model(function (Action $action, array $arguments) {
+                return app($this->pageClass)->getSubject()->getModel()::class;
+            })
+            ->action(function (Action $action, array $arguments) {
+                $record = app($this->pageClass)->getSubject()->getModel();
+                $record->fill([
+                    ...$action->getFormData(),
+                    $this->config->getColumnField() => $arguments['column'],
+                ]);
+
+                $record->save();
+            })
+            ->after(function (Action $action, array $arguments) {
+                $this->refreshBoard();
+            });
+
+        return $boardPage->createAction($action);
     }
 
-    /**
-     * Edit card form configuration.
-     */
-    public function editRecordForm(Form $form): Form
+    public function editAction(): ?Action
     {
-        $form = $this->adapter->getEditForm($form);
+        $boardPage = app($this->pageClass);
 
-        return $form->model($this->adapter->baseQuery->getModel())->statePath('editRecordData');
+        if (!method_exists($boardPage, 'editAction')) return null;
+
+        $action = Action::make('edit')
+            ->model(function (Action $action, array $arguments) {
+                return $this->adapter->getModelById($arguments['record'])::class;
+            })
+            ->record(function (array $arguments) {
+                return $this->adapter->getModelById($arguments['record']);
+            })
+            ->fillForm(function (Action $action, array $arguments) {
+                $record = $this->adapter->getModelById($arguments['record']);
+                return $record->toArray();
+            })
+            ->action(function (Action $action, array $arguments) {
+                $record = $this->adapter->getModelById($arguments['record']);
+                $record->fill($action->getFormData());
+                $record->save();
+
+                Notification::make()
+                    ->title(__(':Record updated successfully', ['record' => $this->config->getSingularCardLabel()]))
+                    ->success()
+                    ->send();
+            })
+            ->after(function (Action $action, array $arguments) {
+                $this->refreshBoard();
+                
+                $this->dispatch('kanban-record-updated', [
+                    'record' => $this->adapter->getModelById($arguments['record'])
+                ]);
+            });
+
+        return $boardPage->editAction($action);
     }
 
     /**
@@ -303,11 +334,11 @@ class KanbanBoard extends Component implements HasForms
     /**
      * Update the order of cards in a column.
      *
-     * @param string|int $columnId The column ID
+     * @param int|string $columnId The column ID
      * @param array $cardIds The card IDs in their new order
      * @return bool Whether the operation was successful
      */
-    public function updateRecordsOrderAndColumn($columnId, $cardIds): bool
+    public function updateRecordsOrderAndColumn(int|string $columnId, array $cardIds): bool
     {
         $success = $this->adapter->updateRecordsOrderAndColumn($columnId, $cardIds);
 
@@ -316,170 +347,6 @@ class KanbanBoard extends Component implements HasForms
         }
 
         return $success;
-    }
-
-    /**
-     * Open the create form modal.
-     *
-     * @param string $columnId The column ID for the new card
-     */
-    public function openCreateForm(string $columnId): void
-    {
-        $this->currentColumn = $columnId;
-        $this->createRecordData = [];
-
-        // Set the base model without filling yet
-        $this->createRecordForm->model($this->adapter->baseQuery->getModel());
-
-        // Pre-set the column field
-        $columnField = $this->config->getColumnField();
-        $this->createRecordData[$columnField] = $columnId;
-    }
-
-    /**
-     * Open the edit form modal.
-     *
-     * @param string|int $recordId The card ID to edit
-     * @param string|int $columnId The column ID containing the card
-     */
-    public function openEditForm(string|int $recordId, string|int $columnId): void
-    {
-        $this->currentColumn = $columnId;
-        $this->currentRecord = $recordId;
-
-        $record = $this->adapter->getModelById($recordId);
-
-        if (!$record) {
-            Notification::make()
-                ->title('Card not found')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        // Set editRecordData first
-        $this->editRecordData = $record->toArray();
-
-        // Clear form state to avoid reactivity issues
-        $this->editRecordForm->fill([]);
-
-        // Set the model on the form - this is crucial for relationships in nested components
-        $this->editRecordForm->model($record);
-
-        // Now fill the form, which will allow nested components to initialize with the model's relationships
-        // Using the model's data directly instead of editRecordData to avoid reactivity loops
-        $this->editRecordForm->fill($record->toArray());
-    }
-
-    /**
-     * Create a new card.
-     */
-    public function createRecord(): void
-    {
-        if (!$this->permissions['canCreate']) {
-            Notification::make()
-                ->title('You do not have permission to create records')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        $record = $this->adapter->createRecord($this->createRecordForm, $this->currentColumn);
-
-        if ($record) {
-            $this->refreshBoard();
-            $this->resetCreateForm();
-
-            $this->dispatch('kanban-record-created', [
-                'record' => $record,
-            ]);
-
-            Notification::make()
-                ->title(__(':Record created successfully', ['record' => $this->config->getSingularCardLabel()]))
-                ->success()
-                ->send();
-        } else {
-            Notification::make()
-                ->title('Failed to create record')
-                ->danger()
-                ->send();
-        }
-    }
-
-    /**
-     * Reset the create form.
-     */
-    private function resetCreateForm(): void
-    {
-        $this->createRecordData = [];
-        $this->currentColumn = null;
-
-        // Just clear the form without chaining methods
-        $this->createRecordForm->fill([]);
-    }
-
-    /**
-     * Update an existing card.
-     */
-    public function updateRecord(): void
-    {
-        $record = $this->adapter->getModelById($this->currentRecord);
-
-        if (!$record) {
-            Notification::make()
-                ->title(__(':Record not found', ['record' => $this->config->getSingularCardLabel()]))
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        $success = $this->adapter->updateRecord($record, $this->editRecordForm);
-
-        if ($success) {
-            $this->refreshBoard();
-            $this->resetEditForm();
-
-            $this->dispatch('kanban-record-updated', [
-                'record' => $record,
-            ]);
-
-            Notification::make()
-                ->title(__(':Record updated successfully', ['record' => $this->config->getSingularCardLabel()]))
-                ->success()
-                ->send();
-        } else {
-            Notification::make()
-                ->title(__(':Record update failed', ['record' => $this->config->getSingularCardLabel()]))
-                ->danger()
-                ->send();
-        }
-    }
-
-    /**
-     * Reset the edit form.
-     */
-    public function resetEditForm(): void
-    {
-        $this->editRecordData = [];
-        $this->currentRecord = null;
-
-        // Just clear the form without chaining methods
-        $this->editRecordForm->fill([]);
-    }
-
-    /**
-     * Open the delete confirmation modal.
-     *
-     * @param string|int $cardId The card ID to delete
-     * @param string $columnId The column ID containing the card
-     */
-    public function confirmDelete(string|int $cardId, string $columnId): void
-    {
-        $this->currentRecord = $cardId;
-        $this->currentColumn = $columnId;
     }
 
     /**
@@ -526,17 +393,6 @@ class KanbanBoard extends Component implements HasForms
                 ->danger()
                 ->send();
         }
-    }
-
-    /**
-     * Define the forms that are available in this component.
-     */
-    protected function getForms(): array
-    {
-        return [
-            'createRecordForm',
-            'editRecordForm',
-        ];
     }
 
     /**

@@ -24,7 +24,10 @@ trait CrudOperationsTrait
     {
         $model = $this->baseQuery->getModel()->newInstance();
 
-        $model->fill($form->getState());
+        $model->fill([
+            ...$form->getState(),
+            $this->config->getColumnField() => $currentColumn,
+        ]);
 
         if ($model->save()) {
             $form->model($model)->saveRelationships();

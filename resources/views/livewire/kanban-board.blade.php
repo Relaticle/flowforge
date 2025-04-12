@@ -8,17 +8,20 @@
     x-data="flowforge({
         state: {
             columns: @js($columns),
+            titleField: '{{ $config->getTitleField() }}',
+            descriptionField: '{{ $config->getDescriptionField() }}',
             columnField: '{{ $config->getColumnField() }}',
             cardLabel: '{{ $config->getSingularCardLabel() }}',
             pluralCardLabel: '{{ $config->getPluralCardLabel() }}'
         }
     })"
 >
+
     <!-- Board Content -->
     <div class="flex-1 overflow-hidden">
         <div class="flex flex-row h-full overflow-x-auto overflow-y-hidden px-2 gap-5 kanban-board pb-4">
             @foreach($columns as $columnId => $column)
-               <x-flowforge::column
+                <x-flowforge::column
                     :columnId="$columnId"
                     :column="$column"
                     :config="$config"
@@ -29,6 +32,5 @@
         </div>
     </div>
 
-    <x-flowforge::modals.create-record :permissions="$this->permissions" :singularCardLabel="$config->getSingularCardLabel()" />
-    <x-flowforge::modals.edit-record :permissions="$this->permissions" :singularCardLabel="$config->getSingularCardLabel()" />
+    <x-filament-actions::modals />
 </div>

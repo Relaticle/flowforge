@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Livewire\Wireable;
 use Relaticle\Flowforge\Concerns\CardFormattingTrait;
 use Relaticle\Flowforge\Concerns\CrudOperationsTrait;
-use Relaticle\Flowforge\Concerns\FormHandlingTrait;
 use Relaticle\Flowforge\Concerns\QueryHandlingTrait;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
@@ -17,7 +16,6 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
 {
     use CardFormattingTrait;
     use CrudOperationsTrait;
-    use FormHandlingTrait;
     use QueryHandlingTrait;
 
     /**

@@ -14,19 +14,9 @@
                 {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
             </div>
         </div>
-        @if($permissions['canCreate'])
-            <button
-                type="button"
-                wire:click="openCreateForm('{{ $columnId }}')"
-                x-on:click="$dispatch('open-modal', { id: 'create-record-modal' })"
-                class="text-gray-400 hover:text-primary-500 dark:text-gray-500 dark:hover:text-primary-400"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                     xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-            </button>
+
+        @if ($this->createAction() && ($this->createAction)(['column' => $columnId])->isVisible())
+            {{ ($this->createAction)(['column' => $columnId]) }}
         @endif
     </div>
 
@@ -40,12 +30,12 @@
         style="max-height: calc(100vh - 13rem);"
     >
         @if (isset($column['items']) && count($column['items']) > 0)
-            @foreach ($column['items'] as $card)
+            @foreach ($column['items'] as $record)
                 <x-flowforge::card
-                    :card="$card"
+                    :record="$record"
                     :config="$config"
                     :columnId="$columnId"
-                    wire:key="card-{{ $card['id'] }}"
+                    wire:key="card-{{ $record['id'] }}"
                 />
             @endforeach
 

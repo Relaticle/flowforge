@@ -9,8 +9,9 @@ use Illuminate\Support\Str;
 use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
+use Relaticle\Flowforge\Contracts\KanbanBoardPageInterface;
 
-abstract class KanbanBoardPage extends Page
+abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
 {
     protected static string $view = 'flowforge::filament.pages.kanban-board-page';
 
@@ -30,6 +31,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the field that stores the column value.
      *
+     * @param string $field
      * @return KanbanBoardPage
      */
     public function columnField(string $field): static
@@ -54,6 +56,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the title field for the Kanban cards.
      *
+     * @param string $field
      * @return KanbanBoardPage
      */
     public function titleField(string $field): static
@@ -66,6 +69,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the description field for the Kanban cards.
      *
+     * @param string $field
      * @return KanbanBoardPage
      */
     public function descriptionField(string $field): static
@@ -102,6 +106,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the order field for the Kanban board.
      *
+     * @param string $field
      * @return KanbanBoardPage
      */
     public function orderField(string $field): static
@@ -114,6 +119,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the label for individual cards.
      *
+     * @param string $label
      * @return KanbanBoardPage
      */
     public function cardLabel(string $label): static
@@ -133,6 +139,7 @@ abstract class KanbanBoardPage extends Page
     /**
      * Set the plural label for multiple cards.
      *
+     * @param string $label
      * @return KanbanBoardPage
      */
     public function pluralCardLabel(string $label): static

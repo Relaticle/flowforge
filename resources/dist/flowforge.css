@@ -4562,11 +4562,6 @@ select {
   color: rgba(var(--gray-700), 0.75);
 }
 
-.hover\:text-primary-500:hover {
-  --tw-text-opacity: 1;
-  color: rgba(var(--primary-500), var(--tw-text-opacity, 1));
-}
-
 .hover\:opacity-100:hover {
   opacity: 1;
 }
@@ -5124,11 +5119,6 @@ select {
 .dark\:hover\:text-gray-400:hover:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgba(var(--gray-400), var(--tw-text-opacity, 1));
-}
-
-.dark\:hover\:text-primary-400:hover:is(.dark *) {
-  --tw-text-opacity: 1;
-  color: rgba(var(--primary-400), var(--tw-text-opacity, 1));
 }
 
 .dark\:hover\:ring-white\/20:hover:is(.dark *) {

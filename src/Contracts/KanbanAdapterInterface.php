@@ -50,21 +50,6 @@ interface KanbanAdapterInterface
     public function getColumnItemsCount(string | int $columnId): int;
 
     /**
-     * Get the form for creating records.
-     *
-     * @param  Form  $form  The form instance
-     * @param  mixed  $currentColumn  The current column
-     */
-    public function getCreateForm(Form $form, mixed $currentColumn): Form;
-
-    /**
-     * Get the form for editing records.
-     *
-     * @param  Form  $form  The form instance
-     */
-    public function getEditForm(Form $form): Form;
-
-    /**
      * Create a new record with the given attributes.
      *
      * @param Form $form

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Config;
 
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -131,7 +132,7 @@ final readonly class KanbanConfig implements Wireable
      *
      * @param  string  $titleField  The field name used for card titles
      * @param  string|null  $descriptionField  Optional field name for card descriptions
-     * @return array<\Filament\Forms\Components\Component> The default form schema
+     * @return array<Component> The default form schema
      */
     public static function getDefaultCreateFormSchema(string $titleField, ?string $descriptionField): array
     {
@@ -142,7 +143,9 @@ final readonly class KanbanConfig implements Wireable
         ];
 
         if ($descriptionField !== null) {
-            $schema[] = Textarea::make($descriptionField)->rows(3);
+            $schema[] = Textarea::make($descriptionField)
+                ->rows(3)
+                ->maxLength(65535);
         }
 
         return $schema;
@@ -155,7 +158,7 @@ final readonly class KanbanConfig implements Wireable
      * @param  string|null  $descriptionField  Optional field name for card descriptions
      * @param  string  $columnField  The field name that determines which column a card belongs to
      * @param  array<string, string>  $columnValues  Available column values with their labels
-     * @return array<\Filament\Forms\Components\Component> The default form schema
+     * @return array<Component> The default form schema
      */
     public static function getDefaultEditFormSchema(
         string $titleField,
@@ -171,7 +174,8 @@ final readonly class KanbanConfig implements Wireable
 
         if ($descriptionField !== null) {
             $schema[] = Textarea::make($descriptionField)
-                ->rows(3);
+                ->rows(3)
+                ->maxLength(65535);
         }
 
         $schema[] = Select::make($columnField)
@@ -226,6 +230,9 @@ final readonly class KanbanConfig implements Wireable
         return new self(...$config);
     }
 
+    /**
+     * @return array
+     */
     public function toLivewire(): array
     {
         return [
@@ -241,6 +248,10 @@ final readonly class KanbanConfig implements Wireable
         ];
     }
 
+    /**
+     * @param $value
+     * @return KanbanConfig
+     */
     public static function fromLivewire($value): KanbanConfig
     {
         return new KanbanConfig(
