@@ -1,0 +1,13 @@
+public function createAction(Action $action): Action
+{
+    return $action
+        ->iconButton()
+        ->icon('heroicon-o-plus')
+        ->modalHeading('Create {{ model }}')
+        ->modalWidth('md')
+        ->form(function (Forms\Form $form) {
+            return $form->schema([
+                {{ createFields }}
+            ]);
+        });
+} 
