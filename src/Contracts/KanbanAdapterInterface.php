@@ -51,19 +51,13 @@ interface KanbanAdapterInterface
 
     /**
      * Create a new record with the given attributes.
-     *
-     * @param Form $form
-     * @param mixed $currentColumn
-     * @return Model|null
      */
     public function createRecord(Form $form, mixed $currentColumn): ?Model;
 
     /**
      * Update an existing record with the given attributes.
      *
-     * @param Model $record The record to update
-     * @param Form $form
-     * @return bool
+     * @param  Model  $record  The record to update
      */
     public function updateRecord(Model $record, Form $form): bool;
 
