@@ -52,9 +52,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         if (file_exists($package->basePath('/../resources/views'))) {
             $package->hasViews(static::$viewNamespace);
         }
-
-        // Register routes
-        $package->hasRoutes(['web']);
     }
 
     public function packageRegistered(): void {}
@@ -162,9 +159,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         return [
             'flowforge' => [
                 'baseUrl' => url('/'),
-                'routes' => [
-                    'updateStatus' => config('app.url') . '/flowforge/kanban/update-status',
-                ],
             ],
         ];
     }
