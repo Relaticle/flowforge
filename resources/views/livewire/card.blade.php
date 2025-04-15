@@ -3,12 +3,12 @@
 <div
     @class([
         'kanban-card mb-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-150 hover:shadow-md',
-        'cursor-pointer' => $this->editAction() &&  ($this->createAction)(['record' => $record['id']])->isVisible(),
+        'cursor-pointer' => $this->editAction() &&  ($this->editAction)(['record' => $record['id']])->isVisible(),
         'cursor-default' => !$this->editAction()
     ])
     x-sortable-handle
     x-sortable-item="{{ $record['id'] }}"
-    @if($this->editAction() &&  ($this->createAction)(['record' => $record['id']])->isVisible())
+    @if($this->editAction() &&  ($this->editAction)(['record' => $record['id']])->isVisible())
         wire:click="mountAction('edit', {record: {{ $record['id'] }}})"
     @endif
 >
