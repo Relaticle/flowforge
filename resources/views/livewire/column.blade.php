@@ -1,4 +1,4 @@
-@props(['permissions', 'columnId', 'column', 'config'])
+@props(['columnId', 'column', 'config'])
 
 <div
     class="kanban-column w-[300px] min-w-[300px] flex-shrink-0 border border-kanban-column-border dark:border-gray-700 shadow-kanban-column dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden">

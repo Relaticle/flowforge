@@ -50,31 +50,6 @@ interface KanbanAdapterInterface
     public function getColumnItemsCount(string | int $columnId): int;
 
     /**
-     * Create a new record with the given attributes.
-     *
-     * @param Form $form
-     * @param mixed $currentColumn
-     * @return Model|null
-     */
-    public function createRecord(Form $form, mixed $currentColumn): ?Model;
-
-    /**
-     * Update an existing record with the given attributes.
-     *
-     * @param Model $record The record to update
-     * @param Form $form
-     * @return bool
-     */
-    public function updateRecord(Model $record, Form $form): bool;
-
-    /**
-     * Delete an existing record.
-     *
-     * @param  Model  $record  The record to delete
-     */
-    public function deleteRecord(Model $record): bool;
-
-    /**
      * Update the order of records in a column.
      *
      * @param  string|int  $columnId  The column ID

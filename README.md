@@ -117,7 +117,6 @@ Flowforge offers several powerful features out of the box:
 - **Customizable Cards**: Display additional model attributes on cards
 - **Search Functionality**: Built-in search across specified model fields
 - **Integration Support**: Works with other packages like custom fields systems
-- **Permissions**: Respects Laravel Gate permissions for CRUD operations
 
 ## 🏗️ Model Preparation
 

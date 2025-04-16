@@ -89,8 +89,6 @@ class KanbanBoard extends Component implements HasForms, HasActions
      */
     public int $cardsIncrement;
 
-    public array $permissions = [];
-
     /**
      * Initialize the Kanban board.
      *
@@ -109,12 +107,6 @@ class KanbanBoard extends Component implements HasForms, HasActions
         $this->adapter = $adapter;
         $this->searchable = $searchable;
         $this->config = $this->adapter->getConfig();
-
-        // Check permissions
-        $this->permissions = [
-            'canCreate' => Gate::check('create', $this->adapter->baseQuery->getModel()),
-            'canDelete' => Gate::check('delete', $this->adapter->baseQuery->getModel()),
-        ];
 
         // Set default limits
         $initialCardsCount = $initialCardsCount ?? 50;
@@ -243,7 +235,7 @@ class KanbanBoard extends Component implements HasForms, HasActions
             })
             ->after(function (Action $action, array $arguments) {
                 $this->refreshBoard();
-                
+
                 $this->dispatch('kanban-record-updated', [
                     'record' => $this->adapter->getModelById($arguments['record'])
                 ]);
@@ -347,52 +339,6 @@ class KanbanBoard extends Component implements HasForms, HasActions
         }
 
         return $success;
-    }
-
-    /**
-     * Delete a card.
-     */
-    public function deleteRecord(): void
-    {
-        if (!$this->permissions['canDelete']) {
-            Notification::make()
-                ->title(__('You do not have permission to delete :records', ['records' => $this->config->getPluralCardLabel()]))
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        $record = $this->adapter->getModelById($this->currentRecord);
-
-        if (!$record) {
-            Notification::make()
-                ->title('Record not found')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        $success = $this->adapter->deleteRecord($record);
-
-        if ($success) {
-            $this->refreshBoard();
-
-            $this->dispatch('kanban-record-deleted', [
-                'record' => $record,
-            ]);
-
-            Notification::make()
-                ->title(__(':Record deleted successfully', ['record' => $this->config->getSingularCardLabel()]))
-                ->success()
-                ->send();
-        } else {
-            Notification::make()
-                ->title('Failed to delete record')
-                ->danger()
-                ->send();
-        }
     }
 
     /**
