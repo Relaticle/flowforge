@@ -5,8 +5,7 @@ module.exports = {
         './resources/views/livewire/**/*.blade.php', // Add this to include Kanban components
     ],
     corePlugins: {
-        preflight: false,
-        components: false
+        preflight: true
     },
     darkMode: 'class',
     theme: {
