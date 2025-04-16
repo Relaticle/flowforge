@@ -11,26 +11,16 @@
 
 @php
     $badgeClasses = [
-        'inline-flex items-center transition-colors duration-150',
-        'text-xs' => $size === 'sm' || $size === 'md',
-        'text-sm' => $size === 'lg',
-        'font-medium',
+        'ff-badge',
+        'ff-badge--' . $size,
+        'ff-badge--rounded-' . $rounded,
         'kanban-color-' . $color,
-        'rounded-full' => $rounded === 'full',
-        'rounded-md' => $rounded === 'md',
-        'py-0.5 px-2' => $size === 'md',
-        'py-0 px-1.5' => $size === 'sm',
-        'py-1 px-2.5' => $size === 'lg',
         'group' => $icon,
     ];
 
     $iconClasses = [
-        'w-3 h-3' => $size === 'sm',
-        'w-3.5 h-3.5' => $size === 'md',
-        'w-4 h-4' => $size === 'lg',
-        'mr-1' => $size === 'sm',
-        'mr-1.5' => $size === 'md' || $size === 'lg',
-        'flex-shrink-0',
+        'ff-badge__icon',
+        'ff-badge__icon--' . $size,
     ];
 @endphp
 
@@ -40,15 +30,15 @@
     @endif
 
     @if($label)
-        <span class="font-medium mr-0.5">{{ $label }}@if($value):@endif</span>
+        <span class="ff-badge__label">{{ $label }}@if($value):@endif</span>
     @endif
 
     @if($value)
-        <span>{{ $value }}</span>
+        <span class="ff-badge__value">{{ $value }}</span>
     @endif
 
     @if($badge)
-        <span class="ml-1.5 flex items-center justify-center w-4 h-4 rounded-full bg-white bg-opacity-30 text-xs leading-none">
+        <span class="ff-badge__count">
             {{ $badge }}
         </span>
     @endif

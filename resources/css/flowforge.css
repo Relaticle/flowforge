@@ -1,51 +1,164 @@
-@layer base {
-    /* Base variables and theme configuration */
-    :root {
-        /* Base spacing */
-        --kanban-base-spacing: 1rem;
-        --kanban-spacing-xs: calc(var(--kanban-base-spacing) * 0.25); /* 0.25rem | 4px */
-        --kanban-spacing-sm: calc(var(--kanban-base-spacing) * 0.5);  /* 0.5rem | 8px */
-        --kanban-spacing-md: var(--kanban-base-spacing);              /* 1rem | 16px */
-        --kanban-spacing-lg: calc(var(--kanban-base-spacing) * 1.5);  /* 1.5rem | 24px */
-        --kanban-spacing-xl: calc(var(--kanban-base-spacing) * 2);    /* 2rem | 32px */
+/**
+ * Card Component
+ * Used for displaying content blocks throughout the kanban board
+ * Supports interactive hover states and cursor variations based on edit permissions
+ */
+.ff-card {
+    @apply mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-150 hover:shadow-md;
 
-        /* Column styling */
-        --kanban-column-bg: theme('colors.gray.100');
-        --kanban-column-header: theme('colors.gray.700');
-        --kanban-column-border: #e5e7eb;
-        --kanban-column-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-
-        /* Card styling */
-        --kanban-card-bg: theme('colors.white');
-        --kanban-card-hover: theme('colors.gray.50');
-        --kanban-card-border: #f1f1f1;
-        --kanban-card-shadow-normal: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.05);
-        --kanban-card-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
-
-        /* Priority indicators */
-        --kanban-priority-high: #ef4444;
-        --kanban-priority-medium: #f59e0b;
-        --kanban-priority-low: #10b981;
+    &__content {
+        @apply p-3;
     }
 
-    .dark {
-        /* Dark mode column styling */
-        --kanban-column-bg: rgba(31, 41, 55, 0.8);
-        --kanban-column-header: theme('colors.gray.200');
-        --kanban-column-border: #1f2937;
-        --kanban-column-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    &__title {
+        @apply text-sm font-medium text-gray-900 dark:text-white;
+    }
 
-        /* Dark mode card styling */
-        --kanban-card-bg: rgba(43, 55, 73, 0.95);
-        --kanban-card-hover: rgba(55, 65, 81, 0.95);
-        --kanban-card-border: #374151;
-        --kanban-card-shadow-normal: 0 2px 4px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.3);
-        --kanban-card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.25);
+    &__description {
+        @apply mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2;
+    }
 
-        /* Dark mode priority indicators */
-        --kanban-priority-high: #f87171;
-        --kanban-priority-medium: #fbbf24;
-        --kanban-priority-low: #34d399;
+    &__attributes {
+        @apply mt-3 flex flex-wrap gap-1.5;
+    }
+
+    &--interactive {
+        @apply cursor-pointer;
+    }
+
+    &--non-interactive {
+        @apply cursor-default;
+    }
+}
+
+/**
+ * Card Badge Component
+ * Used for displaying metadata, tags, and status indicators within cards
+ * Supports various sizes, colors, and visual treatments
+ */
+.ff-badge {
+    @apply inline-flex items-center transition-colors duration-150;
+
+    &--sm {
+        @apply text-xs py-0 px-1.5;
+    }
+
+    &--md {
+        @apply text-xs py-0.5 px-2;
+    }
+
+    &--lg {
+        @apply text-sm py-1 px-2.5;
+    }
+
+    &--rounded-md {
+        @apply rounded-md;
+    }
+
+    &--rounded-full {
+        @apply rounded-full;
+    }
+
+    &__label {
+        @apply font-medium mr-0.5;
+    }
+
+    &__value {
+        /* Base styling for the value */
+    }
+
+    &__count {
+        @apply ml-1.5 flex items-center justify-center w-4 h-4 rounded-full bg-white bg-opacity-30 text-xs leading-none;
+    }
+
+    &__icon {
+        @apply flex-shrink-0;
+
+        &--sm {
+            @apply w-3 h-3 mr-1;
+        }
+
+        &--md {
+            @apply w-3.5 h-3.5 mr-1.5;
+        }
+
+        &--lg {
+            @apply w-4 h-4 mr-1.5;
+        }
+    }
+}
+
+/**
+ * Column Component
+ * Used for displaying vertical columns in the kanban board
+ * Contains header with title and count, and scrollable content area
+ */
+.ff-column {
+    @apply w-[300px] min-w-[300px] flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden;
+
+    &__header {
+        @apply flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700;
+    }
+
+    &__title-container {
+        @apply flex items-center;
+    }
+
+    &__title {
+        @apply text-sm font-medium text-gray-700 dark:text-gray-200;
+    }
+
+    &__count {
+        @apply ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    }
+
+    &__content {
+        @apply p-3 flex-1 overflow-y-auto overflow-x-hidden;
+        max-height: calc(100vh - 13rem);
+    }
+
+    &__loader {
+        @apply py-3 text-center;
+    }
+
+    &__loading-text {
+        @apply text-xs text-primary-600 dark:text-primary-400;
+    }
+
+    &__count-text {
+        @apply text-xs text-gray-400;
+    }
+}
+
+/**
+ * Empty Column Component
+ * Used for displaying an empty state when a column has no cards
+ */
+.ff-empty-column {
+    @apply p-3 flex flex-col items-center justify-center h-full min-h-[150px] rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-800;
+
+    &__icon {
+        @apply w-10 h-10 text-gray-400 dark:text-gray-600 mb-2;
+    }
+
+    &__text {
+        @apply text-sm text-gray-500 dark:text-gray-400;
+    }
+}
+
+/**
+ * Board Component
+ * Container for the entire kanban board
+ */
+.ff-board {
+    @apply w-full h-full flex flex-col relative;
+
+    &__content {
+        @apply flex-1 overflow-hidden;
+    }
+
+    &__columns {
+        @apply flex flex-row h-full overflow-x-auto overflow-y-hidden px-2 gap-5 pb-4;
     }
 }
 

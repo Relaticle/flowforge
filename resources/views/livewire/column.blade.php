@@ -1,16 +1,14 @@
 @props(['columnId', 'column', 'config'])
 
 <div
-    class="kanban-column w-[300px] min-w-[300px] flex-shrink-0 border border-kanban-column-border dark:border-gray-700 shadow-kanban-column dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden">
+    class="ff-column kanban-column">
     <!-- Column Header -->
-    <div
-        class="kanban-column-header flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center">
-            <h3 class="text-sm font-medium text-kanban-column-header dark:text-kanban-column-header">
+    <div class="ff-column__header">
+        <div class="ff-column__title-container">
+            <h3 class="ff-column__title">
                 {{ $column['label'] }}
             </h3>
-            <div
-                class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium kanban-color-{{ $column['color'] ?? 'default' }}">
+            <div class="ff-column__count kanban-color-{{ $column['color'] ?? 'default' }}">
                 {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
             </div>
         </div>
@@ -26,7 +24,7 @@
         x-sortable-group="cards"
         data-column-id="{{ $columnId }}"
         @end.stop="$wire.updateRecordsOrderAndColumn($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
-        class="p-3 flex-1 overflow-y-auto overflow-x-hidden"
+        class="ff-column__content"
         style="max-height: calc(100vh - 13rem);"
     >
         @if (isset($column['items']) && count($column['items']) > 0)
@@ -47,10 +45,10 @@
                             $wire.loadMoreItems('{{ $columnId }}', {{ $config->cardsIncrement ?? 'null' }});
                         }
                     "
-                    class="py-3 text-center"
+                    class="ff-column__loader"
                 >
                     <div wire:loading wire:target="loadMoreItems('{{ $columnId }}')"
-                         class="text-xs text-primary-600 dark:text-primary-400">
+                         class="ff-column__loading-text">
                         {{ __('Loading more cards...') }}
                         <div class="mt-1 flex justify-center">
                             <svg class="animate-spin h-4 w-4 text-primary-600 dark:text-primary-400"
@@ -63,7 +61,7 @@
                         </div>
                     </div>
                     <div wire:loading.remove wire:target="loadMoreItems('{{ $columnId }}')"
-                         class="text-xs text-gray-400">
+                         class="ff-column__count-text">
                         {{ count($column['items']) }}
                         / {{ $column['total'] }} {{ $config->getPluralCardLabel() }}
                     </div>
