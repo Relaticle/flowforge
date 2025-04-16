@@ -47,6 +47,7 @@ class MakeKanbanBoardCommand extends Command
         $name = $this->argument('name') ?: $this->ask('Board name?', 'Tasks');
         if (empty($name)) {
             $this->error('Board name required');
+
             return self::FAILURE;
         }
 
@@ -54,6 +55,7 @@ class MakeKanbanBoardCommand extends Command
         $model = $this->option('model') ?: $this->ask('Model?', 'Task');
         if (empty($model)) {
             $this->error('Model required');
+
             return self::FAILURE;
         }
 
@@ -67,7 +69,7 @@ class MakeKanbanBoardCommand extends Command
 
         // Check if file exists
         if ($this->files->exists($path)) {
-            if (!$this->confirm("File exists. Overwrite?")) {
+            if (! $this->confirm('File exists. Overwrite?')) {
                 return self::FAILURE;
             }
         }
@@ -79,12 +81,12 @@ class MakeKanbanBoardCommand extends Command
         $this->info("Board created: {$path}");
         $this->newLine();
 
-        $this->info("Register in admin panel:");
+        $this->info('Register in admin panel:');
         $this->line("->pages([\n    App\\Filament\\Pages\\{$className}::class,\n])");
 
         $this->newLine();
-        $this->info("For create/edit functionality, see documentation at:");
-        $this->line("https://github.com/relaticle/flowforge");
+        $this->info('For create/edit functionality, see documentation at:');
+        $this->line('https://github.com/relaticle/flowforge');
 
         return self::SUCCESS;
     }
@@ -117,7 +119,7 @@ class MakeKanbanBoardCommand extends Command
     {
         $stubPath = __DIR__ . '/../../stubs/' . $name;
 
-        if (!$this->files->exists($stubPath)) {
+        if (! $this->files->exists($stubPath)) {
             throw new \RuntimeException("Stub file not found: {$stubPath}");
         }
 

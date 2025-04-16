@@ -11,7 +11,7 @@ interface KanbanBoardPageInterface
 {
     public function getSubject(): Builder;
 
-//    public function createAction(Action $action): Action;
-//
-//    public function editAction(Action $action): Action;
+    //    public function createAction(Action $action): Action;
+    //
+    //    public function editAction(Action $action): Action;
 }

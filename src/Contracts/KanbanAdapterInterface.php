@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Contracts;
 
-use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Relaticle\Flowforge\Config\KanbanConfig;
