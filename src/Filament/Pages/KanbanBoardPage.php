@@ -43,7 +43,6 @@ abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
     /**
      * Set the field that stores the column value.
      *
-     * @param string $field
      * @return KanbanBoardPage
      */
     public function priorityField(string $field): static
