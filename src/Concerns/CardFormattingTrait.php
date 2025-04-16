@@ -27,19 +27,19 @@ trait CardFormattingTrait
 
         $card = [
             'id' => $model->getKey(),
-            'title' => $model->{$titleField},
-            'column' => $model->{$columnField},
+            'title' => data_get($model, $titleField),
+            'column' => data_get($model, $columnField),
         ];
 
-        if ($descriptionField !== null && isset($model->{$descriptionField})) {
-            $card['description'] = $model->{$descriptionField};
+        if ($descriptionField !== null) {
+            $card['description'] = data_get($model, $descriptionField);
         }
 
         foreach ($cardAttributes as $key => $label) {
             $field = is_string($key) ? $key : $label;
             $card['attributes'][$field] = [
                 'label' => is_string($key) ? $label : $field,
-                'value' => $model->{$field},
+                'value' => data_get($model, $field),
             ];
         }
 
