@@ -89,6 +89,30 @@ abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
     }
 
     /**
+     * Set the colors for the card attributes.
+     *
+     * @param  array<string, string>  $colors
+     */
+    public function cardAttributeColors(array $colors): static
+    {
+        $this->config = $this->config->withCardAttributeColors($colors);
+
+        return $this;
+    }
+
+    /**
+     * Set the icons for the card attributes.
+     *
+     * @param  array<string, string>  $icons
+     */
+    public function cardAttributeIcons(array $icons): static
+    {
+        $this->config = $this->config->withCardAttributeIcons($icons);
+
+        return $this;
+    }
+
+    /**
      * Set the column colors for the Kanban board.
      *
      * @param  array<string, string>  $colors

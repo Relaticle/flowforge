@@ -22,7 +22,9 @@ trait CardFormattingTrait
     {
         $titleField = $this->config->getTitleField();
         $descriptionField = $this->config->getDescriptionField();
-        $cardAttributes = $this->config->getcardAttributes();
+        $cardAttributes = $this->config->getCardAttributes();
+        $cardAttributeColors = $this->config->getCardAttributeColors();
+        $cardAttributeIcons = $this->config->getCardAttributeIcons();
         $columnField = $this->config->getColumnField();
 
         $card = [
@@ -40,6 +42,8 @@ trait CardFormattingTrait
             $card['attributes'][$field] = [
                 'label' => is_string($key) ? $label : $field,
                 'value' => data_get($model, $field),
+                'color' => $cardAttributeColors[$field] ?? null,
+                'icon' => $cardAttributeIcons[$field] ?? null,
             ];
         }
 

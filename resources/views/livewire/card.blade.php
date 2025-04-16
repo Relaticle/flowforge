@@ -20,14 +20,14 @@
         @endif
 
         @if(!empty($record['attributes']))
-            <div class="mt-2 flex flex-wrap gap-2">
+            <div class="mt-3 flex flex-wrap gap-1.5">
                 @foreach($record['attributes'] as $attribute => $label)
                     @if(isset($record['attributes'][$attribute]) && !empty($record['attributes'][$attribute]['value']))
                         <x-flowforge::card-badge
                             :label="$record['attributes'][$attribute]['label']"
                             :value="$record['attributes'][$attribute]['value']"
-                            :color="$config->cardAttributeColors[$attribute] ?? 'gray'"
-                            :icon="$config->cardAttributeIcons[$attribute] ?? null"
+                            :color="$record['attributes'][$attribute]['color']"
+                            :icon="$record['attributes'][$attribute]['icon']"
                         />
                     @endif
                 @endforeach
