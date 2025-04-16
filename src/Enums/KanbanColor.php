@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Relaticle\Flowforge\Enums;
 
 enum KanbanColor: string
 {
     case DEFAULT = 'default';
+    case WHITE = 'white';
     case SLATE = 'slate';
     case GRAY = 'gray';
     case ZINC = 'zinc';
@@ -54,17 +57,5 @@ enum KanbanColor: string
         return collect(self::cases())->mapWithKeys(fn ($color) => [
             $color->value => $color->label(),
         ])->toArray();
-    }
-
-    /**
-     * Create from string value with default fallback
-     */
-    public static function fromStringOrDefault(?string $value): self
-    {
-        if ($value === null) {
-            return self::DEFAULT;
-        }
-
-        return self::tryFrom($value) ?? self::DEFAULT;
     }
 }

@@ -49,95 +49,99 @@
     }
 }
 
-/* Kanban badge color classes - used for count badges */
+/* Kanban badge color classes - updated design system for better visual hierarchy */
 .kanban-color-default {
-    @apply bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200;
+    @apply bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200 dark:bg-gray-700/60 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700;
+}
+
+.kanban-color-white {
+    @apply bg-white text-gray-800 border border-gray-200 hover:bg-gray-100 dark:bg-gray-700/60 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700;
 }
 
 .kanban-color-slate {
-    @apply bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200;
+    @apply bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200 dark:bg-slate-700/60 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-700;
 }
 
 .kanban-color-gray {
-    @apply bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200;
+    @apply bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200 dark:bg-gray-700/60 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700;
 }
 
 .kanban-color-zinc {
-    @apply bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200;
+    @apply bg-zinc-100 text-zinc-800 border border-zinc-200 hover:bg-zinc-200 dark:bg-zinc-700/60 dark:text-zinc-200 dark:border-zinc-600 dark:hover:bg-zinc-700;
 }
 
 .kanban-color-neutral {
-    @apply bg-neutral-200 text-neutral-700 dark:bg-neutral-700 dark:text-neutral-200;
+    @apply bg-neutral-100 text-neutral-800 border border-neutral-200 hover:bg-neutral-200 dark:bg-neutral-700/60 dark:text-neutral-200 dark:border-neutral-600 dark:hover:bg-neutral-700;
 }
 
 .kanban-color-stone {
-    @apply bg-stone-200 text-stone-700 dark:bg-stone-700 dark:text-stone-200;
+    @apply bg-stone-100 text-stone-800 border border-stone-200 hover:bg-stone-200 dark:bg-stone-700/60 dark:text-stone-200 dark:border-stone-600 dark:hover:bg-stone-700;
 }
 
 .kanban-color-red {
-    @apply bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300;
+    @apply bg-red-50 text-red-800 border border-red-200 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-200 dark:border-red-800/60 dark:hover:bg-red-900/60;
 }
 
 .kanban-color-orange {
-    @apply bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300;
+    @apply bg-orange-50 text-orange-800 border border-orange-200 hover:bg-orange-100 dark:bg-orange-900/40 dark:text-orange-200 dark:border-orange-800/60 dark:hover:bg-orange-900/60;
 }
 
 .kanban-color-amber {
-    @apply bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300;
+    @apply bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800/60 dark:hover:bg-amber-900/60;
 }
 
 .kanban-color-yellow {
-    @apply bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300;
+    @apply bg-yellow-50 text-yellow-800 border border-yellow-200 hover:bg-yellow-100 dark:bg-yellow-900/40 dark:text-yellow-200 dark:border-yellow-800/60 dark:hover:bg-yellow-900/60;
 }
 
 .kanban-color-lime {
-    @apply bg-lime-100 text-lime-700 dark:bg-lime-900/50 dark:text-lime-300;
+    @apply bg-lime-50 text-lime-800 border border-lime-200 hover:bg-lime-100 dark:bg-lime-900/40 dark:text-lime-200 dark:border-lime-800/60 dark:hover:bg-lime-900/60;
 }
 
 .kanban-color-green {
-    @apply bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300;
+    @apply bg-green-50 text-green-800 border border-green-200 hover:bg-green-100 dark:bg-green-900/40 dark:text-green-200 dark:border-green-800/60 dark:hover:bg-green-900/60;
 }
 
 .kanban-color-emerald {
-    @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300;
+    @apply bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-800/60 dark:hover:bg-emerald-900/60;
 }
 
 .kanban-color-teal {
-    @apply bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300;
+    @apply bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100 dark:bg-teal-900/40 dark:text-teal-200 dark:border-teal-800/60 dark:hover:bg-teal-900/60;
 }
 
 .kanban-color-cyan {
-    @apply bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300;
+    @apply bg-cyan-50 text-cyan-800 border border-cyan-200 hover:bg-cyan-100 dark:bg-cyan-900/40 dark:text-cyan-200 dark:border-cyan-800/60 dark:hover:bg-cyan-900/60;
 }
 
 .kanban-color-sky {
-    @apply bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300;
+    @apply bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 dark:bg-sky-900/40 dark:text-sky-200 dark:border-sky-800/60 dark:hover:bg-sky-900/60;
 }
 
 .kanban-color-blue {
-    @apply bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300;
+    @apply bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-800/60 dark:hover:bg-blue-900/60;
 }
 
 .kanban-color-indigo {
-    @apply bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300;
+    @apply bg-indigo-50 text-indigo-800 border border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-800/60 dark:hover:bg-indigo-900/60;
 }
 
 .kanban-color-violet {
-    @apply bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300;
+    @apply bg-violet-50 text-violet-800 border border-violet-200 hover:bg-violet-100 dark:bg-violet-900/40 dark:text-violet-200 dark:border-violet-800/60 dark:hover:bg-violet-900/60;
 }
 
 .kanban-color-purple {
-    @apply bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300;
+    @apply bg-purple-50 text-purple-800 border border-purple-200 hover:bg-purple-100 dark:bg-purple-900/40 dark:text-purple-200 dark:border-purple-800/60 dark:hover:bg-purple-900/60;
 }
 
 .kanban-color-fuchsia {
-    @apply bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/50 dark:text-fuchsia-300;
+    @apply bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-200 hover:bg-fuchsia-100 dark:bg-fuchsia-900/40 dark:text-fuchsia-200 dark:border-fuchsia-800/60 dark:hover:bg-fuchsia-900/60;
 }
 
 .kanban-color-pink {
-    @apply bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300;
+    @apply bg-pink-50 text-pink-800 border border-pink-200 hover:bg-pink-100 dark:bg-pink-900/40 dark:text-pink-200 dark:border-pink-800/60 dark:hover:bg-pink-900/60;
 }
 
 .kanban-color-rose {
-    @apply bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300;
+    @apply bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100 dark:bg-rose-900/40 dark:text-rose-200 dark:border-rose-800/60 dark:hover:bg-rose-900/60;
 }

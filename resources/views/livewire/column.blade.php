@@ -10,7 +10,7 @@
                 {{ $column['label'] }}
             </h3>
             <div
-                class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium kanban-color-{{ $column['color'] }}">
+                class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium kanban-color-{{ $column['color'] ?? 'default' }}">
                 {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
             </div>
         </div>

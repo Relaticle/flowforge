@@ -19,15 +19,20 @@
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{{ $record['description'] }}</p>
         @endif
 
-        @if(!empty($record['attributes']))
+        @if(collect($record['attributes'] ?? [])->filter(fn($attribute) => !empty($attribute['value']))->isNotEmpty())
+
             <div class="mt-3 flex flex-wrap gap-1.5">
-                @foreach($record['attributes'] as $attribute => $label)
-                    @if(isset($record['attributes'][$attribute]) && !empty($record['attributes'][$attribute]['value']))
+                @foreach($record['attributes'] as $attribute => $data)
+                    @if(isset($data) && !empty($data['value']))
                         <x-flowforge::card-badge
-                            :label="$record['attributes'][$attribute]['label']"
-                            :value="$record['attributes'][$attribute]['value']"
-                            :color="$record['attributes'][$attribute]['color']"
-                            :icon="$record['attributes'][$attribute]['icon']"
+                            :label="$data['label']"
+                            :value="$data['value']"
+                            :color="$data['color'] ?? 'default'"
+                            :icon="$data['icon'] ?? null"
+                            :type="$data['type'] ?? null"
+                            :badge="$data['badge'] ?? null"
+                            :rounded="$data['rounded'] ?? 'md'"
+                            :size="$data['size'] ?? 'md'"
                         />
                     @endif
                 @endforeach

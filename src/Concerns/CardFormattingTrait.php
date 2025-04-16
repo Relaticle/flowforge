@@ -22,6 +22,7 @@ trait CardFormattingTrait
     {
         $titleField = $this->config->getTitleField();
         $descriptionField = $this->config->getDescriptionField();
+        $priorityField = $this->config->getPriorityField();
         $cardAttributes = $this->config->getCardAttributes();
         $cardAttributeColors = $this->config->getCardAttributeColors();
         $cardAttributeIcons = $this->config->getCardAttributeIcons();
@@ -35,6 +36,10 @@ trait CardFormattingTrait
 
         if ($descriptionField !== null) {
             $card['description'] = data_get($model, $descriptionField);
+        }
+
+        if ($priorityField !== null) {
+            $card['priority'] = data_get($model, $priorityField);
         }
 
         foreach ($cardAttributes as $key => $label) {

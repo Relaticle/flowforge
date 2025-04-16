@@ -316,24 +316,30 @@ public function mount(): void
 ### Available Column Colors
 
 Flowforge uses Tailwind CSS color classes for column styling. The available color options are:
+
+- `white`
+- `slate`
 - `gray`
+- `zinc`
+- `neutral`
+- `stone`
 - `red`
 - `orange`
+- `amber`
 - `yellow`
+- `lime`
 - `green`
+- `emerald`
 - `teal`
-- `blue`
-- `indigo`
-- `purple`
-- `pink`
-- `rose`
 - `cyan`
 - `sky`
-- `lime`
-- `emerald`
-- `amber`
+- `blue`
+- `indigo`
 - `violet`
+- `purple`
 - `fuchsia`
+- `pink`
+- `rose`
 
 If you don't specify colors, they will be automatically assigned from this palette in a rotating manner.
 
