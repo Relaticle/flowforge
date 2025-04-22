@@ -31,6 +31,7 @@ abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
     /**
      * Set the field that stores the column value.
      *
+     * @param string $field
      * @return KanbanBoardPage
      */
     public function columnField(string $field): static
@@ -140,6 +141,7 @@ abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
     /**
      * Set the order field for the Kanban board.
      *
+     * @param string $field
      * @return KanbanBoardPage
      */
     public function orderField(string $field): static
@@ -152,6 +154,7 @@ abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
     /**
      * Set the label for individual cards.
      *
+     * @param string $label
      * @return KanbanBoardPage
      */
     public function cardLabel(string $label): static
@@ -171,6 +174,7 @@ abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
     /**
      * Set the plural label for multiple cards.
      *
+     * @param string $label
      * @return KanbanBoardPage
      */
     public function pluralCardLabel(string $label): static
