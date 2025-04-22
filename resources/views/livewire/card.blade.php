@@ -9,7 +9,7 @@
     x-sortable-handle
     x-sortable-item="{{ $record['id'] }}"
     @if($this->editAction() &&  ($this->editAction)(['record' => $record['id']])->isVisible())
-        wire:click="mountAction('edit', {record: {{ $record['id'] }}})"
+        wire:click="mountAction('edit', {record: '{{ $record['id'] }}'})"
     @endif
 >
     <div class="ff-card__content">
