@@ -276,6 +276,8 @@ These settings enhance your board but are not required:
 - `cardLabel(string)`: Custom label for cards (defaults to model name)
 - `pluralCardLabel(string)`: Custom plural label for cards
 - `cardAttributes(array)`: Additional model attributes to display on cards
+- `cardAttributeColors(array)`: Key-value pairs defining colors for each card attribute
+- `cardAttributeIcons(array)`: Key-value pairs defining icons for each card attribute
 - `initialCardsCount(int)`: Number of cards initially loaded per column (default: 10)
 - `cardsIncrement(int)`: Number of cards to load when clicking "load more" (default: 5)
 
@@ -307,6 +309,14 @@ public function mount(): void
         ->cardAttributes([
             'due_date' => 'Due Date',
             'assignee.name' => 'Assigned To',
+        ])
+        ->cardAttributeColors([
+            'due_date' => 'red',
+            'assignee.name' => 'yellow',
+        ])
+        ->cardAttributeIcons([
+            'due_date' => 'heroicon-o-calendar',
+            'assignee.name' => 'heroicon-o-user',
         ])
         ->initialCardsCount(15)
         ->cardsIncrement(10);
