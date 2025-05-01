@@ -266,6 +266,44 @@ public function editAction(Action $action): Action
 
 **Note:** If this method is not implemented, cards will be read-only and users won't be able to edit them.
 
+### cardActions() - For adding custom actions to cards
+
+If you want to add custom actions to each card (such as viewing details, archiving, marking as complete, etc.), implement this method:
+
+```php
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+
+public function cardActions(ActionGroup $actionGroup): ActionGroup
+{
+    return $actionGroup
+        ->actions([
+            Action::make('view')
+                ->icon('heroicon-m-eye')
+                ->url(fn (mixed $record): string => route('tasks.show', ['task' => $record])),
+                
+            Action::make('archive')
+                ->icon('heroicon-m-archive-box')
+                ->requiresConfirmation()
+                ->action(function (mixed $record): void {
+                    $task = $this->getSubject()->find($record);
+                    $task->update(['archived' => true]);
+                    $this->refreshBoard();
+                }),
+                
+            Action::make('complete')
+                ->icon('heroicon-m-check-circle')
+                ->action(function (mixed $record): void {
+                    $task = $this->getSubject()->find($record);
+                    $task->update(['status' => 'completed']);
+                    $this->refreshBoard();
+                }),
+        ]);
+}
+```
+
+**Note:** If this method is not implemented, no action dropdown will appear on cards. Actions can perform operations on the specific card record and can open modals, execute code, or navigate to other pages.
+
 ## 🧩 Optional Configuration
 
 These settings enhance your board but are not required:

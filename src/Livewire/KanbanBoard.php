@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Relaticle\Flowforge\Livewire;
 
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -204,6 +205,22 @@ class KanbanBoard extends Component implements HasActions, HasForms
             });
 
         return $boardPage->createAction($action);
+    }
+
+    public function cardActions(): ?ActionGroup
+    {
+        $boardPage = app($this->pageClass);
+
+        if (! method_exists($boardPage, 'cardActions')) {
+            return null;
+        }
+
+        $actionGroup = ActionGroup::make([])
+            ->icon('heroicon-m-ellipsis-horizontal')
+            ->size('sm')
+            ->iconButton();
+
+        return $boardPage->cardActions($actionGroup);
     }
 
     public function editAction(): ?Action

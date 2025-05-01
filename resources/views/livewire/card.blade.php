@@ -13,7 +13,22 @@
     @endif
 >
     <div class="ff-card__content">
-        <h4 class="ff-card__title">{{ $record['title'] }}</h4>
+        <div class="flex justify-between items-start">
+            <h4 class="ff-card__title">{{ $record['title'] }}</h4>
+
+            @if($this->cardActions() && count($this->cardActions()->getActions()) > 0)
+                <div class="ff-card__actions" onclick="event.stopPropagation();">
+                    <x-filament-actions::group
+                        :actions="$this->cardActions()->getActions()"
+                        :record="$record['id']"
+                        :action="$this->cardActions()"
+                        :color="$this->cardActions()->getColor()"
+                        :icon="$this->cardActions()->getIcon()"
+                        :size="$this->cardActions()->getSize()"
+                    />
+                </div>
+            @endif
+        </div>
 
         @if(!empty($record['description']))
             <p class="ff-card__description">{{ $record['description'] }}</p>

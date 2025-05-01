@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Filament\Pages;
 
+use Filament\Actions\ActionGroup;
 use Filament\Pages\Page;
 use Illuminate\Support\Str;
 use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
@@ -177,6 +178,17 @@ abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
         $this->config = $this->config->withPluralCardLabel($label);
 
         return $this;
+    }
+
+    /**
+     * Define custom actions that will be displayed on each card.
+     * 
+     * @param ActionGroup $actionGroup The action group to add actions to
+     * @return ActionGroup The modified action group
+     */
+    public function cardActions(ActionGroup $actionGroup): ActionGroup
+    {
+        return $actionGroup;
     }
 
     /**
