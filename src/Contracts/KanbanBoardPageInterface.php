@@ -15,11 +15,11 @@ interface KanbanBoardPageInterface
     //    public function createAction(Action $action): Action;
     //
     //    public function editAction(Action $action): Action;
-    
+
     /**
      * Define custom actions that will be displayed on each card.
-     * 
-     * @param ActionGroup $actionGroup The action group to add actions to
+     *
+     * @param  ActionGroup  $actionGroup  The action group to add actions to
      * @return ActionGroup The modified action group
      */
     public function cardActions(ActionGroup $actionGroup): ActionGroup;
