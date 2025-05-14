@@ -16,6 +16,19 @@
         }
     })"
 >
+    <!-- Filter UI Section -->
+    @if(count($config->getFilterableFields()))
+        <div class="ff-board__filters">
+            @include('flowforge::livewire.kanban-board-filters')
+        </div>
+    @endif
+
+    <!-- Active Filters Indicator -->
+    @if(count($filters))
+        <div class="mb-4 px-4 py-2 bg-primary-50 rounded-md text-sm text-primary-700">
+            {{ __('Viewing filtered results.') }} <button wire:click="resetFilters" class="underline">{{ __('Clear all filters') }}</button>
+        </div>
+    @endif
 
     <!-- Board Content -->
     <div class="ff-board__content">

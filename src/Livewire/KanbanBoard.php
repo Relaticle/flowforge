@@ -84,6 +84,13 @@ class KanbanBoard extends Component implements HasActions, HasForms
     public array $searchable = [];
 
     /**
+     * Active filters for the board.
+     *
+     * @var array
+     */
+    public array $filters = [];
+
+    /**
      * Number of cards to load when clicking "load more".
      */
     public int $cardsIncrement;
@@ -248,6 +255,103 @@ class KanbanBoard extends Component implements HasActions, HasForms
     }
 
     /**
+     * Apply a filter to the board.
+     *
+     * @param  string  $field  The field to filter by
+     * @param  mixed  $value  The filter value
+     */
+    public function applyFilter(string $field, $value): void
+    {
+        // Set the filter value
+        $this->filters[$field] = $value;
+        
+        // Reset card limits to ensure consistent view
+        foreach ($this->columns as $columnId => $column) {
+            $this->columnCardLimits[$columnId] = 10; // Reset to default limit
+        }
+        
+        // Refresh the board with the new filter
+        $this->refreshBoard();
+    }
+
+    /**
+     * Remove a specific filter from the board.
+     *
+     * @param  string  $field  The field to remove filtering for
+     */
+    public function removeFilter(string $field): void
+    {
+        if (isset($this->filters[$field])) {
+            unset($this->filters[$field]);
+            $this->refreshBoard();
+        }
+    }
+
+    /**
+     * Reset all applied filters.
+     */
+    public function resetFilters(): void
+    {
+        $this->filters = [];
+        $this->refreshBoard();
+    }
+    
+    /**
+     * Get available options for a filter field.
+     *
+     * @param  string  $field  The filter field name
+     * @return array  The available options
+     */
+    public function getFilterOptions(string $field): array
+    {
+        $fieldConfig = $this->config->getFilterableFields()[$field] ?? null;
+        
+        if (!$fieldConfig) {
+            return [];
+        }
+        
+        // If options are pre-defined in the config, use those
+        if (isset($fieldConfig['options']) && is_array($fieldConfig['options'])) {
+            return $fieldConfig['options'];
+        }
+        
+        // Otherwise, try to load them dynamically if a source is defined
+        if (isset($fieldConfig['options_source'])) {
+            // This could be a method that loads options from a related model
+            $sourceMethod = $fieldConfig['options_source'];
+            
+            if (method_exists($this->adapter, $sourceMethod)) {
+                return $this->adapter->$sourceMethod();
+            }
+        }
+        
+        return [];
+    }
+
+    /**
+     * Format a filter value for display in the UI.
+     *
+     * @param  string  $field  The filter field name
+     * @param  mixed  $value  The filter value
+     * @return string  The formatted value
+     */
+    public function formatFilterValue(string $field, $value): string
+    {
+        $fieldConfig = $this->config->getFilterableFields()[$field] ?? null;
+        
+        if (!$fieldConfig) {
+            return (string) $value;
+        }
+        
+        // If it's a select field, try to get the label for the value
+        if ($fieldConfig['type'] === 'select' && isset($fieldConfig['options'][$value])) {
+            return $fieldConfig['options'][$value];
+        }
+        
+        return (string) $value;
+    }
+
+    /**
      * Refresh all board data.
      */
     public function refreshBoard(): void
@@ -263,14 +367,24 @@ class KanbanBoard extends Component implements HasActions, HasForms
         foreach ($this->columns as $columnId => $column) {
             $limit = $this->columnCardLimits[$columnId] ?? 10;
 
-            $items = $this->adapter->getItemsForColumn($columnId, $limit);
-            $this->columnCards[$columnId] = $this->formatItems($items);
+            // Use filtered method if filters are active
+            if (count($this->filters) > 0) {
+                $items = $this->adapter->getFilteredItemsForColumn($columnId, $limit, $this->filters);
+                $this->columnCards[$columnId] = $this->formatItems($items);
+                
+                // Get the filtered total count
+                $this->columns[$columnId]['total'] = $this->adapter->getFilteredColumnItemsCount($columnId, $this->filters);
+            } else {
+                // Use standard methods if no filters are active
+                $items = $this->adapter->getItemsForColumn($columnId, $limit);
+                $this->columnCards[$columnId] = $this->formatItems($items);
+                
+                // Get the total count
+                $this->columns[$columnId]['total'] = $this->adapter->getColumnItemsCount($columnId);
+            }
 
-            // Ensure that items and total keys exist in columns data
+            // Ensure that items are stored in columns data
             $this->columns[$columnId]['items'] = $this->columnCards[$columnId];
-
-            // Get the total count
-            $this->columns[$columnId]['total'] = $this->adapter->getColumnItemsCount($columnId);
         }
     }
 
@@ -293,6 +407,10 @@ class KanbanBoard extends Component implements HasActions, HasForms
      */
     public function getColumnItemsCount(string | int $columnId): int
     {
+        if (count($this->filters) > 0) {
+            return $this->adapter->getFilteredColumnItemsCount($columnId, $this->filters);
+        }
+        
         return $this->adapter->getColumnItemsCount($columnId);
     }
 
@@ -310,7 +428,12 @@ class KanbanBoard extends Component implements HasActions, HasForms
 
         $this->columnCardLimits[$columnId] = $newLimit;
 
-        $items = $this->adapter->getItemsForColumn($columnId, $newLimit);
+        if (count($this->filters) > 0) {
+            $items = $this->adapter->getFilteredItemsForColumn($columnId, $newLimit, $this->filters);
+        } else {
+            $items = $this->adapter->getItemsForColumn($columnId, $newLimit);
+        }
+        
         $this->columnCards[$columnId] = $this->formatItems($items);
         $this->refreshBoard();
     }
