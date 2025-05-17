@@ -55,4 +55,28 @@ interface KanbanAdapterInterface
      * @param  array<int, mixed>  $recordIds  The record IDs in their new order
      */
     public function updateRecordsOrderAndColumn(string | int $columnId, array $recordIds): bool;
+    
+    /**
+     * Get items for a specific column with filtering.
+     *
+     * @param  string|int  $columnId  The column ID
+     * @param  int  $limit  The number of items to return
+     * @param  array  $filters  Associative array of field => value filters
+     */
+    public function getFilteredItemsForColumn(string | int $columnId, int $limit = 10, array $filters = []): Collection;
+
+    /**
+     * Get all items with filtering applied.
+     *
+     * @param  array  $filters  Associative array of field => value filters
+     */
+    public function getFilteredItems(array $filters = []): Collection;
+
+    /**
+     * Get the count of filtered items in a specific column.
+     *
+     * @param  string|int  $columnId  The column ID
+     * @param  array  $filters  Associative array of field => value filters
+     */
+    public function getFilteredColumnItemsCount(string | int $columnId, array $filters = []): int;
 }
