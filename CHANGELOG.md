@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.2.1 - 2025-05-29
+
+### What's Changed
+
+* Bump dependabot/fetch-metadata from 2.3.0 to 2.4.0 by @dependabot in https://github.com/Relaticle/flowforge/pull/10
+* Fix empty translation file causing array_replace_recursive() error by @vasilGerginski in https://github.com/Relaticle/flowforge/pull/13
+
+### New Contributors
+
+* @dependabot made their first contribution in https://github.com/Relaticle/flowforge/pull/10
+* @vasilGerginski made their first contribution in https://github.com/Relaticle/flowforge/pull/13
+
+**Full Changelog**: https://github.com/Relaticle/flowforge/compare/0.2.0...0.2.1
+
 ## 0.2.0 - 2025-04-22
 
 **Full Changelog**: https://github.com/Relaticle/flowforge/compare/0.1.9...0.2.0
