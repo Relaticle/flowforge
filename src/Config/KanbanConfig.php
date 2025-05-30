@@ -27,6 +27,7 @@ use Livewire\Wireable;
  * @method self withOrderField(string|null $orderField) Set the field name for maintaining card order
  * @method self withCardLabel(string|null $cardLabel) Set the label for individual cards
  * @method self withPluralCardLabel(string|null $pluralCardLabel) Set the plural label for collection of cards
+ * @method self withFilterableFields(array $filterableFields) Set the fields that can be used for filtering cards
  */
 final readonly class KanbanConfig implements Wireable
 {
@@ -43,6 +44,7 @@ final readonly class KanbanConfig implements Wireable
         private ?string $orderField = null,
         private ?string $cardLabel = null,
         private ?string $pluralCardLabel = null,
+        private array $filterableFields = [],
     ) {}
 
     /**
@@ -159,6 +161,16 @@ final readonly class KanbanConfig implements Wireable
     public function getPluralCardLabel(): string
     {
         return $this->pluralCardLabel ?? Str::plural($this->getSingularCardLabel());
+    }
+
+    /**
+     * Get the fields that can be used for filtering cards.
+     *
+     * @return array<string, array> Map of field names to their filter configuration
+     */
+    public function getFilterableFields(): array
+    {
+        return $this->filterableFields;
     }
 
     /**
@@ -279,6 +291,7 @@ final readonly class KanbanConfig implements Wireable
             'orderField' => $this->orderField,
             'cardLabel' => $this->cardLabel,
             'pluralCardLabel' => $this->pluralCardLabel,
+            'filterableFields' => $this->filterableFields,
         ];
     }
 
@@ -296,7 +309,8 @@ final readonly class KanbanConfig implements Wireable
             $value['cardAttributeIcons'],
             $value['orderField'],
             $value['cardLabel'],
-            $value['pluralCardLabel']
+            $value['pluralCardLabel'],
+            $value['filterableFields'] ?? []
         );
     }
 }
