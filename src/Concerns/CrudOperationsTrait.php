@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -16,17 +16,17 @@ trait CrudOperationsTrait
     /**
      * Create a new record with the given attributes.
      */
-    public function createRecord(Form $form, mixed $currentColumn): ?Model
+    public function createRecord(Schema $schema, mixed $currentColumn): ?Model
     {
         $model = $this->baseQuery->getModel()->newInstance();
 
         $model->fill([
-            ...$form->getState(),
+            ...$schema->getState(),
             $this->config->getColumnField() => $currentColumn,
         ]);
 
         if ($model->save()) {
-            $form->model($model)->saveRelationships();
+            $schema->model($model)->saveRelationships();
 
             return $model;
         }
@@ -39,11 +39,11 @@ trait CrudOperationsTrait
      *
      * @param  Model  $record  The record to update
      */
-    public function updateRecord(Model $record, Form $form): bool
+    public function updateRecord(Model $record, Schema $schema): bool
     {
-        $record->fill($form->getState());
+        $record->fill($schema->getState());
 
-        $form->model($record)->saveRelationships();
+        $schema->model($record)->saveRelationships();
 
         return $record->save();
     }

@@ -2,6 +2,7 @@
 
 namespace Relaticle\Flowforge\Commands;
 
+use RuntimeException;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
@@ -120,7 +121,7 @@ class MakeKanbanBoardCommand extends Command
         $stubPath = __DIR__ . '/../../stubs/' . $name;
 
         if (! $this->files->exists($stubPath)) {
-            throw new \RuntimeException("Stub file not found: {$stubPath}");
+            throw new RuntimeException("Stub file not found: {$stubPath}");
         }
 
         return $this->files->get($stubPath);
