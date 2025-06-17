@@ -216,17 +216,24 @@ class KanbanBoard extends Component implements HasActions, HasForms
 
         $action = Action::make('edit')
             ->model(function (Action $action, array $arguments) {
-                return $this->adapter->getModelById($arguments['record'])::class;
+                return isset($arguments['record']) ? $this->adapter->getModelById($arguments['record'])::class : null;
             })
             ->record(function (array $arguments) {
-                return $this->adapter->getModelById($arguments['record']);
+                return isset($arguments['record']) ? $this->adapter->getModelById($arguments['record']) : null;
             })
             ->fillForm(function (Action $action, array $arguments) {
+                if (!isset($arguments['record'])) {
+                    return [];
+                }
                 $record = $this->adapter->getModelById($arguments['record']);
 
                 return $record->toArray();
             })
             ->action(function (Action $action, array $arguments) {
+                if (!isset($arguments['record'])) {
+                    return;
+                }
+
                 $record = $this->adapter->getModelById($arguments['record']);
                 $record->fill($action->getData());
                 $record->save();
