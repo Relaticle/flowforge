@@ -222,7 +222,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
                 return isset($arguments['record']) ? $this->adapter->getModelById($arguments['record']) : null;
             })
             ->fillForm(function (Action $action, array $arguments) {
-                if (!isset($arguments['record'])) {
+                if (! isset($arguments['record'])) {
                     return [];
                 }
                 $record = $this->adapter->getModelById($arguments['record']);
@@ -230,7 +230,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
                 return $record->toArray();
             })
             ->action(function (Action $action, array $arguments) {
-                if (!isset($arguments['record'])) {
+                if (! isset($arguments['record'])) {
                     return;
                 }
 
