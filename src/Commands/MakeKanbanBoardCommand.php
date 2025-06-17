@@ -2,10 +2,10 @@
 
 namespace Relaticle\Flowforge\Commands;
 
-use RuntimeException;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 class MakeKanbanBoardCommand extends Command
 {
