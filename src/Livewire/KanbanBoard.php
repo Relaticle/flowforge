@@ -228,7 +228,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
             })
             ->action(function (Action $action, array $arguments) {
                 $record = $this->adapter->getModelById($arguments['record']);
-                $record->fill($action->getFormData());
+                $record->fill($action->getData());
                 $record->save();
 
                 Notification::make()
