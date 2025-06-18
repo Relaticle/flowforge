@@ -136,29 +136,6 @@ For drag and drop ordering to work, you can either:
 
 For a functional Kanban board, you only need to implement **two methods**:
 
-### 1. getSubject() - Provides the data source
-```php
-public function getSubject(): Builder
-{
-    return Task::query();
-}
-```
-
-### 2. mount() - Configures the board
-```php
-public function mount(): void
-{
-    $this
-        ->titleField('title');      // Required: Field used for card titles
-        ->columnField('status')     // Required: Field that determines column placement
-        ->columns([                 // Required: Define your columns
-            'todo' => 'To Do',
-            'in_progress' => 'In Progress',
-            'completed' => 'Completed',
-        ])
-}
-```
-
 ### Example: Minimal Read-Only Board
 
 Here's a complete example of a minimal read-only board:
@@ -174,19 +151,21 @@ use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
 
 class TasksBoardPage extends KanbanBoardPage
 {
-    protected static ?string $navigationIcon = 'heroicon-o-view-columns';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-view-columns';
 
+    // Required: Provide the model data source
     public function getSubject(): Builder
     {
         return Task::query();
     }
 
+    // Required: To configure the board with title and column fields
     public function mount(): void
     {
         $this
             ->titleField('title');
             ->columnField('status')
-            ->columns([
+            ->columns([             
                 'todo' => 'To Do',
                 'in_progress' => 'In Progress',
                 'completed' => 'Completed',
@@ -206,6 +185,7 @@ If you want users to be able to add new cards to the board, implement this metho
 ```php
 use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Schemas\Schema;
 
 public function createAction(Action $action): Action
 {
@@ -214,8 +194,8 @@ public function createAction(Action $action): Action
         ->icon('heroicon-o-plus')
         ->modalHeading('Create Task')
         ->modalWidth('xl')
-        ->form(function (Forms\Form $form) {
-            return $form->schema([
+        ->form(function (Schema $schema) {
+            return $schema->schema([
                 Forms\Components\TextInput::make('title')
                     ->required()
                     ->placeholder('Enter task title')
@@ -237,14 +217,15 @@ If you want users to be able to edit existing cards, implement this method:
 ```php
 use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Schemas\Schema;
 
 public function editAction(Action $action): Action
 {
     return $action
         ->modalHeading('Edit Task')
         ->modalWidth('xl')
-        ->form(function (Forms\Form $form) {
-            return $form->schema([
+        ->form(function (Schema $schema) {
+            return $schema->schema([
                 Forms\Components\TextInput::make('title')
                     ->required()
                     ->placeholder('Enter task title')
