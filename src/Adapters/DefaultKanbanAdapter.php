@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Adapters;
 
+use EloquentSerialize;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Wireable;
 use Relaticle\Flowforge\Concerns\CardFormattingTrait;
@@ -44,14 +45,14 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
     public function toLivewire(): array
     {
         return [
-            'query' => \EloquentSerialize::serialize($this->baseQuery),
+            'query' => EloquentSerialize::serialize($this->baseQuery),
             'config' => $this->config,
         ];
     }
 
     public static function fromLivewire($value): static
     {
-        $query = \EloquentSerialize::unserialize($value['query']);
+        $query = EloquentSerialize::unserialize($value['query']);
 
         return new static($query, $value['config']);
     }

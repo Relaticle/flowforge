@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Config;
 
-use Filament\Forms\Components\Component;
+use BadMethodCallException;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -166,7 +166,7 @@ final readonly class KanbanConfig implements Wireable
      *
      * @param  string  $titleField  The field name used for card titles
      * @param  string|null  $descriptionField  Optional field name for card descriptions
-     * @return array<Component> The default form schema
+     * @return array<\Filament\Schemas\Components\Component> The default form schema
      */
     public static function getDefaultCreateFormSchema(string $titleField, ?string $descriptionField): array
     {
@@ -192,7 +192,7 @@ final readonly class KanbanConfig implements Wireable
      * @param  string|null  $descriptionField  Optional field name for card descriptions
      * @param  string  $columnField  The field name that determines which column a card belongs to
      * @param  array<string, string>  $columnValues  Available column values with their labels
-     * @return array<Component> The default form schema
+     * @return array<\Filament\Schemas\Components\Component> The default form schema
      */
     public static function getDefaultEditFormSchema(
         string $titleField,
@@ -230,18 +230,18 @@ final readonly class KanbanConfig implements Wireable
      * @param  array  $arguments  The method arguments
      * @return self A new instance with the updated property
      *
-     * @throws \BadMethodCallException If the method is not a valid with* method or targets a non-existent property
+     * @throws BadMethodCallException If the method is not a valid with* method or targets a non-existent property
      */
     public function __call(string $method, array $arguments): self
     {
         if (! Str::startsWith($method, 'with')) {
-            throw new \BadMethodCallException("Method {$method} not found");
+            throw new BadMethodCallException("Method {$method} not found");
         }
 
         $property = lcfirst(Str::after($method, 'with'));
 
         if (! property_exists($this, $property)) {
-            throw new \BadMethodCallException("Property {$property} not found");
+            throw new BadMethodCallException("Property {$property} not found");
         }
 
         return $this->with([$property => $arguments[0]]);
