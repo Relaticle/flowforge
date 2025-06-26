@@ -2,13 +2,11 @@
 
 namespace Relaticle\Flowforge;
 
-use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 
 class Board
 {
-
     protected ?string $recordTitleAttribute = null;
 
     protected ?string $columnIdentifierAttribute = null;
@@ -57,7 +55,7 @@ class Board
     }
 
     /**
-     * @param Column[] $columns
+     * @param  Column[]  $columns
      */
     public function columns(array $columns): static
     {
@@ -67,7 +65,7 @@ class Board
     }
 
     /**
-     * @param Action[]|ActionGroup[] $actions
+     * @param  Action[]|ActionGroup[]  $actions
      */
     public function columnActions(array $actions): static
     {
@@ -100,7 +98,7 @@ class Board
     }
 
     /**
-     * @param Property[] $properties
+     * @param  Property[]  $properties
      */
     public function recordProperties(array $properties): static
     {
@@ -118,7 +116,7 @@ class Board
     }
 
     /**
-     * @param Action[]|ActionGroup[] $actions
+     * @param  Action[]|ActionGroup[]  $actions
      */
     public function recordActions(array $actions): static
     {

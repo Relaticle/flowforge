@@ -11,7 +11,6 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
@@ -47,13 +46,13 @@ abstract class BoardPage extends Page implements HasActions, HasForms
     protected function cacheBoardActions(): void
     {
         $this->cachedFlatBoardActions = [];
-        
+
         // Cache column actions
         foreach ($this->getBoard()->getColumnActions() as $action) {
             $this->cacheBoardAction($action);
         }
-        
-        // Cache record actions  
+
+        // Cache record actions
         foreach ($this->getBoard()->getRecordActions() as $action) {
             $this->cacheBoardAction($action);
         }
@@ -90,21 +89,21 @@ abstract class BoardPage extends Page implements HasActions, HasForms
     public function getColumnActionsForColumn(string $columnId): array
     {
         $processedActions = [];
-        
+
         foreach ($this->getBoard()->getColumnActions() as $action) {
             try {
                 $actionClone = $action->getClone();
-                
+
                 // Set livewire context
                 if (method_exists($actionClone, 'livewire')) {
                     $actionClone->livewire($this);
                 }
-                
+
                 // Store column context for use in action callbacks
                 if (method_exists($actionClone, 'arguments')) {
                     $actionClone->arguments(['column' => $columnId]);
                 }
-                
+
                 // Handle ActionGroup differently
                 if ($actionClone instanceof ActionGroup) {
                     // Set context for all actions within the group
@@ -115,7 +114,7 @@ abstract class BoardPage extends Page implements HasActions, HasForms
                         if (method_exists($flatAction, 'arguments')) {
                             $flatAction->arguments(['column' => $columnId]);
                         }
-                        
+
                         // For record-based actions used as column actions, provide a placeholder
                         $this->configureColumnAction($flatAction, $columnId);
                     }
@@ -123,8 +122,8 @@ abstract class BoardPage extends Page implements HasActions, HasForms
                     // Handle individual actions
                     $this->configureColumnAction($actionClone, $columnId);
                 }
-                
-                if (!$actionClone->isHidden()) {
+
+                if (! $actionClone->isHidden()) {
                     $processedActions[] = $actionClone;
                 }
             } catch (\Exception $e) {
@@ -132,7 +131,7 @@ abstract class BoardPage extends Page implements HasActions, HasForms
                 continue;
             }
         }
-        
+
         return $processedActions;
     }
 
@@ -145,23 +144,23 @@ abstract class BoardPage extends Page implements HasActions, HasForms
         // but are used as column actions, we need to provide a record context
         if (method_exists($action, 'record')) {
             $actionClass = get_class($action);
-            
+
             // Check if this is a record-based action
-            if (str_contains($actionClass, 'DeleteAction') || 
-                str_contains($actionClass, 'EditAction') || 
+            if (str_contains($actionClass, 'DeleteAction') ||
+                str_contains($actionClass, 'EditAction') ||
                 str_contains($actionClass, 'ViewAction')) {
-                
+
                 // Create a new instance of the model for column actions
                 // This provides the necessary context without affecting real data
                 $modelClass = $this->getEloquentQuery()->getModel();
-                $dummyRecord = new $modelClass();
-                
+                $dummyRecord = new $modelClass;
+
                 // Set the column field to match the current column
                 $columnField = $this->getAdapter()->getConfig()->getColumnField();
                 if ($columnField) {
                     $dummyRecord->setAttribute($columnField, $columnId);
                 }
-                
+
                 $action->record($dummyRecord);
             }
         }
@@ -173,23 +172,23 @@ abstract class BoardPage extends Page implements HasActions, HasForms
     public function getRecordActionsForRecord(array $recordData): array
     {
         $processedActions = [];
-        
+
         // Get the record model first
         $recordModel = $this->getAdapter()->getModelById($recordData['id']);
-        
+
         // If we can't find the record, return empty actions
-        if (!$recordModel) {
+        if (! $recordModel) {
             return [];
         }
-        
+
         foreach ($this->getBoard()->getRecordActions() as $action) {
             $actionClone = $action->getClone();
-            
+
             // Set livewire context
             if (method_exists($actionClone, 'livewire')) {
                 $actionClone->livewire($this);
             }
-            
+
             // Handle ActionGroup differently
             if ($actionClone instanceof ActionGroup) {
                 // Set context for all actions within the group
@@ -207,19 +206,20 @@ abstract class BoardPage extends Page implements HasActions, HasForms
                     $actionClone->record($recordModel);
                 }
             }
-            
-            if (!$actionClone->isHidden()) {
+
+            if (! $actionClone->isHidden()) {
                 $processedActions[] = $actionClone;
             }
         }
-        
+
         return $processedActions;
     }
 
     protected function makeBoard(): Board
     {
-        $board = new Board();
+        $board = new Board;
         $this->board($board);
+
         return $board;
     }
 
@@ -231,7 +231,7 @@ abstract class BoardPage extends Page implements HasActions, HasForms
     {
         $query = $this->getTableQuery();
         $config = $this->createKanbanConfig();
-        
+
         return new DefaultKanbanAdapter($query, $config);
     }
 
@@ -243,36 +243,36 @@ abstract class BoardPage extends Page implements HasActions, HasForms
     protected function createKanbanConfig(): KanbanConfig
     {
         $board = $this->getBoard();
-        
+
         // Set columns configuration
         $columns = [];
         $columnColors = [];
-        
+
         foreach ($board->getColumns() as $column) {
             $columns[$column->getName()] = $column->getLabel() ?? ucfirst($column->getName());
             if ($color = $column->getColor()) {
                 $columnColors[$column->getName()] = $color;
             }
         }
-        
+
         // Build config parameters
         $configData = [
             'columnValues' => $columns,
             'columnColors' => $columnColors,
         ];
-        
+
         if ($titleAttribute = $board->getRecordTitleAttribute()) {
             $configData['titleField'] = $titleAttribute;
         }
-        
+
         if ($columnAttribute = $board->getColumnIdentifierAttribute()) {
             $configData['columnField'] = $columnAttribute;
         }
-        
+
         if ($defaultSort = $board->getDefaultSort()) {
             $configData['orderField'] = $defaultSort['column'];
         }
-        
+
         return new KanbanConfig(...$configData);
     }
 
@@ -290,7 +290,6 @@ abstract class BoardPage extends Page implements HasActions, HasForms
     {
         return static::class;
     }
-
 
     protected function getViewData(): array
     {

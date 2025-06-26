@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Livewire;
 
-use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
@@ -184,7 +182,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
     protected function getBoardPage(): ?\Relaticle\Flowforge\BoardPage
     {
         $boardPage = app($this->pageClass);
-        
+
         return $boardPage instanceof \Relaticle\Flowforge\BoardPage ? $boardPage : null;
     }
 

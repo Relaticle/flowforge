@@ -10,7 +10,7 @@ class Property
 
     protected string $name;
 
-    protected string|\BackedEnum|null $icon = null;
+    protected string | \BackedEnum | null $icon = null;
 
     final public function __construct(string $name)
     {
@@ -43,7 +43,7 @@ class Property
         // Override in subclasses if needed
     }
 
-    public function icon(string|\BackedEnum $icon): static
+    public function icon(string | \BackedEnum $icon): static
     {
         $this->icon = $icon;
 
@@ -57,7 +57,7 @@ class Property
         return $this;
     }
 
-    public function getIcon(): string|\BackedEnum|null
+    public function getIcon(): string | \BackedEnum | null
     {
         return $this->icon;
     }
