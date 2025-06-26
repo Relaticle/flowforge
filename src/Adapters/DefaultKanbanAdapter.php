@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Adapters;
 
-use EloquentSerialize;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Wireable;
 use Relaticle\Flowforge\Concerns\CardFormattingTrait;
@@ -20,9 +20,19 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
     use QueryHandlingTrait;
 
     /**
-     * The base Eloquent query builder.
+     * The query closure that returns a fresh query builder.
      */
-    public Builder $baseQuery;
+    protected Closure $queryCallback;
+
+    /**
+     * The model class name for reconstruction.
+     */
+    protected string $modelClass;
+
+    /**
+     * The connection name for reconstruction.
+     */
+    protected ?string $connectionName;
 
     /**
      * Create a new abstract Kanban adapter instance.
@@ -31,7 +41,27 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
         Builder $query,
         public KanbanConfig $config
     ) {
-        $this->baseQuery = $query;
+        $this->modelClass = get_class($query->getModel());
+        $this->connectionName = $query->getModel()->getConnectionName();
+        
+        // Store a closure that can recreate the query
+        $this->queryCallback = fn() => $query->clone();
+    }
+
+    /**
+     * Get a fresh query builder instance.
+     */
+    protected function getQuery(): Builder
+    {
+        return ($this->queryCallback)();
+    }
+
+    /**
+     * Get the base query (for backwards compatibility).
+     */
+    public function getBaseQuery(): Builder
+    {
+        return $this->getQuery();
     }
 
     /**
@@ -45,15 +75,25 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
     public function toLivewire(): array
     {
         return [
-            'query' => EloquentSerialize::serialize($this->baseQuery),
+            'modelClass' => $this->modelClass,
+            'connectionName' => $this->connectionName,
             'config' => $this->config,
         ];
     }
 
     public static function fromLivewire($value): static
     {
-        $query = EloquentSerialize::unserialize($value['query']);
-
+        $modelClass = $value['modelClass'];
+        $connectionName = $value['connectionName'];
+        
+        // Recreate the query from the model class and connection
+        $model = new $modelClass();
+        if ($connectionName) {
+            $model->setConnection($connectionName);
+        }
+        
+        $query = $model->newQuery();
+        
         return new static($query, $value['config']);
     }
 }

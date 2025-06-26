@@ -1,16 +1,19 @@
 @props(['config', 'columnId', 'record'])
 
+@php
+    $boardPage = app($this->pageClass);
+    $recordActions = $boardPage instanceof \Relaticle\Flowforge\BoardPage ? $boardPage->getBoard()->getRecordActions() : [];
+    $hasActions = !empty($recordActions);
+@endphp
+
 <div
     @class([
         'ff-card kanban-card',
-        'ff-card--interactive' => $this->editAction() &&  ($this->editAction)(['record' => $record['id']])->isVisible(),
-        'ff-card--non-interactive' => !$this->editAction()
+        'ff-card--interactive' => $hasActions,
+        'ff-card--non-interactive' => !$hasActions
     ])
     x-sortable-handle
     x-sortable-item="{{ $record['id'] }}"
-    @if($this->editAction() &&  ($this->editAction)(['record' => $record['id']])->isVisible())
-        wire:click="mountAction('edit', {record: '{{ $record['id'] }}'})"
-    @endif
 >
     <div class="ff-card__content">
         <h4 class="ff-card__title">{{ $record['title'] }}</h4>
@@ -38,4 +41,17 @@
             </div>
         @endif
     </div>
+    
+    {{-- Render record actions --}}
+    @if($hasActions)
+        @php
+            $processedRecordActions = $boardPage->getRecordActionsForRecord($record);
+        @endphp
+        
+        <div class="ff-card__actions">
+            @foreach($processedRecordActions as $action)
+                {{ $action }}
+            @endforeach
+        </div>
+    @endif
 </div>

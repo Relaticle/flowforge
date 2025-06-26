@@ -18,7 +18,7 @@ trait CrudOperationsTrait
      */
     public function createRecord(Schema $schema, mixed $currentColumn): ?Model
     {
-        $model = $this->baseQuery->getModel()->newInstance();
+        $model = $this->getQuery()->getModel()->newInstance();
 
         $model->fill([
             ...$schema->getState(),
@@ -74,6 +74,12 @@ trait CrudOperationsTrait
 
         foreach ($recordIds as $id) {
             $model = $this->getModelById($id);
+            
+            // Skip if model not found
+            if (!$model) {
+                continue;
+            }
+            
             $primaryKeyColumn = $model->getQualifiedKeyName();
 
             $attributes = [

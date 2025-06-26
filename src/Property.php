@@ -4,13 +4,13 @@ namespace Relaticle\Flowforge;
 
 use Exception;
 
-class Column
+class Property
 {
-    protected ?string $color = null;
-
     protected ?string $label = null;
 
     protected string $name;
+
+    protected string|\BackedEnum|null $icon = null;
 
     final public function __construct(string $name)
     {
@@ -43,9 +43,9 @@ class Column
         // Override in subclasses if needed
     }
 
-    public function color(string $color): static
+    public function icon(string|\BackedEnum $icon): static
     {
-        $this->color = $color;
+        $this->icon = $icon;
 
         return $this;
     }
@@ -57,9 +57,9 @@ class Column
         return $this;
     }
 
-    public function getColor(): ?string
+    public function getIcon(): string|\BackedEnum|null
     {
-        return $this->color;
+        return $this->icon;
     }
 
     public function getLabel(): ?string

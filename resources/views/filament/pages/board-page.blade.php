@@ -1,3 +1,6 @@
 <x-filament-panels::page>
-  Board Page
+    @livewire('relaticle.flowforge.livewire.kanban-board', [
+        'adapter' => $this->getAdapter(),
+        'pageClass' => $this->getPageClass(),
+    ])
 </x-filament-panels::page>

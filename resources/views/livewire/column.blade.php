@@ -13,9 +13,17 @@
             </div>
         </div>
 
-        @if ($this->createAction() && ($this->createAction)(['column' => $columnId])->isVisible())
-            {{ ($this->createAction)(['column' => $columnId]) }}
-        @endif
+        {{-- Render column actions --}}
+        @php
+            $boardPage = app($this->pageClass);
+            $processedActions = $boardPage instanceof \Relaticle\Flowforge\BoardPage 
+                ? $boardPage->getColumnActionsForColumn($columnId) 
+                : [];
+        @endphp
+        
+        @foreach($processedActions as $action)
+            {{ $action }}
+        @endforeach
     </div>
 
     <!-- Column Content -->
