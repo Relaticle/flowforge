@@ -3,10 +3,29 @@
 namespace Relaticle\Flowforge;
 
 use Exception;
+use Filament\Support\Components\ViewComponent;
+use Relaticle\Flowforge\Concerns\HasColor;
+use Relaticle\Flowforge\Concerns\HasIcon;
+use Relaticle\Flowforge\Concerns\HasLimit;
+use Relaticle\Flowforge\Concerns\CanBeSortable;
+use Relaticle\Flowforge\Concerns\CanBeVisible;
 
-class Column
+class Column extends ViewComponent
 {
-    protected ?string $color = null;
+    use HasColor;
+    use HasIcon;
+    use HasLimit;
+    use CanBeSortable;
+    use CanBeVisible;
+
+    /**
+     * @var view-string
+     */
+    protected string $view = 'flowforge::column';
+
+    protected string $viewIdentifier = 'column';
+
+    protected string $evaluationIdentifier = 'column';
 
     protected ?string $label = null;
 
@@ -38,16 +57,11 @@ class Column
         return null;
     }
 
-    protected function configure(): void
+    protected function setUp(): void
     {
+        parent::setUp();
+
         // Override in subclasses if needed
-    }
-
-    public function color(string $color): static
-    {
-        $this->color = $color;
-
-        return $this;
     }
 
     public function label(string $label): static
@@ -55,11 +69,6 @@ class Column
         $this->label = $label;
 
         return $this;
-    }
-
-    public function getColor(): ?string
-    {
-        return $this->color;
     }
 
     public function getLabel(): ?string
@@ -70,5 +79,16 @@ class Column
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
+    {
+        return match ($parameterName) {
+            'column' => [$this],
+            default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
+        };
     }
 }

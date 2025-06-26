@@ -3,14 +3,31 @@
 namespace Relaticle\Flowforge;
 
 use Exception;
+use Filament\Support\Components\ViewComponent;
+use Relaticle\Flowforge\Concerns\HasIcon;
+use Relaticle\Flowforge\Concerns\HasColor;
+use Relaticle\Flowforge\Concerns\CanBeVisible;
+use Relaticle\Flowforge\Concerns\HasStateFormatting;
 
-class Property
+class Property extends ViewComponent
 {
+    use HasIcon;
+    use HasColor;
+    use CanBeVisible;
+    use HasStateFormatting;
+
+    /**
+     * @var view-string
+     */
+    protected string $view = 'flowforge::property';
+
+    protected string $viewIdentifier = 'property';
+
+    protected string $evaluationIdentifier = 'property';
+
     protected ?string $label = null;
 
     protected string $name;
-
-    protected string|\BackedEnum|null $icon = null;
 
     final public function __construct(string $name)
     {
@@ -38,16 +55,11 @@ class Property
         return null;
     }
 
-    protected function configure(): void
+    protected function setUp(): void
     {
+        parent::setUp();
+
         // Override in subclasses if needed
-    }
-
-    public function icon(string|\BackedEnum $icon): static
-    {
-        $this->icon = $icon;
-
-        return $this;
     }
 
     public function label(string $label): static
@@ -55,11 +67,6 @@ class Property
         $this->label = $label;
 
         return $this;
-    }
-
-    public function getIcon(): string|\BackedEnum|null
-    {
-        return $this->icon;
     }
 
     public function getLabel(): ?string
@@ -70,5 +77,16 @@ class Property
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
+    {
+        return match ($parameterName) {
+            'property' => [$this],
+            default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
+        };
     }
 }

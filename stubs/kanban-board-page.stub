@@ -4,34 +4,31 @@ namespace {{ namespace }};
 
 use {{ modelNamespace }};
 use Illuminate\Database\Eloquent\Builder;
-use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
+use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\BoardPage;
+use Relaticle\Flowforge\Column;
 
-class {{ class }} extends KanbanBoardPage
+class {{ class }} extends BoardPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-view-columns';
     protected static ?string $navigationLabel = '{{ navigationLabel }}';
     protected static ?string $title = '{{ title }}';
 
-    public function getSubject(): Builder
+    public function board(Board $board): void
     {
-        return {{ model }}::query();
+        $board
+            ->recordTitleAttribute('{{ titleField }}')
+            ->columnIdentifierAttribute('{{ statusField }}')
+            ->defaultSort('sort_order')
+            ->columns([
+                Column::make('todo')->label('To Do')->color('blue'),
+                Column::make('in_progress')->label('In Progress')->color('yellow'),
+                Column::make('completed')->label('Completed')->color('green'),
+            ]);
     }
 
-    public function mount(): void
+    public function getEloquentQuery(): Builder
     {
-        $this
-            ->titleField('{{ titleField }}')
-            ->orderField('sort_order')
-            ->columnField('{{ statusField }}')
-            ->columns([
-                'todo' => 'To Do',
-                'in_progress' => 'In Progress',
-                'completed' => 'Completed',
-            ])
-            ->columnColors([
-                'todo' => 'blue',
-                'in_progress' => 'yellow',
-                'completed' => 'green',
-            ]);
+        return {{ model }}::query();
     }
 }

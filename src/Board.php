@@ -2,35 +2,35 @@
 
 namespace Relaticle\Flowforge;
 
-use Closure;
-use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
+use Filament\Support\Components\ViewComponent;
+use Relaticle\Flowforge\Concerns\HasColumns;
+use Relaticle\Flowforge\Concerns\HasActions;
+use Relaticle\Flowforge\Concerns\HasProperties;
 
-class Board
+class Board extends ViewComponent
 {
+    use HasColumns;
+    use HasActions;
+    use HasProperties;
+
+    /**
+     * @var view-string
+     */
+    protected string $view = 'flowforge::board';
+
+    protected string $viewIdentifier = 'board';
+
+    protected string $evaluationIdentifier = 'board';
 
     protected ?string $recordTitleAttribute = null;
 
     protected ?string $columnIdentifierAttribute = null;
 
+    protected ?string $descriptionAttribute = null;
+
     protected ?array $defaultSort = null;
 
-    /**
-     * @var Column[]
-     */
-    protected array $columns = [];
-
-    /**
-     * @var Action[]|ActionGroup[]
-     */
-    protected array $columnActions = [];
-
-    protected array $recordProperties = [];
-
-    /**
-     * @var Action[]|ActionGroup[]
-     */
-    protected array $recordActions = [];
+    protected array $filters = [];
 
     public function recordTitleAttribute(string $attribute): static
     {
@@ -46,6 +46,13 @@ class Board
         return $this;
     }
 
+    public function descriptionAttribute(string $attribute): static
+    {
+        $this->descriptionAttribute = $attribute;
+
+        return $this;
+    }
+
     public function defaultSort(string $column, string $direction = 'asc'): static
     {
         $this->defaultSort = [
@@ -57,21 +64,11 @@ class Board
     }
 
     /**
-     * @param Column[] $columns
+     * @param array $filters
      */
-    public function columns(array $columns): static
+    public function filters(array $filters): static
     {
-        $this->columns = $columns;
-
-        return $this;
-    }
-
-    /**
-     * @param Action[]|ActionGroup[] $actions
-     */
-    public function columnActions(array $actions): static
-    {
-        $this->columnActions = $actions;
+        $this->filters = $filters;
 
         return $this;
     }
@@ -86,60 +83,36 @@ class Board
         return $this->columnIdentifierAttribute;
     }
 
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->descriptionAttribute;
+    }
+
     public function getDefaultSort(): ?array
     {
         return $this->defaultSort;
     }
 
-    /**
-     * @return Column[]
-     */
-    public function getColumns(): array
+    public function getFilters(): array
     {
-        return $this->columns;
+        return $this->filters;
     }
 
     /**
-     * @param Property[] $properties
+     * @return array<mixed>
      */
-    public function recordProperties(array $properties): static
+    protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
     {
-        $this->recordProperties = $properties;
-
-        return $this;
+        return match ($parameterName) {
+            'board' => [$this],
+            default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
+        };
     }
 
-    /**
-     * @return Property[]
-     */
-    public function getRecordProperties(): array
+    protected function setUp(): void
     {
-        return $this->recordProperties;
-    }
+        parent::setUp();
 
-    /**
-     * @param Action[]|ActionGroup[] $actions
-     */
-    public function recordActions(array $actions): static
-    {
-        $this->recordActions = $actions;
-
-        return $this;
-    }
-
-    /**
-     * @return Action[]|ActionGroup[]
-     */
-    public function getColumnActions(): array
-    {
-        return $this->columnActions;
-    }
-
-    /**
-     * @return Action[]|ActionGroup[]
-     */
-    public function getRecordActions(): array
-    {
-        return $this->recordActions;
+        // Any board-specific setup can go here
     }
 }

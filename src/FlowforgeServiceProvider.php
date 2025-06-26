@@ -5,15 +5,12 @@ namespace Relaticle\Flowforge;
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
-use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Support\Facades\Blade;
-use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Relaticle\Flowforge\Commands\MakeKanbanBoardCommand;
 use Relaticle\Flowforge\Livewire\KanbanBoard;
-use Relaticle\Flowforge\Testing\TestsFlowforge;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -64,14 +61,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
             $this->getAssetPackageName()
         );
 
-        // Asset Registration
-        FilamentAsset::register(
-            assets: [
-                AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js'),
-            ],
-            package: $this->getAssetPackageName()
-        );
-
         FilamentAsset::registerScriptData(
             $this->getScriptData(),
             $this->getAssetPackageName()
@@ -119,9 +108,8 @@ class FlowforgeServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            // AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/components/flowforge.js'),
+            AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js'),
             Css::make('flowforge', __DIR__ . '/../resources/dist/flowforge.css')->loadedOnRequest(),
-            Js::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js')->loadedOnRequest(),
         ];
     }
 
