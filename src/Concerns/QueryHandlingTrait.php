@@ -18,7 +18,7 @@ trait QueryHandlingTrait
      */
     protected function newQuery(): Builder
     {
-        return clone $this->baseQuery;
+        return $this->getQuery()->clone();
     }
 
     /**
@@ -30,7 +30,7 @@ trait QueryHandlingTrait
     {
         // Just find by ID without additional filters from the base query
         // This ensures we can find models by ID regardless of the base query filters
-        return $this->baseQuery->getModel()::query()->find($id);
+        return $this->getQuery()->getModel()::query()->find($id);
     }
 
     /**

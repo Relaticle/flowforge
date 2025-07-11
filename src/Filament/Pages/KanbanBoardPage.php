@@ -6,6 +6,7 @@ namespace Relaticle\Flowforge\Filament\Pages;
 
 use Filament\Pages\Page;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
@@ -13,7 +14,7 @@ use Relaticle\Flowforge\Contracts\KanbanBoardPageInterface;
 
 abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
 {
-    protected static string $view = 'flowforge::filament.pages.kanban-board-page';
+    protected string $view = 'flowforge::filament.pages.kanban-board-page';
 
     /**
      * The Kanban configuration object.
@@ -182,7 +183,7 @@ abstract class KanbanBoardPage extends Page implements KanbanBoardPageInterface
     /**
      * Get the Kanban adapter.
      *
-     * @throws \InvalidArgumentException If the subject is not set
+     * @throws InvalidArgumentException If the subject is not set
      */
     public function getAdapter(): KanbanAdapterInterface
     {

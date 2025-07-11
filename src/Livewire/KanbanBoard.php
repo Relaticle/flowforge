@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Livewire;
 
-use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Locked;
@@ -178,73 +176,14 @@ class KanbanBoard extends Component implements HasActions, HasForms
         return $colors;
     }
 
-    public function createAction(): ?Action
+    /**
+     * Get the board page instance.
+     */
+    protected function getBoardPage(): ?\Relaticle\Flowforge\BoardPage
     {
         $boardPage = app($this->pageClass);
 
-        if (! method_exists($boardPage, 'createAction')) {
-            return null;
-        }
-
-        $action = Action::make('create')
-            ->model(function (Action $action, array $arguments) {
-                return app($this->pageClass)->getSubject()->getModel()::class;
-            })
-            ->action(function (Action $action, array $arguments) {
-                $record = app($this->pageClass)->getSubject()->getModel();
-                $record->fill([
-                    ...$action->getFormData(),
-                    $this->config->getColumnField() => $arguments['column'],
-                ]);
-
-                $record->save();
-            })
-            ->after(function (Action $action, array $arguments) {
-                $this->refreshBoard();
-            });
-
-        return $boardPage->createAction($action);
-    }
-
-    public function editAction(): ?Action
-    {
-        $boardPage = app($this->pageClass);
-
-        if (! method_exists($boardPage, 'editAction')) {
-            return null;
-        }
-
-        $action = Action::make('edit')
-            ->model(function (Action $action, array $arguments) {
-                return $this->adapter->getModelById($arguments['record'])::class;
-            })
-            ->record(function (array $arguments) {
-                return $this->adapter->getModelById($arguments['record']);
-            })
-            ->fillForm(function (Action $action, array $arguments) {
-                $record = $this->adapter->getModelById($arguments['record']);
-
-                return $record->toArray();
-            })
-            ->action(function (Action $action, array $arguments) {
-                $record = $this->adapter->getModelById($arguments['record']);
-                $record->fill($action->getFormData());
-                $record->save();
-
-                Notification::make()
-                    ->title(__(':Record updated successfully', ['record' => $this->config->getSingularCardLabel()]))
-                    ->success()
-                    ->send();
-            })
-            ->after(function (Action $action, array $arguments) {
-                $this->refreshBoard();
-
-                $this->dispatch('kanban-record-updated', [
-                    'record' => $this->adapter->getModelById($arguments['record']),
-                ]);
-            });
-
-        return $boardPage->editAction($action);
+        return $boardPage instanceof \Relaticle\Flowforge\BoardPage ? $boardPage : null;
     }
 
     /**
