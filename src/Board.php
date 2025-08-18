@@ -1,17 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Relaticle\Flowforge;
 
+use Exception;
 use Filament\Support\Components\ViewComponent;
 use Relaticle\Flowforge\Concerns\HasColumns;
 use Relaticle\Flowforge\Concerns\HasActions;
 use Relaticle\Flowforge\Concerns\HasProperties;
+use Relaticle\Flowforge\Concerns\InteractsWithKanbanQuery;
 
 class Board extends ViewComponent
 {
     use HasColumns;
     use HasActions;
     use HasProperties;
+    use InteractsWithKanbanQuery;
 
     /**
      * @var view-string
@@ -22,45 +27,21 @@ class Board extends ViewComponent
 
     protected string $evaluationIdentifier = 'board';
 
-    protected ?string $recordTitleAttribute = null;
-
-    protected ?string $columnIdentifierAttribute = null;
-
-    protected ?string $descriptionAttribute = null;
-
-    protected ?array $defaultSort = null;
-
     protected array $filters = [];
 
-    public function recordTitleAttribute(string $attribute): static
+    final public function __construct()
     {
-        $this->recordTitleAttribute = $attribute;
-
-        return $this;
+        // Board should be instantiated via make() method only
     }
 
-    public function columnIdentifierAttribute(string $attribute): static
+    public static function make(): static
     {
-        $this->columnIdentifierAttribute = $attribute;
+        $boardClass = static::class;
 
-        return $this;
-    }
+        $static = app($boardClass);
+        $static->configure();
 
-    public function descriptionAttribute(string $attribute): static
-    {
-        $this->descriptionAttribute = $attribute;
-
-        return $this;
-    }
-
-    public function defaultSort(string $column, string $direction = 'asc'): static
-    {
-        $this->defaultSort = [
-            'column' => $column,
-            'direction' => $direction,
-        ];
-
-        return $this;
+        return $static;
     }
 
     /**
@@ -71,26 +52,6 @@ class Board extends ViewComponent
         $this->filters = $filters;
 
         return $this;
-    }
-
-    public function getRecordTitleAttribute(): ?string
-    {
-        return $this->recordTitleAttribute;
-    }
-
-    public function getColumnIdentifierAttribute(): ?string
-    {
-        return $this->columnIdentifierAttribute;
-    }
-
-    public function getDescriptionAttribute(): ?string
-    {
-        return $this->descriptionAttribute;
-    }
-
-    public function getDefaultSort(): ?array
-    {
-        return $this->defaultSort;
     }
 
     public function getFilters(): array
@@ -105,6 +66,7 @@ class Board extends ViewComponent
     {
         return match ($parameterName) {
             'board' => [$this],
+            'filters' => [$this->getFilters()],
             default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
         };
     }

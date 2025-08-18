@@ -1,13 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Relaticle\Flowforge;
 
+use Closure;
 use Exception;
 use Filament\Support\Components\ViewComponent;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Relaticle\Flowforge\Concerns\HasIcon;
 use Relaticle\Flowforge\Concerns\HasColor;
 use Relaticle\Flowforge\Concerns\CanBeVisible;
 use Relaticle\Flowforge\Concerns\HasStateFormatting;
+use Relaticle\Flowforge\Concerns\BelongsToBoard;
 
 class Property extends ViewComponent
 {
@@ -15,6 +22,7 @@ class Property extends ViewComponent
     use HasColor;
     use CanBeVisible;
     use HasStateFormatting;
+    use BelongsToBoard;
 
     /**
      * @var view-string
@@ -25,7 +33,9 @@ class Property extends ViewComponent
 
     protected string $evaluationIdentifier = 'property';
 
-    protected ?string $label = null;
+    protected string|Htmlable|Closure|null $label = null;
+
+    protected bool $shouldTranslateLabel = false;
 
     protected string $name;
 
@@ -36,15 +46,15 @@ class Property extends ViewComponent
 
     public static function make(?string $name = null): static
     {
-        $columnClass = static::class;
+        $propertyClass = static::class;
 
         $name ??= static::getDefaultName();
 
         if (blank($name)) {
-            throw new Exception("Column of class [$columnClass] must have a unique name, passed to the [make()] method.");
+            throw new Exception("Property of class [$propertyClass] must have a unique name, passed to the [make()] method.");
         }
 
-        $static = app($columnClass, ['name' => $name]);
+        $static = app($propertyClass, ['name' => $name]);
         $static->configure();
 
         return $static;
@@ -62,21 +72,57 @@ class Property extends ViewComponent
         // Override in subclasses if needed
     }
 
-    public function label(string $label): static
+    public function label(string|Htmlable|Closure|null $label): static
     {
         $this->label = $label;
 
         return $this;
     }
 
-    public function getLabel(): ?string
+    public function translateLabel(bool $shouldTranslateLabel = true): static
     {
-        return $this->label;
+        $this->shouldTranslateLabel = $shouldTranslateLabel;
+
+        return $this;
+    }
+
+    public function getLabel(): string|Htmlable|null
+    {
+        $label = $this->evaluate($this->label) ?? $this->generateDefaultLabel();
+
+        return $this->shouldTranslateLabel ? __($label) : $label;
+    }
+
+    protected function generateDefaultLabel(): string
+    {
+        return str($this->getName())
+            ->afterLast('.')
+            ->kebab()
+            ->replace(['-', '_'], ' ')
+            ->title();
     }
 
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Get the state value from a record using dot notation
+     */
+    public function getState(Model $record): mixed
+    {
+        return Arr::get($record->toArray(), $this->getName());
+    }
+
+    /**
+     * Get the formatted state for display
+     */
+    public function getFormattedState(Model $record): mixed
+    {
+        $state = $this->getState($record);
+
+        return $this->formatState($state);
     }
 
     /**
@@ -86,6 +132,8 @@ class Property extends ViewComponent
     {
         return match ($parameterName) {
             'property' => [$this],
+            'name' => [$this->getName()],
+            'label' => [$this->getLabel()],
             default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
         };
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Relaticle\Flowforge;
 
 use Filament\Actions\Action;
@@ -13,10 +15,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
+use Relaticle\Flowforge\Contracts\HasBoard;
 use Relaticle\Flowforge\Concerns\HasRecords;
 use Relaticle\Flowforge\Concerns\InteractsWithBoard;
 
-abstract class BoardPage extends Page implements HasActions, HasForms
+abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
 {
     use InteractsWithActions;
     use InteractsWithForms;
@@ -249,12 +252,11 @@ abstract class BoardPage extends Page implements HasActions, HasForms
 
     protected function makeBoard(): Board
     {
-        $board = new Board();
-        $this->board($board);
-        return $board;
+        $board = Board::make();
+        return $this->board($board);
     }
 
-    abstract public function board(Board $board): void;
+    abstract public function board(Board $board): Board;
 
     abstract public function getEloquentQuery(): Builder;
 

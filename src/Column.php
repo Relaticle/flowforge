@@ -1,14 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Relaticle\Flowforge;
 
+use Closure;
 use Exception;
 use Filament\Support\Components\ViewComponent;
+use Illuminate\Contracts\Support\Htmlable;
 use Relaticle\Flowforge\Concerns\HasColor;
 use Relaticle\Flowforge\Concerns\HasIcon;
 use Relaticle\Flowforge\Concerns\HasLimit;
 use Relaticle\Flowforge\Concerns\CanBeSortable;
 use Relaticle\Flowforge\Concerns\CanBeVisible;
+use Relaticle\Flowforge\Concerns\BelongsToBoard;
 
 class Column extends ViewComponent
 {
@@ -17,6 +22,7 @@ class Column extends ViewComponent
     use HasLimit;
     use CanBeSortable;
     use CanBeVisible;
+    use BelongsToBoard;
 
     /**
      * @var view-string
@@ -27,7 +33,9 @@ class Column extends ViewComponent
 
     protected string $evaluationIdentifier = 'column';
 
-    protected ?string $label = null;
+    protected string|Htmlable|Closure|null $label = null;
+
+    protected bool $shouldTranslateLabel = false;
 
     protected string $name;
 
@@ -64,16 +72,33 @@ class Column extends ViewComponent
         // Override in subclasses if needed
     }
 
-    public function label(string $label): static
+    public function label(string|Htmlable|Closure|null $label): static
     {
         $this->label = $label;
 
         return $this;
     }
 
-    public function getLabel(): ?string
+    public function translateLabel(bool $shouldTranslateLabel = true): static
     {
-        return $this->label;
+        $this->shouldTranslateLabel = $shouldTranslateLabel;
+
+        return $this;
+    }
+
+    public function getLabel(): string|Htmlable|null
+    {
+        $label = $this->evaluate($this->label) ?? $this->generateDefaultLabel();
+
+        return $this->shouldTranslateLabel ? __($label) : $label;
+    }
+
+    protected function generateDefaultLabel(): string
+    {
+        return str($this->getName())
+            ->kebab()
+            ->replace(['-', '_'], ' ')
+            ->title();
     }
 
     public function getName(): string
@@ -88,6 +113,8 @@ class Column extends ViewComponent
     {
         return match ($parameterName) {
             'column' => [$this],
+            'name' => [$this->getName()],
+            'label' => [$this->getLabel()],
             default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
         };
     }
