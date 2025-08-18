@@ -39,6 +39,8 @@ class Property extends ViewComponent
 
     protected bool $isIconOnly = false;
 
+    protected mixed $currentState = null;
+
     protected string $name;
 
     final public function __construct(string $name)
@@ -124,12 +126,13 @@ class Property extends ViewComponent
         return $this;
     }
 
+
     /**
      * Get the state value from a record using dot notation
      */
     public function getState(Model $record): mixed
     {
-        return Arr::get($record->toArray(), $this->getName());
+        return data_get($record, $this->getName());
     }
 
     /**
@@ -138,6 +141,7 @@ class Property extends ViewComponent
     public function getFormattedState(Model $record): mixed
     {
         $state = $this->getState($record);
+        $this->currentState = $state;
 
         return $this->formatState($state);
     }
@@ -151,6 +155,7 @@ class Property extends ViewComponent
             'property' => [$this],
             'name' => [$this->getName()],
             'label' => [$this->getLabel()],
+            'state' => [$this->currentState ?? null],
             default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
         };
     }

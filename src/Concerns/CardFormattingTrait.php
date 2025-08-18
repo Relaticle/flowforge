@@ -46,6 +46,7 @@ trait CardFormattingTrait
                         'value' => $value,
                         'color' => $property->getColor(),
                         'icon' => $property->getIcon(),
+                        'iconColor' => $property->getIconColor(),
                     ];
                 }
             }

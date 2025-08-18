@@ -3,6 +3,7 @@
     'value' => null,
     'color' => 'default',
     'icon' => null,
+    'iconColor' => null,
     'size' => 'md',
     'rounded' => 'md',
     'badge' => null
@@ -28,6 +29,7 @@
         <x-filament::icon 
             :icon="$icon" 
             @class(['ff-badge__icon', 'ff-badge__icon--' . $size])
+            @style(['color: ' . $iconColor => $iconColor])
         />
     @endif
 
