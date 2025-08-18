@@ -36,13 +36,10 @@ final readonly class KanbanConfig implements Wireable
         private array | bool | null $columnColors = null,
         private string $titleField = 'title',
         private ?string $descriptionField = null,
-        private ?string $priorityField = null,
-        private array $cardAttributes = [],
-        private ?array $cardAttributeColors = [],
-        private ?array $cardAttributeIcons = [],
         private ?string $orderField = null,
         private ?string $cardLabel = null,
         private ?string $pluralCardLabel = null,
+        private ?array $cardProperties = null,
     ) {}
 
     /**
@@ -95,45 +92,7 @@ final readonly class KanbanConfig implements Wireable
         return $this->descriptionField;
     }
 
-    /**
-     * Get the field used for card descriptions.
-     *
-     * @return string|null The description field name, or null if not set
-     */
-    public function getPriorityField(): ?string
-    {
-        return $this->priorityField;
-    }
 
-    /**
-     * Get the additional fields to display on cards.
-     *
-     * @return array<string, string> Map of attribute names to their display labels
-     */
-    public function getCardAttributes(): array
-    {
-        return $this->cardAttributes;
-    }
-
-    /**
-     * Get the colors for card attributes.
-     *
-     * @return array<string, string> Map of attribute names to color codes
-     */
-    public function getCardAttributeColors(): array
-    {
-        return $this->cardAttributeColors ?? [];
-    }
-
-    /**
-     * Get the icons for card attributes.
-     *
-     * @return array<string, string> Map of attribute names to icon names
-     */
-    public function getCardAttributeIcons(): array
-    {
-        return $this->cardAttributeIcons ?? [];
-    }
 
     /**
      * Get the field used for maintaining card order.
@@ -159,6 +118,14 @@ final readonly class KanbanConfig implements Wireable
     public function getPluralCardLabel(): string
     {
         return $this->pluralCardLabel ?? Str::plural($this->getSingularCardLabel());
+    }
+
+    /**
+     * Get the card properties.
+     */
+    public function getCardProperties(): ?array
+    {
+        return $this->cardProperties;
     }
 
     /**
@@ -272,10 +239,6 @@ final readonly class KanbanConfig implements Wireable
             'columnColors' => $this->columnColors,
             'titleField' => $this->titleField,
             'descriptionField' => $this->descriptionField,
-            'priorityField' => $this->priorityField,
-            'cardAttributes' => $this->cardAttributes,
-            'cardAttributeColors' => $this->cardAttributeColors,
-            'cardAttributeIcons' => $this->cardAttributeIcons,
             'orderField' => $this->orderField,
             'cardLabel' => $this->cardLabel,
             'pluralCardLabel' => $this->pluralCardLabel,
@@ -290,10 +253,6 @@ final readonly class KanbanConfig implements Wireable
             $value['columnColors'],
             $value['titleField'],
             $value['descriptionField'],
-            $value['priorityField'],
-            $value['cardAttributes'],
-            $value['cardAttributeColors'],
-            $value['cardAttributeIcons'],
             $value['orderField'],
             $value['cardLabel'],
             $value['pluralCardLabel']

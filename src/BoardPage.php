@@ -299,6 +299,11 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
             $configData['orderField'] = $defaultSort['column'];
         }
 
+        // Add card properties to config - store the property instances for formatting
+        if ($cardProperties = $board->getCardProperties()) {
+            $configData['cardProperties'] = $cardProperties;
+        }
+
         return new KanbanConfig(...$configData);
     }
 

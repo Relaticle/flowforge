@@ -22,10 +22,6 @@ trait CardFormattingTrait
     {
         $titleField = $this->config->getTitleField();
         $descriptionField = $this->config->getDescriptionField();
-        $priorityField = $this->config->getPriorityField();
-        $cardAttributes = $this->config->getCardAttributes();
-        $cardAttributeColors = $this->config->getCardAttributeColors();
-        $cardAttributeIcons = $this->config->getCardAttributeIcons();
         $columnField = $this->config->getColumnField();
 
         $card = [
@@ -38,18 +34,21 @@ trait CardFormattingTrait
             $card['description'] = data_get($model, $descriptionField);
         }
 
-        if ($priorityField !== null) {
-            $card['priority'] = data_get($model, $priorityField);
-        }
-
-        foreach ($cardAttributes as $key => $label) {
-            $field = is_string($key) ? $key : $label;
-            $card['attributes'][$field] = [
-                'label' => is_string($key) ? $label : $field,
-                'value' => data_get($model, $field),
-                'color' => $cardAttributeColors[$field] ?? null,
-                'icon' => $cardAttributeIcons[$field] ?? null,
-            ];
+        // Use card properties for formatted display
+        if ($cardProperties = $this->config->getCardProperties()) {
+            foreach ($cardProperties as $property) {
+                $name = $property->getName();
+                $value = $property->getFormattedState($model);
+                
+                if ($value !== null && $value !== '') {
+                    $card['attributes'][$name] = [
+                        'label' => $property->getLabel(),
+                        'value' => $value,
+                        'color' => $property->getColor(),
+                        'icon' => $property->getIcon(),
+                    ];
+                }
+            }
         }
 
         return $card;
