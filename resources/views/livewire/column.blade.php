@@ -20,7 +20,11 @@
         
         @if(count($processedActions) > 0)
             <div class="ff-column__actions">
-                <x-filament-actions::group :actions="$processedActions" />
+                @if(count($processedActions) === 1)
+                    {{ $processedActions[0] }}
+                @else
+                    <x-filament-actions::group :actions="$processedActions" />
+                @endif
             </div>
         @endif
     </div>
