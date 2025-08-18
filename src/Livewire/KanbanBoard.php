@@ -130,6 +130,52 @@ class KanbanBoard extends Component implements HasActions, HasForms
     }
 
     /**
+     * Boot the InteractsWithActions trait after component is hydrated.
+     */
+    public function bootedInteractsWithActions(): void
+    {
+        // Cache board actions for Filament's action system
+        $this->cacheBoardActions();
+    }
+
+    /**
+     * Cache board actions for Filament's InteractsWithActions trait.
+     */
+    protected function cacheBoardActions(): void
+    {
+        $boardPage = $this->getBoardPage();
+        if (!$boardPage) {
+            return;
+        }
+
+        // Cache column actions
+        foreach ($boardPage->getBoard()->getColumnActions() as $action) {
+            $this->cacheBoardAction($action);
+        }
+
+        // Cache record actions
+        foreach ($boardPage->getBoard()->getRecordActions() as $action) {
+            $this->cacheBoardAction($action);
+        }
+    }
+
+    /**
+     * Cache a board action for Filament's action system.
+     */
+    protected function cacheBoardAction(\Filament\Actions\Action | \Filament\Actions\ActionGroup $action): void
+    {
+        if ($action instanceof \Filament\Actions\ActionGroup) {
+            // Cache all actions within the group using Filament's method
+            foreach ($action->getFlatActions() as $flatAction) {
+                $this->cacheAction($flatAction);
+            }
+        } elseif ($action instanceof \Filament\Actions\Action) {
+            // Use Filament's built-in cacheAction for proper setup
+            $this->cacheAction($action);
+        }
+    }
+
+    /**
      * Resolve column colors from adapter config or use defaults.
      */
     protected function resolveColumnColors(): array
@@ -185,6 +231,129 @@ class KanbanBoard extends Component implements HasActions, HasForms
         $boardPage = app($this->pageClass);
         
         return $boardPage instanceof \Relaticle\Flowforge\BoardPage ? $boardPage : null;
+    }
+
+    /**
+     * Get processed column actions for a specific column.
+     */
+    public function getColumnActionsForColumn(string $columnId): array
+    {
+        $boardPage = $this->getBoardPage();
+        if (!$boardPage) {
+            return [];
+        }
+
+        $processedActions = [];
+
+        foreach ($boardPage->getBoard()->getColumnActions() as $action) {
+            try {
+                // Skip record-based actions entirely to prevent null record errors
+                if ($boardPage->isRecordBasedAction($action)) {
+                    continue;
+                }
+
+                $actionClone = $action->getClone();
+
+                // Set livewire context to this KanbanBoard component
+                $actionClone->livewire($this);
+
+                // Store column context for use in action callbacks
+                $actionClone->arguments(['column' => $columnId]);
+
+                // Handle ActionGroup differently
+                if ($actionClone instanceof \Filament\Actions\ActionGroup) {
+                    // Filter and set context for all actions within the group
+                    $validGroupActions = [];
+                    foreach ($actionClone->getFlatActions() as $flatAction) {
+                        // Skip record-based actions in groups too
+                        if ($boardPage->isRecordBasedAction($flatAction)) {
+                            continue;
+                        }
+
+                        $flatAction->livewire($this);
+                        $flatAction->arguments(['column' => $columnId]);
+
+                        $validGroupActions[] = $flatAction;
+                    }
+
+                    // Only include the group if it has valid actions
+                    if (!empty($validGroupActions)) {
+                        $processedActions[] = $actionClone;
+                    }
+                } else {
+                    // Handle individual actions
+                    if (!$actionClone->isHidden()) {
+                        $processedActions[] = $actionClone;
+                    }
+                }
+            } catch (\Exception) {
+                // Skip actions that can't be properly configured for column context
+                continue;
+            }
+        }
+
+        return $processedActions;
+    }
+
+    /**
+     * Get processed record actions for a specific record.
+     */
+    public function getRecordActionsForRecord(array $recordData): array
+    {
+        $boardPage = $this->getBoardPage();
+        if (!$boardPage) {
+            return [];
+        }
+
+        $processedActions = [];
+
+        try {
+            // Get the record model first
+            $recordModel = $this->adapter->getModelById($recordData['id']);
+
+            // If we can't find the record, return empty actions
+            if (!$recordModel || !($recordModel instanceof \Illuminate\Database\Eloquent\Model)) {
+                return [];
+            }
+
+            foreach ($boardPage->getBoard()->getRecordActions() as $action) {
+                try {
+                    $actionClone = $action->getClone();
+
+                    // Set livewire context to this KanbanBoard component
+                    $actionClone->livewire($this);
+
+                    // Handle ActionGroup differently
+                    if ($actionClone instanceof \Filament\Actions\ActionGroup) {
+                        // Set context for all actions within the group
+                        foreach ($actionClone->getFlatActions() as $flatAction) {
+                            $flatAction->livewire($this);
+                            if (method_exists($flatAction, 'record')) {
+                                $flatAction->record($recordModel);
+                            }
+                        }
+                    } else {
+                        // Set record context for individual actions
+                        if (method_exists($actionClone, 'record')) {
+                            $actionClone->record($recordModel);
+                        }
+                    }
+
+                    // Safely check if action is hidden
+                    if (!$actionClone->isHidden()) {
+                        $processedActions[] = $actionClone;
+                    }
+                } catch (\Exception $e) {
+                    // Skip actions that can't be properly configured
+                    continue;
+                }
+            }
+        } catch (\Exception $e) {
+            // If anything goes wrong, return empty actions to prevent errors
+            return [];
+        }
+
+        return $processedActions;
     }
 
     /**

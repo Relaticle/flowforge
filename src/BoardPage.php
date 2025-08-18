@@ -124,15 +124,12 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
 
                 $actionClone = $action->getClone();
 
-                // Set livewire context
-                if (method_exists($actionClone, 'livewire')) {
-                    $actionClone->livewire($this);
-                }
+                // Set livewire context using the proper Livewire component from the kanban board
+                $livewireComponent = $this->getLivewire() ?? $this;
+                $actionClone->livewire($livewireComponent);
 
                 // Store column context for use in action callbacks
-                if (method_exists($actionClone, 'arguments')) {
-                    $actionClone->arguments(['column' => $columnId]);
-                }
+                $actionClone->arguments(['column' => $columnId]);
 
                 // Handle ActionGroup differently
                 if ($actionClone instanceof ActionGroup) {
@@ -144,12 +141,8 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
                             continue;
                         }
 
-                        if (method_exists($flatAction, 'livewire')) {
-                            $flatAction->livewire($this);
-                        }
-                        if (method_exists($flatAction, 'arguments')) {
-                            $flatAction->arguments(['column' => $columnId]);
-                        }
+                        $flatAction->livewire($livewireComponent);
+                        $flatAction->arguments(['column' => $columnId]);
 
                         $this->configureColumnAction($flatAction, $columnId);
                         $validGroupActions[] = $flatAction;

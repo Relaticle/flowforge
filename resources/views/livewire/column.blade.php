@@ -15,15 +15,14 @@
 
         {{-- Render column actions --}}
         @php
-            $boardPage = app($this->pageClass);
-            $processedActions = $boardPage instanceof \Relaticle\Flowforge\BoardPage 
-                ? $boardPage->getColumnActionsForColumn($columnId) 
-                : [];
+            $processedActions = $this->getColumnActionsForColumn($columnId);
         @endphp
         
-        @foreach($processedActions as $action)
-            {{ $action }}
-        @endforeach
+        @if(count($processedActions) > 0)
+            <div class="ff-column__actions">
+                <x-filament-actions::group :actions="$processedActions" />
+            </div>
+        @endif
     </div>
 
     <!-- Column Content -->

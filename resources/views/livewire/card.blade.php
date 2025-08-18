@@ -1,9 +1,8 @@
 @props(['config', 'columnId', 'record'])
 
 @php
-    $boardPage = app($this->pageClass);
-    $recordActions = $boardPage instanceof \Relaticle\Flowforge\BoardPage ? $boardPage->getBoard()->getRecordActions() : [];
-    $hasActions = !empty($recordActions);
+    $processedRecordActions = $this->getRecordActionsForRecord($record);
+    $hasActions = !empty($processedRecordActions);
 @endphp
 
 <div
@@ -21,10 +20,6 @@
 
             {{-- Render record actions --}}
             @if($hasActions)
-                @php
-                    $processedRecordActions = $boardPage->getRecordActionsForRecord($record);
-                @endphp
-
                 <div class="ff-card__actions">
                     <x-filament-actions::group :actions="$processedRecordActions" />
                 </div>
