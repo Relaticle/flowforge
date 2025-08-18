@@ -100,7 +100,7 @@ public function panel(Panel $panel): Panel
 
 Go to your Filament admin panel and you should see your new Kanban board in the navigation!
 
-The generated board is intentionally minimal - it gives you a working read-only board to start with. When you're ready to add interactive features, you can manually add the `createAction()` and `editAction()` methods following the examples in the [Optional Methods](#-optional-methods) section.
+The generated board is intentionally minimal - it gives you a working read-only board to start with. When you're ready to add interactive features, you can add `columnActions()` and `cardActions()` to your board configuration following the examples in the [Interactive Features](#-interactive-features) section.
 
 ## 🌟 Features
 
@@ -136,26 +136,27 @@ For drag and drop ordering to work, you can either:
 
 For a functional Kanban board, you only need to implement **two methods**:
 
-### 1. getSubject() - Provides the data source
+### 1. getEloquentQuery() - Provides the data source
 ```php
-public function getSubject(): Builder
+public function getEloquentQuery(): Builder
 {
     return Task::query();
 }
 ```
 
-### 2. mount() - Configures the board
+### 2. board() - Configures the board using the fluent API
 ```php
-public function mount(): void
+public function board(Board $board): Board
 {
-    $this
-        ->titleField('title');      // Required: Field used for card titles
+    return $board
+        ->query($this->getEloquentQuery())
+        ->cardTitle('title')        // Required: Field used for card titles
         ->columnField('status')     // Required: Field that determines column placement
         ->columns([                 // Required: Define your columns
-            'todo' => 'To Do',
-            'in_progress' => 'In Progress',
-            'completed' => 'Completed',
-        ])
+            Column::make('todo')->label('To Do')->color('gray'),
+            Column::make('in_progress')->label('In Progress')->color('blue'),
+            Column::make('completed')->label('Completed')->color('green'),
+        ]);
 }
 ```
 
@@ -170,156 +171,189 @@ namespace App\Filament\Pages;
 
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
-use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
+use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\BoardPage;
+use Relaticle\Flowforge\Column;
 
-class TasksBoardPage extends KanbanBoardPage
+class TasksBoardPage extends BoardPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-view-columns';
 
-    public function getSubject(): Builder
+    public function getEloquentQuery(): Builder
     {
         return Task::query();
     }
 
-    public function mount(): void
+    public function board(Board $board): Board
     {
-        $this
-            ->titleField('title');
+        return $board
+            ->query($this->getEloquentQuery())
+            ->cardTitle('title')
             ->columnField('status')
             ->columns([
-                'todo' => 'To Do',
-                'in_progress' => 'In Progress',
-                'completed' => 'Completed',
-            ])
+                Column::make('todo')->label('To Do')->color('gray'),
+                Column::make('in_progress')->label('In Progress')->color('blue'),
+                Column::make('completed')->label('Completed')->color('green'),
+            ]);
     }
 }
 ```
 
-## 🔄 Optional Methods
+## 🔄 Interactive Features
 
-These methods are completely optional and only needed if you want specific functionality:
+The Board API provides several optional features to make your Kanban board interactive:
 
-### createAction() - For creating new cards
+### Column Actions - For creating new cards
 
-If you want users to be able to add new cards to the board, implement this method:
+Add actions to column headers using the `columnActions()` method:
 
 ```php
-use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Actions\CreateAction;
+use Filament\Forms\Components\TextInput;
 
-public function createAction(Action $action): Action
+public function board(Board $board): Board
 {
-    return $action
-        ->iconButton()
-        ->icon('heroicon-o-plus')
-        ->modalHeading('Create Task')
-        ->modalWidth('xl')
-        ->form(function (Forms\Form $form) {
-            return $form->schema([
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->placeholder('Enter task title')
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
-                // Add more form fields as needed
-            ]);
-        });
+    return $board
+        ->query($this->getEloquentQuery())
+        ->cardTitle('title')
+        ->columnField('status')
+        ->columns([...])
+        ->columnActions([
+            CreateAction::make()
+                ->label('Add Task')
+                ->iconButton()
+                ->icon('heroicon-o-plus')
+                ->model(Task::class)
+                ->schema([
+                    TextInput::make('title')
+                        ->required()
+                        ->columnSpanFull(),
+                    TextInput::make('description')
+                        ->columnSpanFull(),
+                ]),
+        ]);
 }
 ```
 
-**Note:** If this method is not implemented, no "+" button will appear in column headers and users won't be able to create new cards.
+### Card Actions - For editing and deleting cards
 
-### editAction() - For editing existing cards
-
-If you want users to be able to edit existing cards, implement this method:
+Add actions to individual cards using the `cardActions()` method:
 
 ```php
-use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\TextInput;
 
-public function editAction(Action $action): Action
-{
-    return $action
-        ->modalHeading('Edit Task')
-        ->modalWidth('xl')
-        ->form(function (Forms\Form $form) {
-            return $form->schema([
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->placeholder('Enter task title')
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
-                Forms\Components\Select::make('status')
-                    ->options([
-                        'todo' => 'To Do',
-                        'in_progress' => 'In Progress',
-                        'completed' => 'Completed',
-                    ])
-                    ->required(),
-                // Add more form fields as needed
-            ]);
-        });
-}
+->cardActions([
+    EditAction::make()
+        ->model(Task::class)
+        ->schema([
+            TextInput::make('title')
+                ->required()
+                ->columnSpanFull(),
+            TextInput::make('description')
+                ->columnSpanFull(),
+        ])
+        ->using(function (Task $record, array $data): Task {
+            $record->update($data);
+            return $record;
+        }),
+    DeleteAction::make()
+        ->model(Task::class),
+])
 ```
-
-**Note:** If this method is not implemented, cards will be read-only and users won't be able to edit them.
 
 ## 🧩 Optional Configuration
 
-These settings enhance your board but are not required:
+The Board API provides these optional configuration methods:
 
-- `descriptionField(string)`: Field used for card descriptions
-- `orderField(string)`: Field used to maintain card order (required for drag & drop)
-- `columnColors(array)`: Key-value pairs defining colors for each column
-- `cardLabel(string)`: Custom label for cards (defaults to model name)
-- `pluralCardLabel(string)`: Custom plural label for cards
-- `cardAttributes(array)`: Additional model attributes to display on cards
-- `cardAttributeColors(array)`: Key-value pairs defining colors for each card attribute
-- `cardAttributeIcons(array)`: Key-value pairs defining icons for each card attribute
-- `initialCardsCount(int)`: Number of cards initially loaded per column (default: 10)
-- `cardsIncrement(int)`: Number of cards to load when clicking "load more" (default: 5)
+### Card Properties - Display additional information
 
-Example with optional configuration:
+Use `cardProperties()` to show additional model attributes on cards:
 
 ```php
-public function mount(): void
+use Relaticle\Flowforge\Property;
+
+->cardProperties([
+    Property::make('title')
+        ->label('Task Title'),
+    Property::make('description')
+        ->label('Description'),
+    Property::make('due_date')
+        ->label('Due Date')
+        ->color('red')
+        ->icon('heroicon-o-calendar'),
+    Property::make('assignee.name')
+        ->label('Assigned To')
+        ->color('blue')
+        ->icon('heroicon-o-user'),
+])
+```
+
+### Complete Example with All Features
+
+Here's a comprehensive example showing all available configuration options:
+
+```php
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\TextInput;
+use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\Column;
+use Relaticle\Flowforge\Property;
+
+public function board(Board $board): Board
 {
-    $this
-        // Required configuration
+    return $board
+        ->query($this->getEloquentQuery())
+        ->cardTitle('title')
+        ->description('description')
         ->columnField('status')
+        ->defaultSort('order_column')
         ->columns([
-            'todo' => 'To Do',
-            'in_progress' => 'In Progress',
-            'completed' => 'Completed',
+            Column::make('todo')
+                ->label('To Do')
+                ->color('gray'),
+            Column::make('in_progress')
+                ->label('In Progress')
+                ->color('blue'),
+            Column::make('completed')
+                ->label('Completed')
+                ->color('green'),
         ])
-        ->titleField('title')
-        
-        // Optional configuration
-        ->descriptionField('description')
-        ->orderField('order_column')
-        ->columnColors([
-            'todo' => 'blue',
-            'in_progress' => 'yellow',
-            'completed' => 'green',
+        ->columnActions([
+            CreateAction::make()
+                ->label('Add Task')
+                ->iconButton()
+                ->icon('heroicon-o-plus')
+                ->model(Task::class)
+                ->schema([
+                    TextInput::make('title')->required()->columnSpanFull(),
+                    TextInput::make('description')->columnSpanFull(),
+                ]),
         ])
-        ->cardLabel('Task')
-        ->pluralCardLabel('Tasks')
-        ->cardAttributes([
-            'due_date' => 'Due Date',
-            'assignee.name' => 'Assigned To',
+        ->cardProperties([
+            Property::make('title')->label('Task Title'),
+            Property::make('description')->label('Description'),
+            Property::make('due_date')
+                ->label('Due Date')
+                ->color('red')
+                ->icon('heroicon-o-calendar'),
         ])
-        ->cardAttributeColors([
-            'due_date' => 'red',
-            'assignee.name' => 'yellow',
-        ])
-        ->cardAttributeIcons([
-            'due_date' => 'heroicon-o-calendar',
-            'assignee.name' => 'heroicon-o-user',
-        ])
-        ->initialCardsCount(15)
-        ->cardsIncrement(10);
+        ->cardActions([
+            EditAction::make()
+                ->model(Task::class)
+                ->schema([
+                    TextInput::make('title')->required()->columnSpanFull(),
+                    TextInput::make('description')->columnSpanFull(),
+                ])
+                ->using(function (Task $record, array $data): Task {
+                    $record->update($data);
+                    return $record;
+                }),
+            DeleteAction::make()->model(Task::class),
+        ]);
 }
 ```
 
@@ -367,7 +401,7 @@ For complex scenarios (like integration with custom fields), you can create a cu
 
 **Solution**:
 1. Ensure your model has an integer field for ordering (e.g., `order_column`)
-2. Configure this field with `orderField('order_column')` in your `mount()` method
+2. Configure this field with `->defaultSort('order_column')` in your `board()` method
 3. Check browser console for JavaScript errors
 
 #### Empty board or missing columns
@@ -377,7 +411,7 @@ For complex scenarios (like integration with custom fields), you can create a cu
 **Solution**:
 1. Verify your model has records with the status values matching your column keys
 2. Check that your `columnField()` matches a real field in your database
-3. Use `dd($this->getSubject()->get())` in your page class to debug your model data
+3. Use `dd($this->getEloquentQuery()->get())` in your page class to debug your model data
 
 #### Form validation errors
 
@@ -393,7 +427,7 @@ For complex scenarios (like integration with custom fields), you can create a cu
 **Issue**: No create/edit options appear.
 
 **Solution**:
-1. Make sure you've implemented `createAction()` and/or `editAction()` methods
+1. Make sure you've configured `columnActions()` and/or `cardActions()` in your board method
 2. Check that you've properly imported and used the Filament Action and Forms classes
 3. Verify that you've returned the action properly from these methods
 
@@ -402,7 +436,7 @@ For complex scenarios (like integration with custom fields), you can create a cu
 **Issue**: Cards can be dragged but don't stay in place after reload.
 
 **Solution**:
-1. Ensure the `orderField()` method is set in your configuration
+1. Ensure the `->defaultSort()` method is set in your board configuration
 2. Verify your model is properly saving the order value
 3. If using Spatie's Eloquent-Sortable, ensure it's correctly configured
 

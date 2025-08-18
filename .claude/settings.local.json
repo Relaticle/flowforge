@@ -5,7 +5,8 @@
       "Bash(composer:*)",
       "Bash(grep:*)",
       "Bash(rg:*)",
-      "Bash(/usr/bin/grep -n -A 15 -B 5 \"recordActions.*foreach\" /Users/manuk/Herd/flowforge/vendor/filament/tables/resources/views/index.blade.php)"
+      "Bash(/usr/bin/grep -n -A 15 -B 5 \"recordActions.*foreach\" /Users/manuk/Herd/flowforge/vendor/filament/tables/resources/views/index.blade.php)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

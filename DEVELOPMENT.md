@@ -8,7 +8,7 @@ Flowforge follows a clean, modular architecture:
 
 ### Core Components
 
-- **KanbanBoardPage**: Abstract Filament page class that serves as the foundation for boards
+- **BoardPage**: Abstract Filament page class that serves as the foundation for boards
 - **KanbanBoard**: Livewire component that handles the UI and interactions
 - **KanbanConfig**: Immutable configuration class for board settings
 - **KanbanAdapterInterface**: Contract for data operations between models and the board
@@ -36,7 +36,7 @@ src/
 ├── Enums/               # Enum classes
 ├── Facades/             # Laravel facades
 ├── Filament/            # Filament integration
-│   ├── Pages/           # KanbanBoardPage base class
+│   ├── Pages/           # BoardPage base class
 │   └── Resources/       # Filament resource integration 
 ├── Livewire/            # Livewire components
 │   └── Components/      # KanbanBoard component
@@ -133,7 +133,7 @@ composer format
 ### Adding a New Configuration Option
 
 1. Add the property to `KanbanConfig` class
-2. Add a setter method in the `KanbanBoardPage` class
+2. Add a setter method in the `BoardPage` class
 3. Update the Livewire component to use the new configuration
 4. Add tests for the new feature
 5. Document the new option in README.md

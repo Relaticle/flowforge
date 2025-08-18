@@ -18,7 +18,6 @@ use Livewire\WithPagination;
 use Relaticle\Flowforge\Config\KanbanConfig;
 use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 use Relaticle\Flowforge\Enums\KanbanColor;
-use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
 
 class KanbanBoard extends Component implements HasActions, HasForms
 {
@@ -29,7 +28,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
     /**
      * The name of the kanban board page class.
      */
-    public KanbanBoardPage | string $pageClass;
+    public string $pageClass;
 
     /**
      * The Kanban board adapter.
