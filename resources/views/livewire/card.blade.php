@@ -39,6 +39,7 @@
                             :value="$data['value']"
                             :color="$data['color'] ?? 'default'"
                             :icon="$data['icon'] ?? null"
+                            :iconColor="$data['iconColor'] ?? null"
                             :type="$data['type'] ?? null"
                             :badge="$data['badge'] ?? null"
                             :rounded="$data['rounded'] ?? 'md'"
