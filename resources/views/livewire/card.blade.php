@@ -16,7 +16,20 @@
     x-sortable-item="{{ $record['id'] }}"
 >
     <div class="ff-card__content">
-        <h4 class="ff-card__title">{{ $record['title'] }}</h4>
+        <div class="ff-card__header">
+            <h4 class="ff-card__title">{{ $record['title'] }}</h4>
+
+            {{-- Render record actions --}}
+            @if($hasActions)
+                @php
+                    $processedRecordActions = $boardPage->getRecordActionsForRecord($record);
+                @endphp
+
+                <div class="ff-card__actions">
+                    <x-filament-actions::group :actions="$processedRecordActions" />
+                </div>
+            @endif
+        </div>
 
         @if(!empty($record['description']))
             <p class="ff-card__description">{{ $record['description'] }}</p>
@@ -41,17 +54,4 @@
             </div>
         @endif
     </div>
-    
-    {{-- Render record actions --}}
-    @if($hasActions)
-        @php
-            $processedRecordActions = $boardPage->getRecordActionsForRecord($record);
-        @endphp
-        
-        <div class="ff-card__actions">
-            @foreach($processedRecordActions as $action)
-                {{ $action }}
-            @endforeach
-        </div>
-    @endif
 </div>
