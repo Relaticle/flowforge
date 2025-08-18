@@ -18,7 +18,7 @@ Flowforge is a powerful Kanban board package for Laravel Filament 4 that works s
 - [🌟 Features](#-features)
 - [🏗️ Model Preparation](#️-model-preparation)
 - [✅ Required Configuration](#-required-configuration)
-- [🔄 Optional Methods](#-optional-methods)
+- [🔄 Interactive Features](#-interactive-features)
 - [🧩 Optional Configuration](#-optional-configuration)
 - [❓ Troubleshooting](#-troubleshooting)
 - [👨‍💻 Contributing](#-contributing)
@@ -429,7 +429,7 @@ For complex scenarios (like integration with custom fields), you can create a cu
 **Solution**:
 1. Make sure you've configured `columnActions()` and/or `cardActions()` in your board method
 2. Check that you've properly imported and used the Filament Action and Forms classes
-3. Verify that you've returned the action properly from these methods
+3. Verify that you've configured the actions properly in your board configuration
 
 #### Cards not saving when dragged
 
