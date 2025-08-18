@@ -37,6 +37,8 @@ class Property extends ViewComponent
 
     protected bool $shouldTranslateLabel = false;
 
+    protected bool $isIconOnly = false;
+
     protected string $name;
 
     final public function __construct(string $name)
@@ -88,6 +90,10 @@ class Property extends ViewComponent
 
     public function getLabel(): string|Htmlable|null
     {
+        if ($this->isIconOnly) {
+            return null;
+        }
+
         $label = $this->evaluate($this->label) ?? $this->generateDefaultLabel();
 
         return $this->shouldTranslateLabel ? __($label) : $label;
@@ -99,12 +105,23 @@ class Property extends ViewComponent
             ->afterLast('.')
             ->kebab()
             ->replace(['-', '_'], ' ')
-            ->title();
+            ->title()
+            ->toString();
     }
 
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Configure this property to display only an icon without a label.
+     */
+    public function iconProperty(): static
+    {
+        $this->isIconOnly = true;
+        
+        return $this;
     }
 
     /**
