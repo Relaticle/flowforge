@@ -28,9 +28,20 @@ trait QueryHandlingTrait
      */
     public function getModelById(mixed $id): ?Model
     {
-        // Just find by ID without additional filters from the base query
-        // This ensures we can find models by ID regardless of the base query filters
-        return $this->getQuery()->getModel()::query()->find($id);
+        try {
+            // Use the adapter's base query to ensure proper scoping and relationships
+            $model = $this->newQuery()->find($id);
+            
+            // If not found in the scoped query, try a direct find as fallback
+            if (!$model) {
+                $model = $this->getQuery()->getModel()::query()->find($id);
+            }
+            
+            return $model;
+        } catch (\Exception $e) {
+            // If anything fails, return null to prevent errors
+            return null;
+        }
     }
 
     /**

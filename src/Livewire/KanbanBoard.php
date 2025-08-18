@@ -229,7 +229,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
     protected function getBoardPage(): ?\Relaticle\Flowforge\BoardPage
     {
         $boardPage = app($this->pageClass);
-        
+
         return $boardPage instanceof \Relaticle\Flowforge\BoardPage ? $boardPage : null;
     }
 
@@ -298,7 +298,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
     /**
      * Get processed record actions for a specific record.
      */
-    public function getRecordActionsForRecord(array $recordData): array
+    public function getCardActionsForRecord(array $recordData): array
     {
         $boardPage = $this->getBoardPage();
         if (!$boardPage) {
@@ -331,12 +331,23 @@ class KanbanBoard extends Component implements HasActions, HasForms
                             if (method_exists($flatAction, 'record')) {
                                 $flatAction->record($recordModel);
                             }
+                            
+                            // Add after hook to refresh board after any action
+                            $flatAction->after(function () {
+                                $this->refreshBoard();
+                            });
+
                         }
                     } else {
                         // Set record context for individual actions
                         if (method_exists($actionClone, 'record')) {
                             $actionClone->record($recordModel);
                         }
+                        
+                        // Add after hook to refresh board after any action
+                        $actionClone->after(function () {
+                            $this->refreshBoard();
+                        });
                     }
 
                     // Safely check if action is hidden
@@ -451,6 +462,34 @@ class KanbanBoard extends Component implements HasActions, HasForms
         }
 
         return $success;
+    }
+
+
+    /**
+     * Get the default record for an action - this is how Filament injects records into action closures.
+     * This method is called by Filament's action system when resolving record parameters.
+     */
+    public function getDefaultActionRecord(\Filament\Actions\Action $action): ?\Illuminate\Database\Eloquent\Model
+    {
+        // Get the current mounted action context
+        $mountedActions = $this->mountedActions ?? [];
+        
+        if (empty($mountedActions)) {
+            return null;
+        }
+        
+        // Get the last (current) mounted action
+        $currentMountedAction = end($mountedActions);
+        
+        // Extract recordKey from the context
+        $recordKey = $currentMountedAction['context']['recordKey'] ?? null;
+        
+        if (!$recordKey) {
+            return null;
+        }
+        
+        // Resolve the record using our adapter
+        return $this->adapter->getModelById($recordKey);
     }
 
     /**

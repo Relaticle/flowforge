@@ -1,7 +1,7 @@
 @props(['config', 'columnId', 'record'])
 
 @php
-    $processedRecordActions = $this->getRecordActionsForRecord($record);
+    $processedRecordActions = $this->getCardActionsForRecord($record);
     $hasActions = !empty($processedRecordActions);
 @endphp
 

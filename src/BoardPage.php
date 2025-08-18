@@ -186,7 +186,7 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
     /**
      * Get processed record actions for a specific record.
      */
-    public function getRecordActionsForRecord(array $recordData): array
+    public function getCardActionsForRecord(array $recordData): array
     {
         $processedActions = [];
 
