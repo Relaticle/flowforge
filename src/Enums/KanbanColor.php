@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Enums;
 
-enum KanbanColor: string
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel;
+
+enum KanbanColor: string implements HasColor, HasLabel
 {
     case DEFAULT = 'default';
     case WHITE = 'white';
@@ -39,12 +42,14 @@ enum KanbanColor: string
         return 'kanban-color-' . $this->value;
     }
 
-    /**
-     * Get the display name for this color
-     */
-    public function label(): string
+    public function getLabel(): string
     {
         return ucfirst($this->value);
+    }
+
+    public function getColor(): string | array | null
+    {
+        return $this->value;
     }
 
     /**
@@ -55,7 +60,7 @@ enum KanbanColor: string
     public static function options(): array
     {
         return collect(self::cases())->mapWithKeys(fn ($color) => [
-            $color->value => $color->label(),
+            $color->value => $color->getLabel(),
         ])->toArray();
     }
 }

@@ -10,16 +10,20 @@ use Filament\Support\Components\ViewComponent;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Relaticle\Flowforge\Concerns\HasIcon;
-use Relaticle\Flowforge\Concerns\HasColor;
+use Filament\Support\Concerns\HasColor;
+use Filament\Support\Concerns\HasIcon;
+use Filament\Support\Concerns\HasIconColor;
+use Filament\Support\Concerns\HasIconPosition;
 use Relaticle\Flowforge\Concerns\CanBeVisible;
 use Relaticle\Flowforge\Concerns\HasStateFormatting;
 use Relaticle\Flowforge\Concerns\BelongsToBoard;
 
 class Property extends ViewComponent
 {
-    use HasIcon;
     use HasColor;
+    use HasIcon;
+    use HasIconColor;
+    use HasIconPosition;
     use CanBeVisible;
     use HasStateFormatting;
     use BelongsToBoard;

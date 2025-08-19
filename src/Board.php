@@ -6,15 +6,15 @@ namespace Relaticle\Flowforge;
 
 use Exception;
 use Filament\Support\Components\ViewComponent;
-use Relaticle\Flowforge\Concerns\HasColumns;
 use Relaticle\Flowforge\Concerns\HasActions;
+use Relaticle\Flowforge\Concerns\HasColumns;
 use Relaticle\Flowforge\Concerns\HasProperties;
 use Relaticle\Flowforge\Concerns\InteractsWithKanbanQuery;
 
 class Board extends ViewComponent
 {
-    use HasColumns;
     use HasActions;
+    use HasColumns;
     use HasProperties;
     use InteractsWithKanbanQuery;
 

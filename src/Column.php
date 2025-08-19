@@ -8,8 +8,10 @@ use Closure;
 use Exception;
 use Filament\Support\Components\ViewComponent;
 use Illuminate\Contracts\Support\Htmlable;
-use Relaticle\Flowforge\Concerns\HasColor;
-use Relaticle\Flowforge\Concerns\HasIcon;
+use Filament\Support\Concerns\HasColor;
+use Filament\Support\Concerns\HasIcon;
+use Filament\Support\Concerns\HasIconColor;
+use Filament\Support\Concerns\HasIconPosition;
 use Relaticle\Flowforge\Concerns\HasLimit;
 use Relaticle\Flowforge\Concerns\CanBeSortable;
 use Relaticle\Flowforge\Concerns\CanBeVisible;
@@ -19,6 +21,8 @@ class Column extends ViewComponent
 {
     use HasColor;
     use HasIcon;
+    use HasIconColor;
+    use HasIconPosition;
     use HasLimit;
     use CanBeSortable;
     use CanBeVisible;
