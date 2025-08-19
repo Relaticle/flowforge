@@ -291,6 +291,10 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
             $configData['titleField'] = $titleAttribute;
         }
 
+        if ($descriptionAttribute = $board->getDescriptionAttribute()) {
+            $configData['descriptionField'] = $descriptionAttribute;
+        }
+
         if ($columnAttribute = $board->getColumnIdentifierAttribute()) {
             $configData['columnField'] = $columnAttribute;
         }
