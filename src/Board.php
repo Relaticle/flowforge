@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge;
 
-use Exception;
 use Filament\Support\Components\ViewComponent;
 use Relaticle\Flowforge\Concerns\HasActions;
 use Relaticle\Flowforge\Concerns\HasColumns;
@@ -44,9 +43,6 @@ class Board extends ViewComponent
         return $static;
     }
 
-    /**
-     * @param array $filters
-     */
     public function filters(array $filters): static
     {
         $this->filters = $filters;

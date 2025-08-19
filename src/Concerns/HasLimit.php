@@ -8,9 +8,9 @@ use Closure;
 
 trait HasLimit
 {
-    protected int|Closure|null $limit = null;
+    protected int | Closure | null $limit = null;
 
-    public function limit(int|Closure|null $limit): static
+    public function limit(int | Closure | null $limit): static
     {
         $this->limit = $limit;
 

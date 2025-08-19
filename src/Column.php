@@ -7,26 +7,26 @@ namespace Relaticle\Flowforge;
 use Closure;
 use Exception;
 use Filament\Support\Components\ViewComponent;
-use Illuminate\Contracts\Support\Htmlable;
 use Filament\Support\Concerns\HasColor;
 use Filament\Support\Concerns\HasIcon;
 use Filament\Support\Concerns\HasIconColor;
 use Filament\Support\Concerns\HasIconPosition;
-use Relaticle\Flowforge\Concerns\HasLimit;
+use Illuminate\Contracts\Support\Htmlable;
+use Relaticle\Flowforge\Concerns\BelongsToBoard;
 use Relaticle\Flowforge\Concerns\CanBeSortable;
 use Relaticle\Flowforge\Concerns\CanBeVisible;
-use Relaticle\Flowforge\Concerns\BelongsToBoard;
+use Relaticle\Flowforge\Concerns\HasLimit;
 
 class Column extends ViewComponent
 {
+    use BelongsToBoard;
+    use CanBeSortable;
+    use CanBeVisible;
     use HasColor;
     use HasIcon;
     use HasIconColor;
     use HasIconPosition;
     use HasLimit;
-    use CanBeSortable;
-    use CanBeVisible;
-    use BelongsToBoard;
 
     /**
      * @var view-string
@@ -37,7 +37,7 @@ class Column extends ViewComponent
 
     protected string $evaluationIdentifier = 'column';
 
-    protected string|Htmlable|Closure|null $label = null;
+    protected string | Htmlable | Closure | null $label = null;
 
     protected bool $shouldTranslateLabel = false;
 
@@ -76,7 +76,7 @@ class Column extends ViewComponent
         // Override in subclasses if needed
     }
 
-    public function label(string|Htmlable|Closure|null $label): static
+    public function label(string | Htmlable | Closure | null $label): static
     {
         $this->label = $label;
 
@@ -90,7 +90,7 @@ class Column extends ViewComponent
         return $this;
     }
 
-    public function getLabel(): string|Htmlable|null
+    public function getLabel(): string | Htmlable | null
     {
         $label = $this->evaluate($this->label) ?? $this->generateDefaultLabel();
 

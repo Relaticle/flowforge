@@ -8,18 +8,18 @@ use Closure;
 
 trait CanBeVisible
 {
-    protected bool|Closure $isVisible = true;
+    protected bool | Closure $isVisible = true;
 
-    protected bool|Closure $isHidden = false;
+    protected bool | Closure $isHidden = false;
 
-    public function visible(bool|Closure $condition = true): static
+    public function visible(bool | Closure $condition = true): static
     {
         $this->isVisible = $condition;
 
         return $this;
     }
 
-    public function hidden(bool|Closure $condition = true): static
+    public function hidden(bool | Closure $condition = true): static
     {
         $this->isHidden = $condition;
 

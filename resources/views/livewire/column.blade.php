@@ -53,7 +53,7 @@
                     x-intersect.full="
                         if (!isLoadingColumn('{{ $columnId }}')) {
                             beginLoading('{{ $columnId }}');
-                            $wire.loadMoreItems('{{ $columnId }}', {{ $config->cardsIncrement ?? 'null' }});
+                            $wire.loadMoreItems('{{ $columnId }}', {{ $this->cardsIncrement ?? 'null' }});
                         }
                     "
                     class="ff-column__loader"

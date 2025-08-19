@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
-use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 
@@ -21,7 +20,7 @@ trait HasActions
     protected array $columnActions = [];
 
     /**
-     * @param array<Action|ActionGroup> $actions
+     * @param  array<Action|ActionGroup>  $actions
      */
     public function cardActions(array $actions): static
     {
@@ -32,7 +31,7 @@ trait HasActions
     }
 
     /**
-     * @param array<Action|ActionGroup> $actions
+     * @param  array<Action|ActionGroup>  $actions
      */
     public function pushCardActions(array $actions): static
     {
@@ -43,7 +42,7 @@ trait HasActions
         return $this;
     }
 
-    public function pushCardAction(Action|ActionGroup $action): static
+    public function pushCardAction(Action | ActionGroup $action): static
     {
         $this->cardActions[] = $action;
 
@@ -51,7 +50,7 @@ trait HasActions
     }
 
     /**
-     * @param array<Action|ActionGroup> $actions
+     * @param  array<Action|ActionGroup>  $actions
      */
     public function columnActions(array $actions): static
     {
@@ -62,7 +61,7 @@ trait HasActions
     }
 
     /**
-     * @param array<Action|ActionGroup> $actions
+     * @param  array<Action|ActionGroup>  $actions
      */
     public function pushColumnActions(array $actions): static
     {
@@ -73,7 +72,7 @@ trait HasActions
         return $this;
     }
 
-    public function pushColumnAction(Action|ActionGroup $action): static
+    public function pushColumnAction(Action | ActionGroup $action): static
     {
         $this->columnActions[] = $action;
 
@@ -98,7 +97,7 @@ trait HasActions
 
     /**
      * Alias for getCardActions() to maintain backwards compatibility
-     * 
+     *
      * @return array<Action|ActionGroup>
      */
     public function getRecordActions(): array

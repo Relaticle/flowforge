@@ -74,12 +74,12 @@ trait CrudOperationsTrait
 
         foreach ($recordIds as $id) {
             $model = $this->getModelById($id);
-            
+
             // Skip if model not found
-            if (!$model) {
+            if (! $model) {
                 continue;
             }
-            
+
             $primaryKeyColumn = $model->getQualifiedKeyName();
 
             $attributes = [

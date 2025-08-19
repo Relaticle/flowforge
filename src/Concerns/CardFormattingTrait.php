@@ -39,7 +39,7 @@ trait CardFormattingTrait
             foreach ($cardProperties as $property) {
                 $name = $property->getName();
                 $value = $property->getFormattedState($model);
-                
+
                 if ($value !== null && $value !== '') {
                     $card['attributes'][$name] = [
                         'label' => $property->getLabel(),

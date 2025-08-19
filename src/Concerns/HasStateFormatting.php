@@ -9,9 +9,9 @@ use Illuminate\Support\Str;
 
 trait HasStateFormatting
 {
-    protected Closure|null $formatStateUsing = null;
+    protected ?Closure $formatStateUsing = null;
 
-    protected bool|Closure $shouldFormatStateUsing = true;
+    protected bool | Closure $shouldFormatStateUsing = true;
 
     public function formatStateUsing(?Closure $callback): static
     {

@@ -8,9 +8,9 @@ use Closure;
 
 trait CanBeSortable
 {
-    protected bool|Closure $isSortable = false;
+    protected bool | Closure $isSortable = false;
 
-    public function sortable(bool|Closure $condition = true): static
+    public function sortable(bool | Closure $condition = true): static
     {
         $this->isSortable = $condition;
 

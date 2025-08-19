@@ -35,8 +35,9 @@ trait InteractsWithBoard
      */
     public function bootedInteractsWithBoard(): void
     {
-        $this->board = $this->getBoard();
-        
+        // Recreate board fresh (Filament pattern)
+        $this->board = $this->board(Board::make());
+
         // Set the query on the board if not already set
         if (! $this->board->getQuery()) {
             $this->board->query($this->getEloquentQuery());
@@ -50,7 +51,7 @@ trait InteractsWithBoard
     {
         $board = $this->getBoard();
         $columnIdentifier = $board->getColumnIdentifierAttribute();
-        
+
         if (! $columnIdentifier) {
             throw new \Exception('Column identifier attribute is required for moving records');
         }
@@ -59,7 +60,15 @@ trait InteractsWithBoard
         $record->{$columnIdentifier} = $toColumn;
         $record->save();
 
-        // Refresh the board
-        $this->dispatch('$refresh');
+        // Refresh the model to ensure relationships are up to date
+        $record->refresh();
+
+        // Force refresh the board data
+        if (method_exists($this, 'refreshBoard')) {
+            $this->refreshBoard();
+        } else {
+            // Fallback to Livewire refresh
+            $this->dispatch('$refresh');
+        }
     }
 }

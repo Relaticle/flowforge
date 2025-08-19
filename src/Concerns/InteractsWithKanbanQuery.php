@@ -6,42 +6,41 @@ namespace Relaticle\Flowforge\Concerns;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 trait InteractsWithKanbanQuery
 {
-    protected Builder|Closure|null $query = null;
+    protected Builder | Closure | null $query = null;
 
-    protected string|Closure|null $cardTitleAttribute = null;
+    protected string | Closure | null $cardTitleAttribute = null;
 
-    protected string|Closure|null $columnIdentifierAttribute = null;
+    protected string | Closure | null $columnIdentifierAttribute = null;
 
-    protected string|Closure|null $descriptionAttribute = null;
+    protected string | Closure | null $descriptionAttribute = null;
 
-    protected array|Closure|null $defaultSort = null;
+    protected array | Closure | null $defaultSort = null;
 
-    public function query(Builder|Closure $query): static
+    public function query(Builder | Closure $query): static
     {
         $this->query = $query;
 
         return $this;
     }
 
-    public function cardTitle(string|Closure $attribute): static
+    public function cardTitle(string | Closure $attribute): static
     {
         $this->cardTitleAttribute = $attribute;
 
         return $this;
     }
 
-    public function columnIdentifier(string|Closure $attribute): static
+    public function columnIdentifier(string | Closure $attribute): static
     {
         $this->columnIdentifierAttribute = $attribute;
 
         return $this;
     }
 
-    public function cardDescription(string|Closure $attribute): static
+    public function cardDescription(string | Closure $attribute): static
     {
         $this->descriptionAttribute = $attribute;
 
@@ -86,7 +85,7 @@ trait InteractsWithKanbanQuery
     /**
      * Backwards compatibility aliases
      */
-    public function recordTitleAttribute(string|Closure $attribute): static
+    public function recordTitleAttribute(string | Closure $attribute): static
     {
         return $this->cardTitle($attribute);
     }

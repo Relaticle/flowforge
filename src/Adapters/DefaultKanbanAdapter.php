@@ -43,9 +43,9 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
     ) {
         $this->modelClass = get_class($query->getModel());
         $this->connectionName = $query->getModel()->getConnectionName();
-        
+
         // Store a closure that can recreate the query
-        $this->queryCallback = fn() => $query->clone();
+        $this->queryCallback = fn () => $query->clone();
     }
 
     /**
@@ -85,15 +85,15 @@ class DefaultKanbanAdapter implements KanbanAdapterInterface, Wireable
     {
         $modelClass = $value['modelClass'];
         $connectionName = $value['connectionName'];
-        
+
         // Recreate the query from the model class and connection
-        $model = new $modelClass();
+        $model = new $modelClass;
         if ($connectionName) {
             $model->setConnection($connectionName);
         }
-        
+
         $query = $model->newQuery();
-        
+
         return new static($query, $value['config']);
     }
 }

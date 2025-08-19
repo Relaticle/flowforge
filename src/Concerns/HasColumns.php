@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
-use Closure;
 use Relaticle\Flowforge\Column;
 
 trait HasColumns
@@ -15,7 +14,7 @@ trait HasColumns
     protected array $columns = [];
 
     /**
-     * @param array<Column> $columns
+     * @param  array<Column>  $columns
      */
     public function columns(array $columns): static
     {
@@ -26,7 +25,7 @@ trait HasColumns
     }
 
     /**
-     * @param array<Column> $columns
+     * @param  array<Column>  $columns
      */
     public function pushColumns(array $columns): static
     {

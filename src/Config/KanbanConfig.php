@@ -92,8 +92,6 @@ final readonly class KanbanConfig implements Wireable
         return $this->descriptionField;
     }
 
-
-
     /**
      * Get the field used for maintaining card order.
      *
@@ -242,6 +240,8 @@ final readonly class KanbanConfig implements Wireable
             'orderField' => $this->orderField,
             'cardLabel' => $this->cardLabel,
             'pluralCardLabel' => $this->pluralCardLabel,
+            // Note: cardProperties are not serialized as they contain non-serializable objects
+            // They will be recreated from the board configuration
         ];
     }
 
@@ -256,6 +256,7 @@ final readonly class KanbanConfig implements Wireable
             $value['orderField'],
             $value['cardLabel'],
             $value['pluralCardLabel']
+            // Note: cardProperties will be null after hydration and need to be recreated
         );
     }
 }

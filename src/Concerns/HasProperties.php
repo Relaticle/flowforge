@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
-use Closure;
 use Relaticle\Flowforge\Property;
 
 trait HasProperties
@@ -15,7 +14,7 @@ trait HasProperties
     protected array $cardProperties = [];
 
     /**
-     * @param array<Property> $properties
+     * @param  array<Property>  $properties
      */
     public function cardProperties(array $properties): static
     {
@@ -26,7 +25,7 @@ trait HasProperties
     }
 
     /**
-     * @param array<Property> $properties
+     * @param  array<Property>  $properties
      */
     public function pushCardProperties(array $properties): static
     {

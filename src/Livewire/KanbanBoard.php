@@ -9,10 +9,8 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
-use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Relaticle\Flowforge\Config\KanbanConfig;
@@ -31,15 +29,9 @@ class KanbanBoard extends Component implements HasActions, HasForms
     public string $pageClass;
 
     /**
-     * The Kanban board adapter.
+     * The Kanban board adapter (follows Filament Table pattern).
      */
-    #[Locked]
-    public KanbanAdapterInterface $adapter;
-
-    /**
-     * The Kanban board configuration from the adapter.
-     */
-    public KanbanConfig $config;
+    protected ?KanbanAdapterInterface $adapter = null;
 
     /**
      * The columns data for the Kanban board.
@@ -90,7 +82,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
     /**
      * Initialize the Kanban board.
      *
-     * @param  KanbanAdapterInterface  $adapter  The Kanban adapter
+     * @param  KanbanAdapterInterface  $adapter  The Kanban adapter (will be recreated fresh)
      * @param  int|null  $initialCardsCount  The initial number of cards to load per column
      * @param  int|null  $cardsIncrement  The number of cards to load on "load more"
      * @param  array<int, string>  $searchable  The searchable fields
@@ -101,16 +93,17 @@ class KanbanBoard extends Component implements HasActions, HasForms
         ?int $cardsIncrement = null,
         array $searchable = []
     ): void {
-        $this->adapter = $adapter;
+        // Store initial adapter and recreate fresh on boot (Filament pattern)
+        $this->adapter = $this->adapter($adapter);
         $this->searchable = $searchable;
-        $this->config = $this->adapter->getConfig();
 
         // Set default limits
         $initialCardsCount = $initialCardsCount ?? 50;
         $this->cardsIncrement = $cardsIncrement ?? 10;
 
-        // Initialize columns
-        $this->columns = collect($this->config->getColumnValues())
+        // Initialize columns using adapter config
+        $config = $this->getConfig();
+        $this->columns = collect($config->getColumnValues())
             ->map(fn ($label, $value) => [
                 'id' => $value,
                 'label' => $label,
@@ -130,10 +123,50 @@ class KanbanBoard extends Component implements HasActions, HasForms
     }
 
     /**
+     * Configure the adapter (like Filament's table() method).
+     */
+    public function adapter(KanbanAdapterInterface $adapter): KanbanAdapterInterface
+    {
+        return $adapter;
+    }
+
+    /**
+     * Get the adapter instance (like Filament's getTable()).
+     */
+    public function getAdapter(): KanbanAdapterInterface
+    {
+        return $this->adapter ??= $this->adapter($this->makeAdapter());
+    }
+
+    /**
+     * Create a fresh adapter (like Filament's makeTable()).
+     */
+    protected function makeAdapter(): KanbanAdapterInterface
+    {
+        $boardPage = $this->getBoardPage();
+        if (! $boardPage) {
+            throw new \Exception('Board page not found');
+        }
+
+        return $boardPage->getAdapter();
+    }
+
+    /**
+     * Get the config from the adapter.
+     */
+    public function getConfig(): KanbanConfig
+    {
+        return $this->getAdapter()->getConfig();
+    }
+
+    /**
      * Boot the InteractsWithActions trait after component is hydrated.
      */
     public function bootedInteractsWithActions(): void
     {
+        // Recreate adapter fresh after hydration (exact Filament Table pattern)
+        $this->adapter = $this->adapter($this->makeAdapter());
+
         // Cache board actions for Filament's action system
         $this->cacheBoardActions();
     }
@@ -144,7 +177,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
     protected function cacheBoardActions(): void
     {
         $boardPage = $this->getBoardPage();
-        if (!$boardPage) {
+        if (! $boardPage) {
             return;
         }
 
@@ -180,7 +213,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
      */
     protected function resolveColumnColors(): array
     {
-        $adapterColors = $this->adapter->getConfig()->getColumnColors();
+        $adapterColors = $this->getAdapter()->getConfig()->getColumnColors();
 
         if (is_array($adapterColors)) {
             return $adapterColors;
@@ -213,7 +246,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
         ];
 
         $colors = [];
-        $columnKeys = array_keys($this->adapter->getConfig()->getColumnValues());
+        $columnKeys = array_keys($this->getAdapter()->getConfig()->getColumnValues());
 
         foreach ($columnKeys as $index => $key) {
             $colorIndex = $index % count($defaultColors);
@@ -239,7 +272,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
     public function getColumnActionsForColumn(string $columnId): array
     {
         $boardPage = $this->getBoardPage();
-        if (!$boardPage) {
+        if (! $boardPage) {
             return [];
         }
 
@@ -277,12 +310,12 @@ class KanbanBoard extends Component implements HasActions, HasForms
                     }
 
                     // Only include the group if it has valid actions
-                    if (!empty($validGroupActions)) {
+                    if (! empty($validGroupActions)) {
                         $processedActions[] = $actionClone;
                     }
                 } else {
                     // Handle individual actions
-                    if (!$actionClone->isHidden()) {
+                    if (! $actionClone->isHidden()) {
                         $processedActions[] = $actionClone;
                     }
                 }
@@ -301,7 +334,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
     public function getCardActionsForRecord(array $recordData): array
     {
         $boardPage = $this->getBoardPage();
-        if (!$boardPage) {
+        if (! $boardPage) {
             return [];
         }
 
@@ -309,10 +342,10 @@ class KanbanBoard extends Component implements HasActions, HasForms
 
         try {
             // Get the record model first
-            $recordModel = $this->adapter->getModelById($recordData['id']);
+            $recordModel = $this->getAdapter()->getModelById($recordData['id']);
 
             // If we can't find the record, return empty actions
-            if (!$recordModel || !($recordModel instanceof \Illuminate\Database\Eloquent\Model)) {
+            if (! $recordModel || ! ($recordModel instanceof \Illuminate\Database\Eloquent\Model)) {
                 return [];
             }
 
@@ -331,7 +364,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
                             if (method_exists($flatAction, 'record')) {
                                 $flatAction->record($recordModel);
                             }
-                            
+
                             // Add after hook to refresh board after any action
                             $flatAction->after(function () {
                                 $this->refreshBoard();
@@ -343,7 +376,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
                         if (method_exists($actionClone, 'record')) {
                             $actionClone->record($recordModel);
                         }
-                        
+
                         // Add after hook to refresh board after any action
                         $actionClone->after(function () {
                             $this->refreshBoard();
@@ -351,7 +384,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
                     }
 
                     // Safely check if action is hidden
-                    if (!$actionClone->isHidden()) {
+                    if (! $actionClone->isHidden()) {
                         $processedActions[] = $actionClone;
                     }
                 } catch (\Exception $e) {
@@ -383,14 +416,14 @@ class KanbanBoard extends Component implements HasActions, HasForms
         foreach ($this->columns as $columnId => $column) {
             $limit = $this->columnCardLimits[$columnId] ?? 10;
 
-            $items = $this->adapter->getItemsForColumn($columnId, $limit);
+            $items = $this->getAdapter()->getItemsForColumn($columnId, $limit);
             $this->columnCards[$columnId] = $this->formatItems($items);
 
             // Ensure that items and total keys exist in columns data
             $this->columns[$columnId]['items'] = $this->columnCards[$columnId];
 
             // Get the total count
-            $this->columns[$columnId]['total'] = $this->adapter->getColumnItemsCount($columnId);
+            $this->columns[$columnId]['total'] = $this->getAdapter()->getColumnItemsCount($columnId);
         }
     }
 
@@ -413,7 +446,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
      */
     public function getColumnItemsCount(string | int $columnId): int
     {
-        return $this->adapter->getColumnItemsCount($columnId);
+        return $this->getAdapter()->getColumnItemsCount($columnId);
     }
 
     /**
@@ -430,7 +463,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
 
         $this->columnCardLimits[$columnId] = $newLimit;
 
-        $items = $this->adapter->getItemsForColumn($columnId, $newLimit);
+        $items = $this->getAdapter()->getItemsForColumn($columnId, $newLimit);
         $this->columnCards[$columnId] = $this->formatItems($items);
         $this->refreshBoard();
     }
@@ -455,7 +488,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
      */
     public function updateRecordsOrderAndColumn(int | string $columnId, array $cardIds): bool
     {
-        $success = $this->adapter->updateRecordsOrderAndColumn($columnId, $cardIds);
+        $success = $this->getAdapter()->updateRecordsOrderAndColumn($columnId, $cardIds);
 
         if ($success) {
             $this->refreshBoard();
@@ -463,7 +496,6 @@ class KanbanBoard extends Component implements HasActions, HasForms
 
         return $success;
     }
-
 
     /**
      * Get the default record for an action - this is how Filament injects records into action closures.
@@ -473,23 +505,23 @@ class KanbanBoard extends Component implements HasActions, HasForms
     {
         // Get the current mounted action context
         $mountedActions = $this->mountedActions ?? [];
-        
+
         if (empty($mountedActions)) {
             return null;
         }
-        
+
         // Get the last (current) mounted action
         $currentMountedAction = end($mountedActions);
-        
+
         // Extract recordKey from the context
         $recordKey = $currentMountedAction['context']['recordKey'] ?? null;
-        
-        if (!$recordKey) {
+
+        if (! $recordKey) {
             return null;
         }
-        
+
         // Resolve the record using our adapter
-        return $this->adapter->getModelById($recordKey);
+        return $this->getAdapter()->getModelById($recordKey);
     }
 
     /**
@@ -497,6 +529,9 @@ class KanbanBoard extends Component implements HasActions, HasForms
      */
     public function render(): View
     {
-        return view('flowforge::livewire.kanban-board');
+        return view('flowforge::livewire.kanban-board', [
+            'columns' => $this->columns,
+            'config' => $this->getConfig(),
+        ]);
     }
 }

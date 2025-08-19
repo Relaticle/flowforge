@@ -7,26 +7,25 @@ namespace Relaticle\Flowforge;
 use Closure;
 use Exception;
 use Filament\Support\Components\ViewComponent;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Filament\Support\Concerns\HasColor;
 use Filament\Support\Concerns\HasIcon;
 use Filament\Support\Concerns\HasIconColor;
 use Filament\Support\Concerns\HasIconPosition;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
+use Relaticle\Flowforge\Concerns\BelongsToBoard;
 use Relaticle\Flowforge\Concerns\CanBeVisible;
 use Relaticle\Flowforge\Concerns\HasStateFormatting;
-use Relaticle\Flowforge\Concerns\BelongsToBoard;
 
 class Property extends ViewComponent
 {
+    use BelongsToBoard;
+    use CanBeVisible;
     use HasColor;
     use HasIcon;
     use HasIconColor;
     use HasIconPosition;
-    use CanBeVisible;
     use HasStateFormatting;
-    use BelongsToBoard;
 
     /**
      * @var view-string
@@ -37,7 +36,7 @@ class Property extends ViewComponent
 
     protected string $evaluationIdentifier = 'property';
 
-    protected string|Htmlable|Closure|null $label = null;
+    protected string | Htmlable | Closure | null $label = null;
 
     protected bool $shouldTranslateLabel = false;
 
@@ -80,7 +79,7 @@ class Property extends ViewComponent
         // Override in subclasses if needed
     }
 
-    public function label(string|Htmlable|Closure|null $label): static
+    public function label(string | Htmlable | Closure | null $label): static
     {
         $this->label = $label;
 
@@ -94,7 +93,7 @@ class Property extends ViewComponent
         return $this;
     }
 
-    public function getLabel(): string|Htmlable|null
+    public function getLabel(): string | Htmlable | null
     {
         if ($this->isIconOnly) {
             return null;
@@ -126,10 +125,9 @@ class Property extends ViewComponent
     public function iconProperty(): static
     {
         $this->isIconOnly = true;
-        
+
         return $this;
     }
-
 
     /**
      * Get the state value from a record using dot notation

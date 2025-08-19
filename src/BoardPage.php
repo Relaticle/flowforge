@@ -13,20 +13,20 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Relaticle\Flowforge\Adapters\DefaultKanbanAdapter;
-use Relaticle\Flowforge\Config\KanbanConfig;
-use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
-use Relaticle\Flowforge\Contracts\HasBoard;
 use Relaticle\Flowforge\Concerns\HasRecords;
 use Relaticle\Flowforge\Concerns\InteractsWithBoard;
+use Relaticle\Flowforge\Config\KanbanConfig;
+use Relaticle\Flowforge\Contracts\HasBoard;
+use Relaticle\Flowforge\Contracts\KanbanAdapterInterface;
 
-abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
+abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
 {
-    use InteractsWithActions;
-    use InteractsWithForms;
     use HasRecords;
+    use InteractsWithActions;
     use InteractsWithBoard {
         InteractsWithBoard::moveRecord insteadof HasRecords;
     }
+    use InteractsWithForms;
 
     protected string $view = 'flowforge::filament.pages.board-page';
 
@@ -41,12 +41,15 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
 
     public function bootedInteractsWithActions(): void
     {
-        $this->bootedInteractsWithBoard();
-    }
+        // Recreate board fresh (Filament pattern)
+        $this->board = $this->board(Board::make());
 
-    public function bootedInteractsWithBoard(): void
-    {
-        $this->board = $this->makeBoard();
+        // Set the query on the board if not already set
+        if (! $this->board->getQuery()) {
+            $this->board->query($this->getEloquentQuery());
+        }
+
+        // Recreate adapter fresh (Filament pattern)
         $this->adapter = $this->createAdapter();
         $this->cacheBoardActions();
     }
@@ -94,7 +97,7 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
     /**
      * Check if an action is a record-based action that shouldn't be used as column action.
      */
-    public function isRecordBasedAction(Action|ActionGroup $action): bool
+    public function isRecordBasedAction(Action | ActionGroup $action): bool
     {
         // ActionGroups themselves are not record-based, only individual actions within them can be
         if ($action instanceof ActionGroup) {
@@ -149,14 +152,14 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
                     }
 
                     // Only include the group if it has valid actions
-                    if (!empty($validGroupActions)) {
+                    if (! empty($validGroupActions)) {
                         $processedActions[] = $actionClone;
                     }
                 } else {
                     // Handle individual actions
                     $this->configureColumnAction($actionClone, $columnId);
 
-                    if (!$actionClone->isHidden()) {
+                    if (! $actionClone->isHidden()) {
                         $processedActions[] = $actionClone;
                     }
                 }
@@ -195,7 +198,7 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
             $recordModel = $this->getAdapter()->getModelById($recordData['id']);
 
             // If we can't find the record, return empty actions
-            if (!$recordModel || !($recordModel instanceof \Illuminate\Database\Eloquent\Model)) {
+            if (! $recordModel || ! ($recordModel instanceof \Illuminate\Database\Eloquent\Model)) {
                 return [];
             }
 
@@ -227,7 +230,7 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
                     }
 
                     // Safely check if action is hidden
-                    if (!$actionClone->isHidden()) {
+                    if (! $actionClone->isHidden()) {
                         $processedActions[] = $actionClone;
                     }
                 } catch (\Exception $e) {
@@ -246,6 +249,7 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
     protected function makeBoard(): Board
     {
         $board = Board::make();
+
         return $this->board($board);
     }
 
@@ -268,7 +272,16 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
 
     protected function createKanbanConfig(): KanbanConfig
     {
-        $board = $this->getBoard();
+        // Ensure board is initialized before creating config
+        if (! isset($this->board)) {
+            $this->board = $this->board(Board::make());
+            // Set the query on the board if not already set
+            if (! $this->board->getQuery()) {
+                $this->board->query($this->getEloquentQuery());
+            }
+        }
+
+        $board = $this->board;
 
         // Set columns configuration
         $columns = [];
@@ -313,7 +326,7 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
 
     public function getBoard(): Board
     {
-        return $this->board ??= $this->makeBoard();
+        return $this->board ??= $this->board(Board::make());
     }
 
     public function getAdapter(): KanbanAdapterInterface
@@ -326,11 +339,10 @@ abstract class BoardPage extends Page implements HasActions, HasForms, HasBoard
         return static::class;
     }
 
-
     protected function getViewData(): array
     {
         return [
-            'adapter' => $this->adapter,
+            'adapter' => $this->getAdapter(),
             'pageClass' => static::class,
         ];
     }

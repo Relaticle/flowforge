@@ -31,12 +31,12 @@ trait QueryHandlingTrait
         try {
             // Use the adapter's base query to ensure proper scoping and relationships
             $model = $this->newQuery()->find($id);
-            
+
             // If not found in the scoped query, try a direct find as fallback
-            if (!$model) {
+            if (! $model) {
                 $model = $this->getQuery()->getModel()::query()->find($id);
             }
-            
+
             return $model;
         } catch (\Exception $e) {
             // If anything fails, return null to prevent errors
