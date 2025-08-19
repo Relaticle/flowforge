@@ -98,7 +98,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
         $this->searchable = $searchable;
 
         // Set default limits
-        $initialCardsCount = $initialCardsCount ?? 50;
+        $initialCardsCount = $initialCardsCount ?? 15;
         $this->cardsIncrement = $cardsIncrement ?? 10;
 
         // Initialize columns using adapter config
