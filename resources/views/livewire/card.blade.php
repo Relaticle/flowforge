@@ -3,16 +3,23 @@
 @php
     $processedRecordActions = $this->getCardActionsForRecord($record);
     $hasActions = !empty($processedRecordActions);
+    $cardAction = $this->getCardActionForRecord($record);
+    $hasCardAction = $this->hasCardAction($record);
 @endphp
 
 <div
     @class([
         'ff-card kanban-card',
-        'ff-card--interactive' => $hasActions,
-        'ff-card--non-interactive' => !$hasActions
+        'ff-card--interactive' => $hasActions || $hasCardAction,
+        'ff-card--clickable' => $hasCardAction,
+        'ff-card--non-interactive' => !$hasActions && !$hasCardAction
     ])
     x-sortable-handle
     x-sortable-item="{{ $record['id'] }}"
+    @if($hasCardAction && $cardAction)
+        wire:click="mountAction('{{ $cardAction }}', { recordKey: '{{ $record['id'] }}' })"
+        style="cursor: pointer;"
+    @endif
 >
     <div class="ff-card__content">
         <div class="ff-card__header">
@@ -20,7 +27,7 @@
 
             {{-- Render record actions --}}
             @if($hasActions)
-                <div class="ff-card__actions">
+                <div class="ff-card__actions" @if($hasCardAction) @click.stop @endif>
                     <x-filament-actions::group :actions="$processedRecordActions" />
                 </div>
             @endif

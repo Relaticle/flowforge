@@ -401,6 +401,44 @@ class KanbanBoard extends Component implements HasActions, HasForms
     }
 
     /**
+     * Get the card action for a specific record.
+     * This method follows Filament's pattern for record actions.
+     */
+    public function getCardActionForRecord(array $recordData): ?string
+    {
+        $boardPage = $this->getBoardPage();
+        if (! $boardPage) {
+            return null;
+        }
+
+        $board = $boardPage->getBoard();
+        
+        if (! method_exists($board, 'getCardAction')) {
+            return null;
+        }
+
+        try {
+            // Get the record model
+            $recordModel = $this->getAdapter()->getModelById($recordData['id']);
+            if (! $recordModel) {
+                return null;
+            }
+
+            return $board->getCardAction($recordModel);
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
+    /**
+     * Check if a card has an action defined.
+     */
+    public function hasCardAction(array $recordData): bool
+    {
+        return $this->getCardActionForRecord($recordData) !== null;
+    }
+
+    /**
      * Refresh all board data.
      */
     public function refreshBoard(): void
@@ -513,8 +551,8 @@ class KanbanBoard extends Component implements HasActions, HasForms
         // Get the last (current) mounted action
         $currentMountedAction = end($mountedActions);
 
-        // Extract recordKey from the context
-        $recordKey = $currentMountedAction['context']['recordKey'] ?? null;
+        // Extract recordKey from the arguments (second parameter of mountAction)
+        $recordKey = $currentMountedAction['arguments']['recordKey'] ?? null;
 
         if (! $recordKey) {
             return null;

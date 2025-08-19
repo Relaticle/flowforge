@@ -30,8 +30,24 @@
         @apply cursor-pointer;
     }
 
+    &.ff-card--clickable {
+        @apply cursor-pointer transition-all duration-200 ease-in-out;
+
+        &:hover {
+            @apply transform -translate-y-0.5 shadow-lg ring-1 ring-primary-200 dark:ring-primary-800/30;
+        }
+
+        &:active {
+            @apply transform translate-y-0 shadow-md;
+        }
+    }
+
     &.ff-card--non-interactive {
         @apply cursor-default;
+    }
+
+    .ff-card__actions {
+        @apply relative z-10;
     }
 }
 
