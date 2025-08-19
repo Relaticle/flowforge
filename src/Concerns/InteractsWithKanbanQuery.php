@@ -48,14 +48,6 @@ trait InteractsWithKanbanQuery
         return $this;
     }
 
-    /**
-     * @deprecated Use cardDescription() instead
-     */
-    public function description(string|Closure $attribute): static
-    {
-        return $this->cardDescription($attribute);
-    }
-
     public function defaultSort(string $column, string $direction = 'asc'): static
     {
         $this->defaultSort = [
