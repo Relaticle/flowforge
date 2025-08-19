@@ -41,8 +41,8 @@ abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
 
     public function bootedInteractsWithActions(): void
     {
-        // Recreate board fresh (Filament pattern)
-        $this->board = $this->board(Board::make());
+        // Get or create the board (don't overwrite existing configuration)
+        $this->board = $this->getBoard();
 
         // Set the query on the board if not already set
         if (! $this->board->getQuery()) {

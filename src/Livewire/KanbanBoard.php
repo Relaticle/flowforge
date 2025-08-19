@@ -190,6 +190,11 @@ class KanbanBoard extends Component implements HasActions, HasForms
         foreach ($boardPage->getBoard()->getRecordActions() as $action) {
             $this->cacheBoardAction($action);
         }
+
+        // Cache any registered card actions (from Action objects)
+        foreach ($boardPage->getBoard()->getRegisteredCardActions() as $action) {
+            $this->cacheBoardAction($action);
+        }
     }
 
     /**
@@ -412,7 +417,7 @@ class KanbanBoard extends Component implements HasActions, HasForms
         }
 
         $board = $boardPage->getBoard();
-        
+
         if (! method_exists($board, 'getCardAction')) {
             return null;
         }
@@ -424,7 +429,22 @@ class KanbanBoard extends Component implements HasActions, HasForms
                 return null;
             }
 
-            return $board->getCardAction($recordModel);
+            $actionName = $board->getCardAction($recordModel);
+
+            // If we have a registered card action, cache it for Filament's action system
+            if ($actionName && ($registeredAction = $board->getRegisteredCardAction($actionName))) {
+                \Illuminate\Support\Facades\Log::info('KanbanBoard::getCardActionForRecord caching action', [
+                    'action_name' => $actionName,
+                    'record_id' => $recordData['id'],
+                ]);
+
+                $actionClone = $registeredAction->getClone();
+                $actionClone->livewire($this);
+                $actionClone->record($recordModel);
+                $this->cacheAction($actionClone);
+            }
+
+            return $actionName;
         } catch (\Exception) {
             return null;
         }
@@ -551,16 +571,32 @@ class KanbanBoard extends Component implements HasActions, HasForms
         // Get the last (current) mounted action
         $currentMountedAction = end($mountedActions);
 
-        // Extract recordKey from the arguments (second parameter of mountAction)
-        $recordKey = $currentMountedAction['arguments']['recordKey'] ?? null;
+        // Extract recordKey from either context or arguments (both are supported)
+        $recordKey = $currentMountedAction['context']['recordKey'] ??
+                    $currentMountedAction['arguments']['recordKey'] ?? null;
+
+        \Illuminate\Support\Facades\Log::info('KanbanBoard::getDefaultActionRecord called', [
+            'action_name' => $action->getName(),
+            'recordKey' => $recordKey,
+            'context' => $currentMountedAction['context'] ?? [],
+        ]);
 
         if (! $recordKey) {
             return null;
         }
 
         // Resolve the record using our adapter
-        return $this->getAdapter()->getModelById($recordKey);
+        $record = $this->getAdapter()->getModelById($recordKey);
+
+        \Illuminate\Support\Facades\Log::info('KanbanBoard::getDefaultActionRecord resolved', [
+            'recordKey' => $recordKey,
+            'record_found' => $record !== null,
+            'record_id' => $record ? $record->getKey() : null,
+        ]);
+
+        return $record;
     }
+
 
     /**
      * Render the component.

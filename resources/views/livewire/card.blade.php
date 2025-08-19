@@ -17,7 +17,7 @@
     x-sortable-handle
     x-sortable-item="{{ $record['id'] }}"
     @if($hasCardAction && $cardAction)
-        wire:click="mountAction('{{ $cardAction }}', { recordKey: '{{ $record['id'] }}' })"
+        wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
         style="cursor: pointer;"
     @endif
 >

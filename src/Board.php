@@ -30,6 +30,11 @@ class Board extends ViewComponent
 
     protected array $filters = [];
 
+    /**
+     * @var array<string, \Filament\Actions\Action>
+     */
+    protected array $registeredCardActions = [];
+
     final public function __construct()
     {
         // Board should be instantiated via make() method only
@@ -67,6 +72,37 @@ class Board extends ViewComponent
             'filters' => [$this->getFilters()],
             default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
         };
+    }
+
+    /**
+     * Override registerCardActionInstance to store Action objects.
+     */
+    protected function registerCardActionInstance(\Filament\Actions\Action $action, \Illuminate\Database\Eloquent\Model | array $record): void
+    {
+        \Illuminate\Support\Facades\Log::info('Board::registerCardActionInstance called', [
+            'action_name' => $action->getName(),
+            'record_id' => is_array($record) ? ($record['id'] ?? 'unknown') : $record->getKey(),
+        ]);
+        
+        $this->registeredCardActions[$action->getName()] = $action;
+    }
+
+    /**
+     * Get a registered card action by name.
+     */
+    public function getRegisteredCardAction(string $name): ?\Filament\Actions\Action
+    {
+        return $this->registeredCardActions[$name] ?? null;
+    }
+
+    /**
+     * Get all registered card actions.
+     *
+     * @return array<string, \Filament\Actions\Action>
+     */
+    public function getRegisteredCardActions(): array
+    {
+        return $this->registeredCardActions;
     }
 
     protected function setUp(): void
