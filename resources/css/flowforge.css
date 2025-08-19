@@ -117,7 +117,7 @@
     }
 
     .ff-column__content {
-        @apply p-3 flex-1 overflow-y-auto overflow-x-hidden;
+        @apply p-3 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain;
         max-height: calc(100vh - 13rem);
     }
 

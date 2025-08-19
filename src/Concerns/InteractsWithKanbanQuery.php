@@ -41,11 +41,19 @@ trait InteractsWithKanbanQuery
         return $this;
     }
 
-    public function description(string|Closure $attribute): static
+    public function cardDescription(string|Closure $attribute): static
     {
         $this->descriptionAttribute = $attribute;
 
         return $this;
+    }
+
+    /**
+     * @deprecated Use cardDescription() instead
+     */
+    public function description(string|Closure $attribute): static
+    {
+        return $this->cardDescription($attribute);
     }
 
     public function defaultSort(string $column, string $direction = 'asc'): static
