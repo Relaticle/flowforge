@@ -2,6 +2,8 @@
 .idea
 .phpunit.result.cache
 .vscode
+.claude
+CLAUDE.md
 build
 composer.lock
 coverage
