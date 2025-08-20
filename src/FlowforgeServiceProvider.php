@@ -33,6 +33,8 @@ class FlowforgeServiceProvider extends PackageServiceProvider
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
+                    ->publishMigrations()
+                    ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('relaticle/flowforge');
             });
 

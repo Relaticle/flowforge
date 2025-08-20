@@ -60,7 +60,7 @@
                 >
                     <div wire:loading wire:target="loadMoreItems('{{ $columnId }}')"
                          class="ff-column__loading-text">
-                        {{ __('Loading more cards...') }}
+                        {{ __('flowforge::flowforge.loading_more_cards') }}
                         <div class="mt-1 flex justify-center">
                             <svg class="animate-spin h-4 w-4 text-primary-600 dark:text-primary-400"
                                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

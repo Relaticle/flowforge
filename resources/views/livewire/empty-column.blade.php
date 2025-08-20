@@ -6,6 +6,6 @@
         class="ff-empty-column__icon" 
     />
     <p class="ff-empty-column__text">
-        {{ __('No :cardLabel in this column', ['cardLabel' => strtolower($pluralCardLabel)]) }}
+        {{ __('flowforge::flowforge.no_cards_in_column', ['cardLabel' => strtolower($pluralCardLabel)]) }}
     </p>
 </div>
