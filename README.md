@@ -2,11 +2,12 @@
 
 **Transform any Laravel model into a drag-and-drop Kanban board in minutes.**
 
-[![Latest Version](https://img.shields.io/packagist/v/relaticle/flowforge.svg?style=flat-square)](https://packagist.org/packages/relaticle/flowforge)
-[![Total Downloads](https://img.shields.io/packagist/dt/relaticle/flowforge.svg?style=flat-square)](https://packagist.org/packages/relaticle/flowforge)
-[![PHP 8.3+](https://img.shields.io/badge/php-8.3%2B-blue.svg?style=flat-square)](https://php.net)
-[![Laravel 11+](https://img.shields.io/badge/laravel-11%2B-red.svg?style=flat-square)](https://laravel.com)
-[![Filament 4](https://img.shields.io/badge/filament-4.x-purple.svg?style=flat-square)](https://filamentphp.com)
+[![Latest Version](https://img.shields.io/packagist/v/relaticle/flowforge.svg?style=for-the-badge)](https://packagist.org/packages/relaticle/flowforge)
+[![Total Downloads](https://img.shields.io/packagist/dt/relaticle/flowforge.svg?style=for-the-badge)](https://packagist.org/packages/relaticle/flowforge)
+[![PHP 8.3+](https://img.shields.io/badge/php-8.3%2B-blue.svg?style=for-the-badge)](https://php.net)
+[![Laravel 11+](https://img.shields.io/badge/laravel-11%2B-red.svg?style=for-the-badge)](https://laravel.com)
+[![Filament 4](https://img.shields.io/badge/filament-4.x-purple.svg?style=for-the-badge)](https://filamentphp.com)
+[![Tests](https://img.shields.io/github/actions/workflow/status/relaticle/flowforge/run-tests.yml?branch=2.x&style=for-the-badge&label=tests)](https://github.com/relaticle/flowforge/actions)
 
 <div align="center">
 <img src="art/preview.png" alt="Flowforge Kanban Board" width="800">
