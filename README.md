@@ -20,6 +20,8 @@
 
 ---
 
+> **Note:** For Filament v3 compatibility, use version 1.x of this package.
+
 ## Quick Start
 
 Install and create your first Kanban board:
