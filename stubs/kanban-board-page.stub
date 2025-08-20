@@ -19,7 +19,7 @@ class {{ class }} extends BoardPage
         return $board
             ->query($this->getEloquentQuery())
             ->cardTitle('{{ titleField }}')
-            ->columnField('{{ statusField }}')
+            ->columnIdentifier('{{ statusField }}')
             ->defaultSort('order_column')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),

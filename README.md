@@ -29,7 +29,7 @@ composer require relaticle/flowforge
 php artisan flowforge:make-board TaskBoard --model=Task
 ```
 
-That's it! Add the page to your Filament panel and you have a working Kanban board.
+That's it! Add the generated page to your Filament panel and you have a working Kanban board.
 
 <details>
 <summary>📋 <strong>Show complete example</strong></summary>
@@ -59,7 +59,7 @@ class TaskBoard extends BoardPage
         return $board
             ->query($this->getEloquentQuery())
             ->cardTitle('title')
-            ->columnField('status')
+            ->columnIdentifier('status')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
@@ -150,7 +150,7 @@ public function board(Board $board): Board
     return $board
         ->query($this->getEloquentQuery())
         ->cardTitle('title')
-        ->columnField('status')
+        ->columnIdentifier('status')
         ->columns([
             Column::make('backlog')->label('Backlog'),
             Column::make('active')->label('Active'),
@@ -172,7 +172,7 @@ public function board(Board $board): Board
     return $board
         ->query($this->getEloquentQuery())
         ->cardTitle('title')
-        ->columnField('status')
+        ->columnIdentifier('status')
         ->columns([...])
         ->columnActions([
             CreateAction::make()
@@ -211,10 +211,10 @@ use Relaticle\Flowforge\Property;
 | Method | Description | Required |
 |--------|-------------|----------|
 | `cardTitle(string)` | Field used for card titles | ✅ |
-| `columnField(string)` | Field that determines column placement | ✅ |
+| `columnIdentifier(string)` | Field that determines column placement | ✅ |
 | `columns(array)` | Define board columns | ✅ |
 | `query(Builder)` | Set the data source | ✅ |
-| `defaultSort(string)` | Field used for drag & drop ordering | |
+| `defaultSort(string, ?string)` | Field and optional direction for drag & drop ordering | |
 | `cardProperties(array)` | Additional fields to display | |
 | `columnActions(array)` | Actions for column headers | |
 | `cardActions(array)` | Actions for individual cards | |
@@ -273,7 +273,7 @@ use Relaticle\Flowforge\Property;
 
 ## Contributing
 
-Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
