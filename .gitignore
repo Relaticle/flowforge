@@ -3,6 +3,7 @@
 .phpunit.result.cache
 .vscode
 .claude
+.phpunit.cache
 CLAUDE.md
 build
 composer.lock
