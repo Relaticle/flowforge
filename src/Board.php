@@ -83,7 +83,7 @@ class Board extends ViewComponent
             'action_name' => $action->getName(),
             'record_id' => is_array($record) ? ($record['id'] ?? 'unknown') : $record->getKey(),
         ]);
-        
+
         $this->registeredCardActions[$action->getName()] = $action;
     }
 

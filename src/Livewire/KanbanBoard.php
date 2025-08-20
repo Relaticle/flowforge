@@ -597,7 +597,6 @@ class KanbanBoard extends Component implements HasActions, HasForms
         return $record;
     }
 
-
     /**
      * Render the component.
      */
