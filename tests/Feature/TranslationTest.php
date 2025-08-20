@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\App;
-use Relaticle\Flowforge\FlowforgeServiceProvider;
 
 test('translation files exist for supported languages', function () {
     $englishPath = __DIR__ . '/../../resources/lang/en/flowforge.php';
