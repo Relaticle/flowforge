@@ -21,6 +21,8 @@
 ---
 
 > **Note:** For Filament v3 compatibility, use version 1.x of this package.
+> 
+> **⚠️ Beta Warning:** This is a beta version (2.x) and may contain breaking changes.
 
 ## Quick Start
 
