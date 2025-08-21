@@ -1,10 +1,11 @@
+@php use Filament\Support\Facades\FilamentAsset; @endphp
 @props(['columns', 'config'])
 
 <div
     class="ff-board"
     x-load
-    x-load-css="[@js(\Filament\Support\Facades\FilamentAsset::getStyleHref('flowforge', package: 'relaticle/flowforge'))]"
-    x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('flowforge', package: 'relaticle/flowforge') }}"
+    x-load-css="[@js(FilamentAsset::getStyleHref('flowforge', package: 'relaticle/flowforge'))]"
+    x-load-src="{{ FilamentAsset::getAlpineComponentSrc('flowforge', package: 'relaticle/flowforge') }}"
     x-data="flowforge({
         state: {
             columns: @js($columns),
@@ -31,5 +32,5 @@
         </div>
     </div>
 
-    <x-filament-actions::modals />
+    <x-filament-actions::modals/>
 </div>

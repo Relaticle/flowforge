@@ -6,69 +6,32 @@ namespace Relaticle\Flowforge\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Relaticle\Flowforge\Board;
 
 trait InteractsWithBoard
 {
-    protected ?Board $board = null;
+    protected Board $board;
 
     /**
      * Get the board configuration.
      */
     public function getBoard(): Board
     {
-        return $this->board ??= $this->board(Board::make());
+        return $this->board;
     }
-
-    /**
-     * Configure the board.
-     */
-    abstract public function board(Board $board): Board;
-
-    /**
-     * Get the Eloquent query for the board.
-     */
-    abstract public function getEloquentQuery(): Builder;
 
     /**
      * Boot the InteractsWithBoard trait.
      */
     public function bootedInteractsWithBoard(): void
     {
-        // Recreate board fresh (Filament pattern)
-        $this->board = $this->board(Board::make());
-
-        // Set the query on the board if not already set
-        if (! $this->board->getQuery()) {
-            $this->board->query($this->getEloquentQuery());
-        }
+        $this->board = $this->board($this->makeBoard());
     }
 
-    /**
-     * Move a record from one column to another.
-     */
-    public function moveRecord(Model $record, string $toColumn, ?string $fromColumn = null): void
+    protected function makeBoard(): Board
     {
-        $board = $this->getBoard();
-        $columnIdentifier = $board->getColumnIdentifierAttribute();
-
-        if (! $columnIdentifier) {
-            throw new \Exception('Column identifier attribute is required for moving records');
-        }
-
-        // Update the record's column identifier
-        $record->{$columnIdentifier} = $toColumn;
-        $record->save();
-
-        // Refresh the model to ensure relationships are up to date
-        $record->refresh();
-
-        // Force refresh the board data
-        if (method_exists($this, 'refreshBoard')) {
-            $this->refreshBoard();
-        } else {
-            // Fallback to Livewire refresh
-            $this->dispatch('$refresh');
-        }
+        return Board::make($this)
+            ->query(fn (): Builder | Relation | null => $this->getBoardQuery());
     }
 }

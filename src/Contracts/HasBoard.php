@@ -18,9 +18,4 @@ interface HasBoard
      * Configure the board.
      */
     public function board(Board $board): Board;
-
-    /**
-     * Get the Eloquent query for the board.
-     */
-    public function getEloquentQuery(): Builder;
 }
