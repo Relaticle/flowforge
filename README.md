@@ -62,7 +62,7 @@ class TaskBoard extends BoardPage
     {
         return $board
             ->query($this->getEloquentQuery())
-            ->cardTitle('title')
+            ->recordTitleAttribute('title')
             ->columnIdentifier('status')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
@@ -153,7 +153,7 @@ public function board(Board $board): Board
 {
     return $board
         ->query($this->getEloquentQuery())
-        ->cardTitle('title')
+        ->recordTitleAttribute('title')
         ->columnIdentifier('status')
         ->columns([
             Column::make('backlog')->label('Backlog'),
@@ -175,7 +175,7 @@ public function board(Board $board): Board
 {
     return $board
         ->query($this->getEloquentQuery())
-        ->cardTitle('title')
+        ->recordTitleAttribute('title')
         ->columnIdentifier('status')
         ->columns([...])
         ->columnActions([
@@ -214,7 +214,7 @@ use Relaticle\Flowforge\Property;
 
 | Method | Description | Required |
 |--------|-------------|----------|
-| `cardTitle(string)` | Field used for card titles | ✅ |
+| `recordTitleAttribute(string)` | Field used for card titles | ✅ |
 | `columnIdentifier(string)` | Field that determines column placement | ✅ |
 | `columns(array)` | Define board columns | ✅ |
 | `query(Builder)` | Set the data source | ✅ |
