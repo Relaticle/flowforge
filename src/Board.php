@@ -25,12 +25,11 @@ class Board extends ViewComponent
     /**
      * @var view-string
      */
-    protected string $view = 'flowforge::board';
+    protected string $view = 'flowforge::index';
 
     protected string $viewIdentifier = 'board';
 
     protected string $evaluationIdentifier = 'board';
-
 
     final public function __construct(HasBoard $livewire)
     {
@@ -45,12 +44,27 @@ class Board extends ViewComponent
         return $static;
     }
 
-
     protected function setUp(): void
     {
         parent::setUp();
 
         // Any board-specific setup can go here
+    }
+
+    /**
+     * Get registered card actions.
+     */
+    public function getRegisteredCardActions(): array
+    {
+        return [];
+    }
+
+    /**
+     * Get a registered card action by name.
+     */
+    public function getRegisteredCardAction(string $name): ?\Filament\Actions\Action
+    {
+        return null;
     }
 
     protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array

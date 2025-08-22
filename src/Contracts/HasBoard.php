@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Contracts;
 
-use Illuminate\Database\Eloquent\Builder;
 use Relaticle\Flowforge\Board;
 
 interface HasBoard
