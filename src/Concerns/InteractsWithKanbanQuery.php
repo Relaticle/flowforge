@@ -40,7 +40,7 @@ trait InteractsWithKanbanQuery
         return $this;
     }
 
-    public function getQuery(): Builder|Relation|null
+    public function getQuery(): Builder | Relation | null
     {
         return $this->evaluate($this->query);
     }

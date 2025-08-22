@@ -38,7 +38,7 @@ test('board actions are configured correctly via livewire', function () {
 
 test('column actions work via livewire', function () {
     $component = Livewire::test(TestBoardWithActions::class);
-    
+
     $component->call('getColumnActionsForColumn', 'todo')
         ->assertReturned(fn ($actions) => is_array($actions) && count($actions) > 0);
 });
@@ -46,10 +46,10 @@ test('column actions work via livewire', function () {
 test('card actions work via livewire', function () {
     $task = Task::first();
     $component = Livewire::test(TestBoardWithActions::class);
-    
+
     $board = $component->instance()->getBoard();
     $formatted = $board->formatBoardRecord($task);
-    
+
     $component->call('getCardActionsForRecord', $formatted)
         ->assertReturned(fn ($actions) => is_array($actions) && count($actions) > 0);
 });
@@ -57,13 +57,13 @@ test('card actions work via livewire', function () {
 test('card action can be executed via livewire', function () {
     $task = Task::first();
     $component = Livewire::test(TestBoardWithActions::class);
-    
+
     $board = $component->instance()->getBoard();
     $formatted = $board->formatBoardRecord($task);
-    
+
     $component->call('getCardActionForRecord', $formatted)
         ->assertReturned('edit');
-    
+
     $component->call('hasCardAction', $formatted)
         ->assertReturned(true);
 });
