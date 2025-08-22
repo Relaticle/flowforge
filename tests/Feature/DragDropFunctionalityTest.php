@@ -17,7 +17,7 @@ test('updateRecordsOrderAndColumn moves task between columns', function () {
     expect($task->status)->toBe('todo');
 
     Livewire::test(TestBoard::class)
-        ->call('updateRecordsOrderAndColumn', 'in_progress', [$task->id])
+        ->call('updateRecordsOrderAndColumn', 'in_progress', [$task->getKey()])
         ->assertReturned(true);
 
     $task->refresh();
@@ -29,7 +29,7 @@ test('updateRecordsOrderAndColumn updates order correctly', function () {
     $task2 = Task::where('title', 'Task 2')->first();
 
     Livewire::test(TestBoard::class)
-        ->call('updateRecordsOrderAndColumn', 'todo', [$task2->id, $task1->id]);
+        ->call('updateRecordsOrderAndColumn', 'todo', [$task2->getKey(), $task1->getKey()]);
 
     $task1->refresh();
     $task2->refresh();
@@ -90,9 +90,9 @@ test('getBoardRecord returns correct model', function () {
 
     $component = Livewire::test(TestBoard::class);
 
-    $component->call('getBoardRecord', $task->id);
+    $component->call('getBoardRecord', $task->getKey());
 
-    $result = $component->instance()->getBoardRecord($task->id);
+    $result = $component->instance()->getBoardRecord($task->getKey());
     expect($result)->toBeInstanceOf(Task::class);
-    expect($result->id)->toBe($task->id);
+    expect($result->getKey())->toBe($task->getKey());
 });
