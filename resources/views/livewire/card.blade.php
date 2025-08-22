@@ -9,51 +9,36 @@
 
 <div
     @class([
-        'ff-card kanban-card',
-        'ff-card--interactive' => $hasActions || $hasCardAction,
-        'ff-card--clickable' => $hasCardAction,
-        'ff-card--non-interactive' => !$hasActions && !$hasCardAction
+        'mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-100 hover:shadow-md',
+        'cursor-pointer' => $hasActions || $hasCardAction,
+        'cursor-pointer transition-all duration-100 ease-in-out hover:shadow-lg hover:border-neutral-400 active:shadow-md' => $hasCardAction,
+        'cursor-default' => !$hasActions && !$hasCardAction,
     ])
-    x-sortable-handle
-    x-sortable-item="{{ $record['id'] }}"
+    @if($this->getBoard()->getReorderBy() !== null)
+        x-sortable-handle
+        x-sortable-item="{{ $record['id'] }}"
+    @endif
     @if($hasCardAction && $cardAction)
         wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
         style="cursor: pointer;"
     @endif
 >
-    <div class="ff-card__content">
-        <div class="ff-card__header">
-            <h4 class="ff-card__title">{{ $record['title'] }}</h4>
+    <div class="p-3">
+        <div class="flex items-center justify-between mb-2">
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ $record['title'] }}</h4>
 
             {{-- Render record actions --}}
             @if($hasActions)
-                <div class="ff-card__actions" @if($hasCardAction) @click.stop @endif>
+                <div class="relative z-10" @if($hasCardAction) @click.stop @endif>
                     <x-filament-actions::group :actions="$processedRecordActions" />
                 </div>
             @endif
         </div>
 
-        @if(!empty($record['description']))
-            <p class="ff-card__description">{{ $record['description'] }}</p>
-        @endif
-
-        @if(collect($record['attributes'] ?? [])->filter(fn($attribute) => !empty($attribute['value']))->isNotEmpty())
-            <div class="ff-card__attributes">
-                @foreach($record['attributes'] as $attribute => $data)
-                    @if(isset($data) && !empty($data['value']))
-                        <x-flowforge::card-badge
-                            :label="$data['label']"
-                            :value="$data['value']"
-                            :color="$data['color'] ?? 'default'"
-                            :icon="$data['icon'] ?? null"
-                            :iconColor="$data['iconColor'] ?? null"
-                            :type="$data['type'] ?? null"
-                            :badge="$data['badge'] ?? null"
-                            :rounded="$data['rounded'] ?? 'md'"
-                            :size="$data['size'] ?? 'md'"
-                        />
-                    @endif
-                @endforeach
+        {{-- Render card schema with compact spacing --}}
+        @if(isset($record['schema_html']) && !empty($record['schema_html']))
+            <div class="space-y-1 [&_.fi-sc-flex]:gap-2 [&_.fi-sc-flex.fi-dense]:gap-1 [&_.fi-in-entry]:gap-y-0.5 [&_.fi-in-entry-content-ctn]:gap-x-1.5">
+                {!! $record['schema_html'] !!}
             </div>
         @endif
     </div>

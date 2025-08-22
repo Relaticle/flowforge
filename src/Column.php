@@ -13,20 +13,14 @@ use Filament\Support\Concerns\HasIconColor;
 use Filament\Support\Concerns\HasIconPosition;
 use Illuminate\Contracts\Support\Htmlable;
 use Relaticle\Flowforge\Concerns\BelongsToBoard;
-use Relaticle\Flowforge\Concerns\CanBeSortable;
-use Relaticle\Flowforge\Concerns\CanBeVisible;
-use Relaticle\Flowforge\Concerns\HasLimit;
 
 class Column extends ViewComponent
 {
     use BelongsToBoard;
-    use CanBeSortable;
-    use CanBeVisible;
     use HasColor;
     use HasIcon;
     use HasIconColor;
     use HasIconPosition;
-    use HasLimit;
 
     /**
      * @var view-string

@@ -2,13 +2,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev:styles": "npx @tailwindcss/cli -i resources/css/index.css -o resources/dist/flowforge.css --postcss --watch",
-        "dev:scripts": "node bin/build.js --dev",
-        "build:styles": "npx @tailwindcss/cli -i resources/css/index.css -o resources/dist/flowforge.css --postcss --minify && npm run purge",
-        "build:scripts": "node bin/build.js",
-        "purge": "filament-purge -i resources/dist/flowforge.css -o resources/dist/flowforge.css",
-        "dev": "npm-run-all --parallel dev:*",
-        "build": "npm-run-all build:*"
+        "dev": "node bin/build.js --dev",
+        "build": "node bin/build.js"
     },
     "devDependencies": {
         "@awcodes/filament-plugin-purge": "^1.1.2",
