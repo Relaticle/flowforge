@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Board\Concerns;
 
-use Closure;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 trait HasBoardRecords
 {
     protected string $recordTitleAttribute = 'title';
+
     protected ?string $recordDescriptionAttribute = null;
 
     /**
@@ -22,6 +22,7 @@ trait HasBoardRecords
     public function recordTitleAttribute(string $attribute): static
     {
         $this->recordTitleAttribute = $attribute;
+
         return $this;
     }
 
@@ -31,6 +32,7 @@ trait HasBoardRecords
     public function recordDescriptionAttribute(?string $attribute): static
     {
         $this->recordDescriptionAttribute = $attribute;
+
         return $this;
     }
 
@@ -57,7 +59,7 @@ trait HasBoardRecords
     {
         $query = $this->getQuery();
 
-        if (!$query) {
+        if (! $query) {
             return collect();
         }
 
@@ -92,6 +94,7 @@ trait HasBoardRecords
         $query = $this->getQuery();
         if ($query) {
             $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
+
             return (clone $query)->where($statusField, $columnId)->count();
         }
 
@@ -111,6 +114,7 @@ trait HasBoardRecords
 
         // Fallback: direct query
         $query = $this->getQuery();
+
         return $query ? (clone $query)->find($recordId) : null;
     }
 
