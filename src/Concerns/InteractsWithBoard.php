@@ -149,6 +149,40 @@ trait InteractsWithBoard
     }
 
     /**
+     * Get the default record for an action (Filament's record injection system).
+     */
+    public function getDefaultActionRecord(\Filament\Actions\Action $action): ?\Illuminate\Database\Eloquent\Model
+    {
+        // Get the current mounted action context
+        $mountedActions = $this->mountedActions ?? [];
+        
+        if (empty($mountedActions)) {
+            return null;
+        }
+        
+        // Get the current mounted action
+        $currentMountedAction = end($mountedActions);
+        
+        // Extract recordKey from context or arguments
+        $recordKey = $currentMountedAction['context']['recordKey'] ?? 
+                    $currentMountedAction['arguments']['recordKey'] ?? null;
+        
+        if (!$recordKey) {
+            return null;
+        }
+        
+        // Resolve the record using board query
+        $board = $this->getBoard();
+        $query = $board->getQuery();
+        
+        if ($query) {
+            return (clone $query)->find($recordKey);
+        }
+        
+        return null;
+    }
+
+    /**
      * Get board query.
      */
     public function getBoardQuery(): ?Builder

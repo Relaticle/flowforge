@@ -20,7 +20,9 @@ use Relaticle\Flowforge\Contracts\HasBoard;
 abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
 {
     use InteractsWithActions;
-    use InteractsWithBoard;
+    use InteractsWithBoard {
+        InteractsWithBoard::getDefaultActionRecord insteadof InteractsWithActions;
+    }
     use InteractsWithForms;
 
     protected string $view = 'flowforge::filament.pages.board-page';
