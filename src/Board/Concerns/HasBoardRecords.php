@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 trait HasBoardRecords
 {
     protected string $recordTitleAttribute = 'title';
-    protected string $recordDescriptionAttribute = 'description';
+    protected ?string $recordDescriptionAttribute = null;
 
     /**
      * Set the record title attribute.
@@ -28,7 +28,7 @@ trait HasBoardRecords
     /**
      * Set the record description attribute.
      */
-    public function recordDescriptionAttribute(string $attribute): static
+    public function recordDescriptionAttribute(?string $attribute): static
     {
         $this->recordDescriptionAttribute = $attribute;
         return $this;
@@ -45,7 +45,7 @@ trait HasBoardRecords
     /**
      * Get the record description attribute.
      */
-    public function getRecordDescriptionAttribute(): string
+    public function getRecordDescriptionAttribute(): ?string
     {
         return $this->recordDescriptionAttribute;
     }
@@ -56,21 +56,21 @@ trait HasBoardRecords
     public function getBoardRecords(string $columnId): Collection
     {
         $query = $this->getQuery();
-        
+
         if (!$query) {
             return collect();
         }
 
         $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-        
+
         // Get pagination limit from Livewire if available
         $livewire = $this->getLivewire();
         $limit = 10; // default
-        
+
         if (property_exists($livewire, 'columnCardLimits')) {
             $limit = $livewire->columnCardLimits[$columnId] ?? 10;
         }
-        
+
         return (clone $query)
             ->where($statusField, $columnId)
             ->limit($limit)
@@ -83,7 +83,7 @@ trait HasBoardRecords
     public function getBoardRecordCount(string $columnId): int
     {
         $livewire = $this->getLivewire();
-        
+
         if (method_exists($livewire, 'getBoardColumnRecordCount')) {
             return $livewire->getBoardColumnRecordCount($columnId);
         }
@@ -104,7 +104,7 @@ trait HasBoardRecords
     public function getBoardRecord(int | string $recordId): ?Model
     {
         $livewire = $this->getLivewire();
-        
+
         if (method_exists($livewire, 'getBoardRecord')) {
             return $livewire->getBoardRecord($recordId);
         }
@@ -119,10 +119,12 @@ trait HasBoardRecords
      */
     public function formatBoardRecord(Model $record): array
     {
+        $descriptionAttribute = $this->getRecordDescriptionAttribute();
+
         $formatted = [
             'id' => $record->getKey(),
             'title' => data_get($record, $this->getRecordTitleAttribute()),
-            'description' => data_get($record, $this->getRecordDescriptionAttribute()),
+            'description' => $descriptionAttribute ? data_get($record, $this->getRecordDescriptionAttribute()) : null,
             'column' => data_get($record, $this->getColumnIdentifierAttribute() ?? 'status'),
         ];
 

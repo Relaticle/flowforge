@@ -71,7 +71,7 @@ class Board extends ViewComponent
                 return $this->board->getRecordTitleAttribute();
             }
             
-            public function getDescriptionField(): string {
+            public function getDescriptionField(): ?string {
                 return $this->board->getRecordDescriptionAttribute();
             }
             
