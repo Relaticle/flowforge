@@ -8,6 +8,7 @@ use Filament\Support\Components\ViewComponent;
 use Relaticle\Flowforge\Board\Concerns\CanSearchBoardRecords;
 use Relaticle\Flowforge\Board\Concerns\HasBoardActions;
 use Relaticle\Flowforge\Board\Concerns\HasBoardColumns;
+use Relaticle\Flowforge\Board\Concerns\HasBoardFilters;
 use Relaticle\Flowforge\Board\Concerns\HasBoardRecords;
 use Relaticle\Flowforge\Concerns\BelongsToLivewire;
 use Relaticle\Flowforge\Concerns\HasCardSchema;
@@ -20,6 +21,7 @@ class Board extends ViewComponent
     use CanSearchBoardRecords;
     use HasBoardActions;
     use HasBoardColumns;
+    use HasBoardFilters;
     use HasBoardRecords;
     use HasCardSchema;
     use InteractsWithKanbanQuery;
@@ -109,6 +111,8 @@ class Board extends ViewComponent
         return [
             'columns' => $columns,
             'config' => $config,
+            'boardFilters' => $this->getBoardFilters(),
+            'hasBoardFilters' => $this->hasBoardFilters(),
         ];
     }
 

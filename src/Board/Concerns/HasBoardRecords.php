@@ -40,7 +40,7 @@ trait HasBoardRecords
         $query = $this->getQuery();
 
         if (! $query) {
-            return collect();
+            return new Collection();
         }
 
         $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
@@ -55,6 +55,13 @@ trait HasBoardRecords
 
         $queryClone = (clone $query)->where($statusField, $columnId);
 
+        // Apply board filters only if filtering trait is available
+        if (method_exists($livewire, 'applyFiltersToBoardQuery') && 
+            $livewire->getBoard()->hasBoardFilters() &&
+            !empty($livewire->boardFilters ?? [])) {
+            $queryClone = $livewire->applyFiltersToBoardQuery($queryClone);
+        }
+
         // Apply ordering if configured
         $reorderBy = $this->getReorderBy();
         if ($reorderBy) {
@@ -65,25 +72,28 @@ trait HasBoardRecords
     }
 
     /**
-     * Get record count for a column (delegates to Livewire).
+     * Get record count for a column (direct query with filters).
      */
     public function getBoardRecordCount(string $columnId): int
     {
-        $livewire = $this->getLivewire();
-
-        if (method_exists($livewire, 'getBoardColumnRecordCount')) {
-            return $livewire->getBoardColumnRecordCount($columnId);
-        }
-
-        // Fallback: direct query
         $query = $this->getQuery();
-        if ($query) {
-            $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-
-            return (clone $query)->where($statusField, $columnId)->count();
+        
+        if (! $query) {
+            return 0;
         }
 
-        return 0;
+        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
+        $queryClone = (clone $query)->where($statusField, $columnId);
+
+        // Apply board filters only if filtering trait is available
+        $livewire = $this->getLivewire();
+        if (method_exists($livewire, 'applyFiltersToBoardQuery') && 
+            $livewire->getBoard()->hasBoardFilters() &&
+            !empty($livewire->boardFilters ?? [])) {
+            $queryClone = $livewire->applyFiltersToBoardQuery($queryClone);
+        }
+
+        return $queryClone->count();
     }
 
     /**

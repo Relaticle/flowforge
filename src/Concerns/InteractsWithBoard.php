@@ -140,8 +140,8 @@ trait InteractsWithBoard
         $currentLimit = $this->columnCardLimits[$columnId] ?? 10;
         $this->columnCardLimits[$columnId] = $currentLimit + $count;
 
-        // Dispatch event to refresh the board
-        $this->dispatch('board-refreshed');
+        // Just refresh without dispatching events that might reset filter state
+        // The board will automatically refresh to show more items
     }
 
     /**
@@ -203,6 +203,11 @@ trait InteractsWithBoard
 
         $queryClone = (clone $query)->where($statusField, $columnId);
 
+        // Apply board filters if available and active
+        if (method_exists($this, 'applyFiltersToBoardQuery') && $board->hasBoardFilters()) {
+            $queryClone = $this->applyFiltersToBoardQuery($queryClone);
+        }
+
         // Apply ordering if configured
         $reorderBy = $board->getReorderBy();
         if ($reorderBy) {
@@ -225,8 +230,14 @@ trait InteractsWithBoard
         }
 
         $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
+        $queryClone = (clone $query)->where($statusField, $columnId);
 
-        return (clone $query)->where($statusField, $columnId)->count();
+        // Apply board filters if available and active
+        if (method_exists($this, 'applyFiltersToBoardQuery') && $board->hasBoardFilters()) {
+            $queryClone = $this->applyFiltersToBoardQuery($queryClone);
+        }
+
+        return $queryClone->count();
     }
 
     /**

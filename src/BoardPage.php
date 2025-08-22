@@ -10,6 +10,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Relaticle\Flowforge\Concerns\InteractsWithBoard;
+use Relaticle\Flowforge\Concerns\InteractWithBoardFilters;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
 /**
@@ -23,6 +24,7 @@ abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
         InteractsWithBoard::getDefaultActionRecord insteadof InteractsWithActions;
     }
     use InteractsWithForms;
+    use InteractWithBoardFilters;
 
     protected string $view = 'flowforge::filament.pages.board-page';
 
