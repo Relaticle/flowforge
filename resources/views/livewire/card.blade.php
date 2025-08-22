@@ -36,27 +36,10 @@
             @endif
         </div>
 
-        @if(!empty($record['description']))
-            <p class="ff-card__description">{{ $record['description'] }}</p>
-        @endif
-
-        @if(collect($record['attributes'] ?? [])->filter(fn($attribute) => !empty($attribute['value']))->isNotEmpty())
-            <div class="ff-card__attributes">
-                @foreach($record['attributes'] as $attribute => $data)
-                    @if(isset($data) && !empty($data['value']))
-                        <x-flowforge::card-badge
-                            :label="$data['label']"
-                            :value="$data['value']"
-                            :color="$data['color'] ?? 'default'"
-                            :icon="$data['icon'] ?? null"
-                            :iconColor="$data['iconColor'] ?? null"
-                            :type="$data['type'] ?? null"
-                            :badge="$data['badge'] ?? null"
-                            :rounded="$data['rounded'] ?? 'md'"
-                            :size="$data['size'] ?? 'md'"
-                        />
-                    @endif
-                @endforeach
+        {{-- Render card schema if configured --}}
+        @if(isset($record['schema_html']) && !empty($record['schema_html']))
+            <div class="ff-card__schema">
+                {!! $record['schema_html'] !!}
             </div>
         @endif
     </div>

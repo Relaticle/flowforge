@@ -10,7 +10,6 @@
         state: {
             columns: @js($columns),
             titleField: '{{ $config->getTitleField() }}',
-            descriptionField: '{{ $config->getDescriptionField() }}',
             columnField: '{{ $config->getColumnField() }}',
             cardLabel: '{{ $config->getSingularCardLabel() }}',
             pluralCardLabel: '{{ $config->getPluralCardLabel() }}'

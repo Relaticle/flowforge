@@ -14,8 +14,6 @@ trait HasBoardRecords
 {
     protected string $recordTitleAttribute = 'title';
 
-    protected ?string $recordDescriptionAttribute = null;
-
     /**
      * Set the record title attribute.
      */
@@ -27,29 +25,11 @@ trait HasBoardRecords
     }
 
     /**
-     * Set the record description attribute.
-     */
-    public function recordDescriptionAttribute(?string $attribute): static
-    {
-        $this->recordDescriptionAttribute = $attribute;
-
-        return $this;
-    }
-
-    /**
      * Get the record title attribute.
      */
     public function getRecordTitleAttribute(): string
     {
         return $this->recordTitleAttribute;
-    }
-
-    /**
-     * Get the record description attribute.
-     */
-    public function getRecordDescriptionAttribute(): ?string
-    {
-        return $this->recordDescriptionAttribute;
     }
 
     /**
@@ -119,35 +99,27 @@ trait HasBoardRecords
     }
 
     /**
-     * Format a record for display with properties.
+     * Format a record for display with Infolist entries.
      */
     public function formatBoardRecord(Model $record): array
     {
-        $descriptionAttribute = $this->getRecordDescriptionAttribute();
-
         $formatted = [
             'id' => $record->getKey(),
             'title' => data_get($record, $this->getRecordTitleAttribute()),
-            'description' => $descriptionAttribute ? data_get($record, $this->getRecordDescriptionAttribute()) : null,
             'column' => data_get($record, $this->getColumnIdentifierAttribute() ?? 'status'),
+            'model' => $record,
         ];
 
-        // Process card properties if available
-        if (method_exists($this, 'getCardProperties')) {
-            $properties = $this->getCardProperties();
-            foreach ($properties as $property) {
-                $name = $property->getName();
-                $value = $property->getFormattedState($record);
-
-                if ($value !== null && $value !== '') {
-                    $formatted['attributes'][$name] = [
-                        'label' => $property->getLabel(),
-                        'value' => $value,
-                        'color' => $property->getColor(),
-                        'icon' => $property->getIcon(),
-                        'iconColor' => $property->getIconColor(),
-                    ];
-                }
+        // Process card schema if available
+        if (method_exists($this, 'getCardSchema')) {
+            $schema = $this->getCardSchema();
+            
+            if ($schema !== null) {
+                // The schema is already built and configured
+                $schema->model($record);
+                
+                // Render the entire schema as HTML
+                $formatted['schema_html'] = $schema->toHtml();
             }
         }
 

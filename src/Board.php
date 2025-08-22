@@ -10,7 +10,7 @@ use Relaticle\Flowforge\Board\Concerns\HasBoardActions;
 use Relaticle\Flowforge\Board\Concerns\HasBoardColumns;
 use Relaticle\Flowforge\Board\Concerns\HasBoardRecords;
 use Relaticle\Flowforge\Concerns\BelongsToLivewire;
-use Relaticle\Flowforge\Concerns\HasProperties;
+use Relaticle\Flowforge\Concerns\HasCardSchema;
 use Relaticle\Flowforge\Concerns\InteractsWithKanbanQuery;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
@@ -21,7 +21,7 @@ class Board extends ViewComponent
     use HasBoardActions;
     use HasBoardColumns;
     use HasBoardRecords;
-    use HasProperties;
+    use HasCardSchema;
     use InteractsWithKanbanQuery;
 
     /**
@@ -69,10 +69,6 @@ class Board extends ViewComponent
             
             public function getTitleField(): string {
                 return $this->board->getRecordTitleAttribute();
-            }
-            
-            public function getDescriptionField(): ?string {
-                return $this->board->getRecordDescriptionAttribute();
             }
             
             public function getColumnField(): string {
