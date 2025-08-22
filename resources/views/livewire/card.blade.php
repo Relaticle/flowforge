@@ -9,9 +9,9 @@
 
 <div
     @class([
-        'mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-150 hover:shadow-md',
+        'mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-100 hover:shadow-md',
         'cursor-pointer' => $hasActions || $hasCardAction,
-        'cursor-pointer transition-all duration-200 ease-in-out hover:transform hover:-translate-y-0.5 hover:shadow-lg hover:border-gray-300 active:transform active:translate-y-0 active:shadow-md' => $hasCardAction,
+        'cursor-pointer transition-all duration-100 ease-in-out hover:shadow-lg hover:border-neutral-400 active:shadow-md' => $hasCardAction,
         'cursor-default' => !$hasActions && !$hasCardAction,
     ])
     @if($this->getBoard()->getReorderBy() !== null)
