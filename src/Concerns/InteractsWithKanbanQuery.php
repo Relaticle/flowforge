@@ -10,18 +10,22 @@ use Illuminate\Database\Eloquent\Builder;
 trait InteractsWithKanbanQuery
 {
     protected Builder | Closure | null $query = null;
+
     protected string | Closure | null $columnIdentifierAttribute = null;
+
     protected array | Closure | null $reorderBy = null;
 
     public function query(Builder | Closure $query): static
     {
         $this->query = $query;
+
         return $this;
     }
 
     public function columnIdentifier(string | Closure $attribute): static
     {
         $this->columnIdentifierAttribute = $attribute;
+
         return $this;
     }
 
@@ -31,6 +35,7 @@ trait InteractsWithKanbanQuery
             'column' => $column,
             'direction' => $direction,
         ];
+
         return $this;
     }
 

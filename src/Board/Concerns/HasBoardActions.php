@@ -29,6 +29,7 @@ trait HasBoardActions
     protected array $columnActions = [];
 
     protected ?string $cardAction = null;
+
     protected array $registeredCardActions = [];
 
     /**
@@ -37,6 +38,7 @@ trait HasBoardActions
     public function actions(array | Closure $actions): static
     {
         $this->actions = $this->evaluate($actions);
+
         return $this;
     }
 
@@ -46,6 +48,7 @@ trait HasBoardActions
     public function recordActions(array | Closure $actions): static
     {
         $this->recordActions = $this->evaluate($actions);
+
         return $this;
     }
 
@@ -55,6 +58,7 @@ trait HasBoardActions
     public function columnActions(array | Closure $actions): static
     {
         $this->columnActions = $this->evaluate($actions);
+
         return $this;
     }
 
@@ -64,6 +68,7 @@ trait HasBoardActions
     public function cardAction(string | Closure | null $action): static
     {
         $this->cardAction = $this->evaluate($action);
+
         return $this;
     }
 
@@ -129,7 +134,7 @@ trait HasBoardActions
     public function getBoardRecordActions(array $record): array
     {
         $livewire = $this->getLivewire();
-        
+
         if (method_exists($livewire, 'getBoardRecordActions')) {
             return $livewire->getBoardRecordActions($record);
         }
@@ -144,7 +149,7 @@ trait HasBoardActions
     public function getBoardColumnActions(string $columnId): array
     {
         $livewire = $this->getLivewire();
-        
+
         if (method_exists($livewire, 'getBoardColumnActions')) {
             return $livewire->getBoardColumnActions($columnId);
         }

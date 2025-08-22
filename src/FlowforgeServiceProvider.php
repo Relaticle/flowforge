@@ -10,7 +10,7 @@ use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Support\Facades\Blade;
 use Livewire\Livewire;
 use Relaticle\Flowforge\Commands\MakeKanbanBoardCommand;
-use Relaticle\Flowforge\Livewire\KanbanBoard;
+// use Relaticle\Flowforge\Livewire\KanbanBoard;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -75,7 +75,7 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         $this->registerBladeComponents();
 
         // Register Livewire Components
-        Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
+        // Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
 
         // Testing
         // Testable::mixin(new TestsFlowforge);

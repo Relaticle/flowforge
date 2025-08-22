@@ -53,7 +53,6 @@ class Board extends ViewComponent
         // Any board-specific setup can go here
     }
 
-
     /**
      * Get view data for the board template.
      * Delegates to Livewire component like Filament's Table does.
@@ -62,24 +61,29 @@ class Board extends ViewComponent
     {
         // Direct delegation to Livewire component (no adapter)
         $livewire = $this->getLivewire();
-        
+
         // Create simple config object
-        $config = new class($this) {
+        $config = new class($this)
+        {
             public function __construct(private Board $board) {}
-            
-            public function getTitleField(): string {
+
+            public function getTitleField(): string
+            {
                 return $this->board->getRecordTitleAttribute();
             }
-            
-            public function getColumnField(): string {
+
+            public function getColumnField(): string
+            {
                 return $this->board->getColumnIdentifierAttribute() ?? 'status';
             }
-            
-            public function getSingularCardLabel(): string {
+
+            public function getSingularCardLabel(): string
+            {
                 return 'Card';
             }
-            
-            public function getPluralCardLabel(): string {
+
+            public function getPluralCardLabel(): string
+            {
                 return 'Cards';
             }
         };
@@ -88,11 +92,11 @@ class Board extends ViewComponent
         $columns = [];
         foreach ($this->getColumns() as $column) {
             $columnId = $column->getName();
-            
+
             // Get formatted records
             $records = $this->getBoardRecords($columnId);
-            $formattedRecords = $records->map(fn($record) => $this->formatBoardRecord($record))->toArray();
-            
+            $formattedRecords = $records->map(fn ($record) => $this->formatBoardRecord($record))->toArray();
+
             $columns[$columnId] = [
                 'id' => $columnId,
                 'label' => $column->getLabel(),
@@ -107,7 +111,6 @@ class Board extends ViewComponent
             'config' => $config,
         ];
     }
-
 
     protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
     {

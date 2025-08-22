@@ -69,7 +69,7 @@ trait HasBoardColumns
     public function getColumnLabels(): array
     {
         $labels = [];
-        
+
         foreach ($this->columns as $column) {
             $labels[$column->getName()] = $column->getLabel() ?? $column->getName();
         }
@@ -83,7 +83,7 @@ trait HasBoardColumns
     public function getColumnColors(): array
     {
         $colors = [];
-        
+
         foreach ($this->columns as $column) {
             if ($color = $column->getColor()) {
                 $colors[$column->getName()] = $color;

@@ -9,7 +9,6 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
-use Illuminate\Database\Eloquent\Builder;
 use Relaticle\Flowforge\Concerns\InteractsWithBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
 

@@ -1,35 +1,32 @@
 <?php
 
-namespace {{ namespace }};
+declare(strict_types=1);
 
-use {{ modelNamespace }};
+namespace Relaticle\Flowforge\Tests\Fixtures;
+
 use Illuminate\Database\Eloquent\Builder;
 use Relaticle\Flowforge\Board;
 use Relaticle\Flowforge\BoardPage;
 use Relaticle\Flowforge\Column;
 
-class {{ class }} extends BoardPage
+class TestBoard extends BoardPage
 {
-    protected static ?string $navigationIcon = 'heroicon-o-view-columns';
-    protected static ?string $navigationLabel = '{{ navigationLabel }}';
-    protected static ?string $title = '{{ title }}';
+    public function getEloquentQuery(): Builder
+    {
+        return Task::query();
+    }
 
     public function board(Board $board): Board
     {
         return $board
             ->query($this->getEloquentQuery())
-            ->recordTitleAttribute('{{ titleField }}')
-            ->columnIdentifier('{{ statusField }}')
+            ->recordTitleAttribute('title')
+            ->columnIdentifier('status')
             ->reorderBy('order_column')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
                 Column::make('completed')->label('Completed')->color('green'),
             ]);
-    }
-
-    public function getEloquentQuery(): Builder
-    {
-        return {{ model }}::query();
     }
 }

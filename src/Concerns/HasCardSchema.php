@@ -32,7 +32,7 @@ trait HasCardSchema
 
         $livewire = $this->getLivewire();
         $schema = Schema::make($livewire);
-        
+
         return $this->evaluate($this->cardSchemaBuilder, ['schema' => $schema]);
     }
 

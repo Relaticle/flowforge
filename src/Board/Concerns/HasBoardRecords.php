@@ -118,11 +118,11 @@ trait HasBoardRecords
         // Process card schema if available
         if (method_exists($this, 'getCardSchema')) {
             $schema = $this->getCardSchema();
-            
+
             if ($schema !== null) {
                 // The schema is already built and configured
                 $schema->model($record);
-                
+
                 // Render the entire schema as HTML
                 $formatted['schema_html'] = $schema->toHtml();
             }

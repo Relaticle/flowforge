@@ -5,7 +5,8 @@ namespace Relaticle\Flowforge;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Livewire\Livewire;
-use Relaticle\Flowforge\Livewire\KanbanBoard;
+
+// use Relaticle\Flowforge\Livewire\KanbanBoard;
 
 class FlowforgePlugin implements Plugin
 {
@@ -21,7 +22,7 @@ class FlowforgePlugin implements Plugin
 
     public function boot(Panel $panel): void
     {
-        Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
+        // Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
     }
 
     public static function make(): static

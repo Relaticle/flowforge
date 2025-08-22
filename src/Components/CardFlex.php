@@ -18,8 +18,11 @@ class CardFlex extends Component
     protected string $view = 'flowforge::components.card-flex';
 
     protected string $gap = 'xs';
+
     protected bool $wrap = true;
+
     protected string $justify = 'start';
+
     protected string $align = 'center';
 
     /**
@@ -47,6 +50,7 @@ class CardFlex extends Component
     public function wrap(bool $wrap = true): static
     {
         $this->wrap = $wrap;
+
         return $this;
     }
 
@@ -56,6 +60,7 @@ class CardFlex extends Component
     public function justify(string $justify): static
     {
         $this->justify = $justify;
+
         return $this;
     }
 
@@ -65,6 +70,7 @@ class CardFlex extends Component
     public function align(string $align): static
     {
         $this->align = $align;
+
         return $this;
     }
 

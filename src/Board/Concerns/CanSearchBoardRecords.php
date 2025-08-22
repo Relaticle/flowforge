@@ -12,6 +12,7 @@ use Closure;
 trait CanSearchBoardRecords
 {
     protected array $searchableFields = [];
+
     protected bool $isSearchable = false;
 
     /**
@@ -21,6 +22,7 @@ trait CanSearchBoardRecords
     {
         $this->searchableFields = $this->evaluate($fields);
         $this->isSearchable = true;
+
         return $this;
     }
 
@@ -29,7 +31,7 @@ trait CanSearchBoardRecords
      */
     public function isSearchable(): bool
     {
-        return $this->isSearchable && !empty($this->searchableFields);
+        return $this->isSearchable && ! empty($this->searchableFields);
     }
 
     /**
