@@ -1,11 +1,11 @@
 @props(['pluralCardLabel'])
 
-<div class="ff-empty-column">
+<div class="p-3 flex flex-col items-center justify-center h-full min-h-[150px] rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-800">
     <x-filament::icon 
         icon="heroicon-o-archive-box" 
-        class="ff-empty-column__icon" 
+        class="w-10 h-10 text-gray-400 dark:text-gray-600 mb-2" 
     />
-    <p class="ff-empty-column__text">
+    <p class="text-sm text-gray-500 dark:text-gray-400">
         {{ __('flowforge::flowforge.no_cards_in_column', ['cardLabel' => strtolower($pluralCardLabel)]) }}
     </p>
 </div>
