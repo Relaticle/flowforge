@@ -49,11 +49,6 @@ trait InteractsWithKanbanQuery
         return $this->evaluate($this->reorderBy);
     }
 
-    public function isReadonly(): bool
-    {
-        return $this->getReorderBy() === null;
-    }
-
     /**
      * @return array<mixed>
      */

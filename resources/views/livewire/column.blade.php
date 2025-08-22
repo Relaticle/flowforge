@@ -13,27 +13,26 @@
             </div>
         </div>
 
-        {{-- Render column actions (only if not readonly) --}}
-        @if(!$this->getBoard()->isReadonly())
-            @php
-                $processedActions = $this->getColumnActionsForColumn($columnId);
-            @endphp
-            
-            @if(count($processedActions) > 0)
-                <div class="ff-column__actions">
-                    @if(count($processedActions) === 1)
-                        {{ $processedActions[0] }}
-                    @else
-                        <x-filament-actions::group :actions="$processedActions" />
-                    @endif
-                </div>
-            @endif
+
+        {{-- Column actions are always visible --}}
+        @php
+            $processedActions = $this->getColumnActionsForColumn($columnId);
+        @endphp
+
+        @if(count($processedActions) > 0)
+            <div class="ff-column__actions">
+                @if(count($processedActions) === 1)
+                    {{ $processedActions[0] }}
+                @else
+                    <x-filament-actions::group :actions="$processedActions"/>
+                @endif
+            </div>
         @endif
     </div>
 
     <!-- Column Content -->
     <div
-        @if(!$this->getBoard()->isReadonly())
+        @if($this->getBoard()->getReorderBy() !== null)
             x-sortable
             x-sortable-group="cards"
             data-column-id="{{ $columnId }}"

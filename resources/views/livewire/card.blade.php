@@ -13,13 +13,13 @@
         'ff-card--interactive' => $hasActions || $hasCardAction,
         'ff-card--clickable' => $hasCardAction,
         'ff-card--non-interactive' => !$hasActions && !$hasCardAction,
-        'ff-card--readonly' => $this->getBoard()->isReadonly()
+        'ff-card--no-reorder' => $this->getBoard()->getReorderBy() === null
     ])
-    @if(!$this->getBoard()->isReadonly())
+    @if($this->getBoard()->getReorderBy() !== null)
         x-sortable-handle
         x-sortable-item="{{ $record['id'] }}"
     @endif
-    @if($hasCardAction && $cardAction && !$this->getBoard()->isReadonly())
+    @if($hasCardAction && $cardAction)
         wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
         style="cursor: pointer;"
     @endif
