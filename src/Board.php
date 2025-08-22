@@ -22,10 +22,7 @@ class Board extends ViewComponent
     use HasBoardColumns;
     use HasBoardRecords;
     use HasProperties;
-    use InteractsWithKanbanQuery {
-        HasBoardRecords::recordTitleAttribute insteadof InteractsWithKanbanQuery;
-        HasBoardRecords::getRecordTitleAttribute insteadof InteractsWithKanbanQuery;
-    }
+    use InteractsWithKanbanQuery;
 
     /**
      * @var view-string
@@ -71,11 +68,11 @@ class Board extends ViewComponent
             public function __construct(private Board $board) {}
             
             public function getTitleField(): string {
-                return $this->board->getCardTitleAttribute() ?? 'title';
+                return $this->board->getRecordTitleAttribute();
             }
             
             public function getDescriptionField(): string {
-                return $this->board->getDescriptionAttribute() ?? 'description';
+                return $this->board->getRecordDescriptionAttribute();
             }
             
             public function getColumnField(): string {
@@ -115,81 +112,6 @@ class Board extends ViewComponent
         ];
     }
 
-    /**
-     * Get board records for a column (delegates to Livewire).
-     */
-    public function getBoardRecordsForColumn(string $columnId): array
-    {
-        $livewire = $this->getLivewire();
-        
-        // Delegate to Livewire component
-        if (method_exists($livewire, 'getBoardRecordsForColumn')) {
-            return $livewire->getBoardRecordsForColumn($columnId);
-        }
-        
-        // Default implementation
-        $query = $this->getQuery();
-        if ($query) {
-            $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-            return $query->where($statusField, $columnId)->limit(10)->get()->toArray();
-        }
-        
-        return [];
-    }
-
-    /**
-     * Get board record count for a column (delegates to Livewire).
-     */
-    public function getBoardRecordCountForColumn(string $columnId): int
-    {
-        $livewire = $this->getLivewire();
-        
-        // Delegate to Livewire component
-        if (method_exists($livewire, 'getBoardRecordCountForColumn')) {
-            return $livewire->getBoardRecordCountForColumn($columnId);
-        }
-        
-        // Default implementation
-        $query = $this->getQuery();
-        if ($query) {
-            $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-            return $query->where($statusField, $columnId)->count();
-        }
-        
-        return 0;
-    }
-
-    /**
-     * Get card actions for a record (uses new concerns).
-     */
-    public function getCardActionsForRecord(array $record): array
-    {
-        return $this->getBoardRecordActions($record);
-    }
-
-    /**
-     * Get card action for a record (uses new concerns).
-     */
-    public function getCardActionForRecord(array $record): ?string
-    {
-        return $this->getCardAction();
-    }
-
-    /**
-     * Check if card has action (uses new concerns).
-     */
-    public function hasCardAction(array $record): bool
-    {
-        return $this->getCardActionForRecord($record) !== null;
-    }
-
-    /**
-     * Get column actions for a column (uses new concerns).
-     */
-    public function getColumnActionsForColumn(string $columnId): array
-    {
-        return $this->getBoardColumnActions($columnId);
-    }
 
     protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
     {

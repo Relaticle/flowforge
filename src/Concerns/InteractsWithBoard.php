@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Relaticle\Flowforge\Board;
 
@@ -45,14 +49,14 @@ trait InteractsWithBoard
     protected function cacheBoardActions(): void
     {
         $board = $this->getBoard();
-        
+
         // Cache all actions for Filament's action system
         foreach ([...$board->getActions(), ...$board->getRecordActions(), ...$board->getColumnActions()] as $action) {
-            if ($action instanceof \Filament\Actions\ActionGroup) {
+            if ($action instanceof ActionGroup) {
                 foreach ($action->getFlatActions() as $flatAction) {
                     $this->cacheAction($flatAction);
                 }
-            } elseif ($action instanceof \Filament\Actions\Action) {
+            } elseif ($action instanceof Action) {
                 $this->cacheAction($action);
             }
         }
@@ -64,13 +68,60 @@ trait InteractsWithBoard
             ->query(fn (): Builder | Relation | null => $this->getBoardQuery());
     }
 
-
     /**
      * Update records order and column.
      */
     public function updateRecordsOrderAndColumn(string $columnId, array $recordIds): bool
     {
-        return true;
+        $board = $this->getBoard();
+        $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
+        $query = $board->getQuery();
+
+        if (! $query) {
+            return false;
+        }
+
+        $success = true;
+
+        // Update each record's status and order
+        foreach ($recordIds as $index => $recordId) {
+            $record = (clone $query)->find($recordId);
+
+            if ($record) {
+                // Handle enum status field properly
+                $statusValue = $columnId;
+                if (enum_exists($record->getCasts()[$statusField] ?? '')) {
+                    $enumClass = $record->getCasts()[$statusField];
+                    $statusValue = $enumClass::from($columnId);
+                }
+
+                $updateData = [$statusField => $statusValue];
+
+                // Add sort order if the model has that column
+                if ($this->modelHasSortOrder($record)) {
+                    $updateData['sort_order'] = $index;
+                }
+
+                $success = $record->update($updateData) && $success;
+            }
+        }
+
+        return $success;
+    }
+
+    /**
+     * Check if model has sort_order column.
+     */
+    protected function modelHasSortOrder($model): bool
+    {
+        try {
+            $table = $model->getTable();
+            $schema = $model->getConnection()->getSchemaBuilder();
+
+            return $schema->hasColumn($table, 'sort_order');
+        } catch (Exception) {
+            return false;
+        }
     }
 
     /**
@@ -81,7 +132,7 @@ trait InteractsWithBoard
         $count = $count ?? $this->cardsIncrement;
         $currentLimit = $this->columnCardLimits[$columnId] ?? 10;
         $this->columnCardLimits[$columnId] = $currentLimit + $count;
-        
+
         // Dispatch event to refresh the board
         $this->dispatch('board-refreshed');
     }
@@ -89,34 +140,34 @@ trait InteractsWithBoard
     /**
      * Get the default record for an action (Filament's record injection system).
      */
-    public function getDefaultActionRecord(\Filament\Actions\Action $action): ?\Illuminate\Database\Eloquent\Model
+    public function getDefaultActionRecord(Action $action): ?Model
     {
         // Get the current mounted action context
         $mountedActions = $this->mountedActions ?? [];
-        
+
         if (empty($mountedActions)) {
             return null;
         }
-        
+
         // Get the current mounted action
         $currentMountedAction = end($mountedActions);
-        
+
         // Extract recordKey from context or arguments
-        $recordKey = $currentMountedAction['context']['recordKey'] ?? 
+        $recordKey = $currentMountedAction['context']['recordKey'] ??
                     $currentMountedAction['arguments']['recordKey'] ?? null;
-        
-        if (!$recordKey) {
+
+        if (! $recordKey) {
             return null;
         }
-        
+
         // Resolve the record using board query
         $board = $this->getBoard();
         $query = $board->getQuery();
-        
+
         if ($query) {
             return (clone $query)->find($recordKey);
         }
-        
+
         return null;
     }
 
@@ -135,21 +186,20 @@ trait InteractsWithBoard
     {
         $board = $this->getBoard();
         $query = $board->getQuery();
-        
-        if (!$query) {
+
+        if (! $query) {
             return [];
         }
-        
+
         $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
         $limit = $this->columnCardLimits[$columnId] ?? 10;
-        
+
         return (clone $query)
             ->where($statusField, $columnId)
             ->limit($limit)
             ->get()
             ->toArray();
     }
-
 
     /**
      * Get board record count for a column (standardized Filament naming).
@@ -158,13 +208,13 @@ trait InteractsWithBoard
     {
         $board = $this->getBoard();
         $query = $board->getQuery();
-        
-        if (!$query) {
+
+        if (! $query) {
             return 0;
         }
-        
+
         $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
-        
+
         return (clone $query)->where($statusField, $columnId)->count();
     }
 
@@ -175,20 +225,20 @@ trait InteractsWithBoard
     {
         $board = $this->getBoard();
         $actions = [];
-        
+
         // Get the actual model
         $model = $board->getBoardRecord($record['id']);
-        if (!$model) {
+        if (! $model) {
             return [];
         }
-        
+
         foreach ($board->getRecordActions() as $action) {
             $actionClone = $action->getClone();
             $actionClone->livewire($this);
             $actionClone->record($model);
             $actions[] = $actionClone;
         }
-        
+
         return $actions;
     }
 
@@ -199,46 +249,55 @@ trait InteractsWithBoard
     {
         $board = $this->getBoard();
         $actions = [];
-        
+
         foreach ($board->getColumnActions() as $action) {
             $actionClone = $action->getClone();
             $actionClone->livewire($this);
             $actionClone->arguments(['column' => $columnId]);
             $actions[] = $actionClone;
         }
-        
+
         return $actions;
     }
 
     /**
      * Get a board record by ID.
      */
-    public function getBoardRecord(int | string $recordId): ?\Illuminate\Database\Eloquent\Model
+    public function getBoardRecord(int | string $recordId): ?Model
     {
         $board = $this->getBoard();
         $query = $board->getQuery();
-        
+
         return $query ? (clone $query)->find($recordId) : null;
     }
 
     /**
-     * Legacy method names for view compatibility.
+     * Get column actions for a column (delegates to Board).
      */
     public function getColumnActionsForColumn(string $columnId): array
     {
-        return $this->getBoardColumnActions($columnId);
+        return $this->getBoard()->getBoardColumnActions($columnId);
     }
 
+    /**
+     * Get card actions for a record (delegates to Board).
+     */
     public function getCardActionsForRecord(array $record): array
     {
-        return $this->getBoardRecordActions($record);
+        return $this->getBoard()->getBoardRecordActions($record);
     }
 
+    /**
+     * Get card action for a record (delegates to Board).
+     */
     public function getCardActionForRecord(array $record): ?string
     {
         return $this->getBoard()->getCardAction();
     }
 
+    /**
+     * Check if card has action.
+     */
     public function hasCardAction(array $record): bool
     {
         return $this->getCardActionForRecord($record) !== null;
