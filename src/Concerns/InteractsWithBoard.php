@@ -100,7 +100,13 @@ trait InteractsWithBoard
                 // Add sort order if reordering is configured
                 $reorderBy = $board->getReorderBy();
                 if ($reorderBy && $this->modelHasOrderColumn($record, $reorderBy['column'])) {
-                    $updateData[$reorderBy['column']] = $index;
+                    // For DESC order: first item (index 0) gets highest value
+                    // For ASC order: first item (index 0) gets lowest value (0)
+                    if ($reorderBy['direction'] === 'desc') {
+                        $updateData[$reorderBy['column']] = count($recordIds) - 1 - $index;
+                    } else {
+                        $updateData[$reorderBy['column']] = $index;
+                    }
                 }
 
                 $success = $record->update($updateData) && $success;
