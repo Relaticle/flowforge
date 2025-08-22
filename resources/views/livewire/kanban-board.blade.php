@@ -1,1 +1,0 @@
-@include('flowforge::index', ['columns' => $columns, 'config' => $config])
