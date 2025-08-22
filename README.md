@@ -218,7 +218,7 @@ use Relaticle\Flowforge\Property;
 | `columnIdentifier(string)` | Field that determines column placement | ✅ |
 | `columns(array)` | Define board columns | ✅ |
 | `query(Builder)` | Set the data source | ✅ |
-| `defaultSort(string, ?string)` | Field and optional direction for drag & drop ordering | |
+| `reorderBy(string, ?string)` | Field and optional direction for drag & drop ordering | |
 | `cardProperties(array)` | Additional fields to display | |
 | `columnActions(array)` | Actions for column headers | |
 | `cardActions(array)` | Actions for individual cards | |
@@ -236,10 +236,10 @@ use Relaticle\Flowforge\Property;
 
 **Solution:**
 1. Add an integer `order_column` to your model
-2. Configure `->defaultSort('order_column')` in your board
+2. Configure `->reorderBy('order_column')` in your board
 
 ```php
-->defaultSort('order_column')
+->reorderBy('order_column')
 ```
 </details>
 

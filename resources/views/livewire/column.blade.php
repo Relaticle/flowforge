@@ -13,28 +13,32 @@
             </div>
         </div>
 
-        {{-- Render column actions --}}
-        @php
-            $processedActions = $this->getColumnActionsForColumn($columnId);
-        @endphp
-        
-        @if(count($processedActions) > 0)
-            <div class="ff-column__actions">
-                @if(count($processedActions) === 1)
-                    {{ $processedActions[0] }}
-                @else
-                    <x-filament-actions::group :actions="$processedActions" />
-                @endif
-            </div>
+        {{-- Render column actions (only if not readonly) --}}
+        @if(!$this->getBoard()->isReadonly())
+            @php
+                $processedActions = $this->getColumnActionsForColumn($columnId);
+            @endphp
+            
+            @if(count($processedActions) > 0)
+                <div class="ff-column__actions">
+                    @if(count($processedActions) === 1)
+                        {{ $processedActions[0] }}
+                    @else
+                        <x-filament-actions::group :actions="$processedActions" />
+                    @endif
+                </div>
+            @endif
         @endif
     </div>
 
     <!-- Column Content -->
     <div
-        x-sortable
-        x-sortable-group="cards"
-        data-column-id="{{ $columnId }}"
-        @end.stop="$wire.updateRecordsOrderAndColumn($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
+        @if(!$this->getBoard()->isReadonly())
+            x-sortable
+            x-sortable-group="cards"
+            data-column-id="{{ $columnId }}"
+            @end.stop="$wire.updateRecordsOrderAndColumn($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
+        @endif
         class="ff-column__content"
         style="max-height: calc(100vh - 13rem);"
     >

@@ -20,7 +20,7 @@ class {{ class }} extends BoardPage
             ->query($this->getEloquentQuery())
             ->cardTitle('{{ titleField }}')
             ->columnIdentifier('{{ statusField }}')
-            ->defaultSort('order_column')
+            ->reorderBy('order_column')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),

@@ -12,11 +12,14 @@
         'ff-card kanban-card',
         'ff-card--interactive' => $hasActions || $hasCardAction,
         'ff-card--clickable' => $hasCardAction,
-        'ff-card--non-interactive' => !$hasActions && !$hasCardAction
+        'ff-card--non-interactive' => !$hasActions && !$hasCardAction,
+        'ff-card--readonly' => $this->getBoard()->isReadonly()
     ])
-    x-sortable-handle
-    x-sortable-item="{{ $record['id'] }}"
-    @if($hasCardAction && $cardAction)
+    @if(!$this->getBoard()->isReadonly())
+        x-sortable-handle
+        x-sortable-item="{{ $record['id'] }}"
+    @endif
+    @if($hasCardAction && $cardAction && !$this->getBoard()->isReadonly())
         wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
         style="cursor: pointer;"
     @endif

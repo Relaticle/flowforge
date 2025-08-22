@@ -11,7 +11,7 @@ trait InteractsWithKanbanQuery
 {
     protected Builder | Closure | null $query = null;
     protected string | Closure | null $columnIdentifierAttribute = null;
-    protected array | Closure | null $defaultSort = null;
+    protected array | Closure | null $reorderBy = null;
 
     public function query(Builder | Closure $query): static
     {
@@ -25,9 +25,9 @@ trait InteractsWithKanbanQuery
         return $this;
     }
 
-    public function defaultSort(string $column, string $direction = 'asc'): static
+    public function reorderBy(string $column, string $direction = 'asc'): static
     {
-        $this->defaultSort = [
+        $this->reorderBy = [
             'column' => $column,
             'direction' => $direction,
         ];
@@ -44,9 +44,14 @@ trait InteractsWithKanbanQuery
         return $this->evaluate($this->columnIdentifierAttribute);
     }
 
-    public function getDefaultSort(): ?array
+    public function getReorderBy(): ?array
     {
-        return $this->evaluate($this->defaultSort);
+        return $this->evaluate($this->reorderBy);
+    }
+
+    public function isReadonly(): bool
+    {
+        return $this->getReorderBy() === null;
     }
 
     /**
@@ -57,7 +62,7 @@ trait InteractsWithKanbanQuery
         return match ($parameterName) {
             'query' => [$this->getQuery()],
             'columnIdentifierAttribute' => [$this->getColumnIdentifierAttribute()],
-            'defaultSort' => [$this->getDefaultSort()],
+            'reorderBy' => [$this->getReorderBy()],
             default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
         };
     }
