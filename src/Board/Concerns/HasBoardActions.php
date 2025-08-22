@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Relaticle\Flowforge\Concerns;
+namespace Relaticle\Flowforge\Board\Concerns;
 
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 
 /**
- * Unified trait for managing all board actions.
- * Consolidates HasActions, HasCardAction, HasRecordActions into one focused trait.
+ * Clean action management for Board (mirrors Filament's HasActions).
  */
-trait ManagesActions
+trait HasBoardActions
 {
     /**
      * @var array<Action|ActionGroup>
@@ -29,14 +28,7 @@ trait ManagesActions
      */
     protected array $columnActions = [];
 
-    /**
-     * Default card action name.
-     */
     protected ?string $cardAction = null;
-
-    /**
-     * Registered card actions by name.
-     */
     protected array $registeredCardActions = [];
 
     /**
@@ -45,7 +37,6 @@ trait ManagesActions
     public function actions(array | Closure $actions): static
     {
         $this->actions = $this->evaluate($actions);
-
         return $this;
     }
 
@@ -55,7 +46,6 @@ trait ManagesActions
     public function recordActions(array | Closure $actions): static
     {
         $this->recordActions = $this->evaluate($actions);
-
         return $this;
     }
 
@@ -65,28 +55,24 @@ trait ManagesActions
     public function columnActions(array | Closure $actions): static
     {
         $this->columnActions = $this->evaluate($actions);
-
         return $this;
     }
 
     /**
-     * Set the default card action.
+     * Set default card action.
      */
     public function cardAction(string | Closure | null $action): static
     {
         $this->cardAction = $this->evaluate($action);
-
         return $this;
     }
 
     /**
-     * Register a named card action.
+     * Alias for recordActions (API compatibility).
      */
-    public function registerCardAction(string $name, Action $action): static
+    public function cardActions(array | Closure $actions): static
     {
-        $this->registeredCardActions[$name] = $action;
-
-        return $this;
+        return $this->recordActions($actions);
     }
 
     /**
@@ -114,7 +100,7 @@ trait ManagesActions
     }
 
     /**
-     * Get the default card action.
+     * Get default card action.
      */
     public function getCardAction(): ?string
     {
@@ -138,42 +124,32 @@ trait ManagesActions
     }
 
     /**
-     * Get all actions flattened.
+     * Process record actions for a specific record (delegates to Livewire).
      */
-    public function getFlatActions(): array
+    public function getBoardRecordActions(array $record): array
     {
-        $actions = [];
-
-        foreach ([...$this->actions, ...$this->recordActions, ...$this->columnActions] as $action) {
-            if ($action instanceof ActionGroup) {
-                $actions = [...$actions, ...$action->getFlatActions()];
-            } elseif ($action instanceof Action) {
-                $actions[] = $action;
-            }
+        $livewire = $this->getLivewire();
+        
+        if (method_exists($livewire, 'getBoardRecordActions')) {
+            return $livewire->getBoardRecordActions($record);
         }
 
-        return $actions;
+        // Fallback: return raw actions
+        return $this->getRecordActions();
     }
 
     /**
-     * Find an action by name.
+     * Process column actions for a specific column (delegates to Livewire).
      */
-    public function getAction(string $name): ?Action
+    public function getBoardColumnActions(string $columnId): array
     {
-        foreach ($this->getFlatActions() as $action) {
-            if ($action->getName() === $name) {
-                return $action;
-            }
+        $livewire = $this->getLivewire();
+        
+        if (method_exists($livewire, 'getBoardColumnActions')) {
+            return $livewire->getBoardColumnActions($columnId);
         }
 
-        return null;
-    }
-
-    /**
-     * Alias for recordActions (Filament API compatibility).
-     */
-    public function cardActions(array | Closure $actions): static
-    {
-        return $this->recordActions($actions);
+        // Fallback: return raw actions
+        return $this->getColumnActions();
     }
 }

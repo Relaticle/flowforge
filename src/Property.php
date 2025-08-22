@@ -14,13 +14,11 @@ use Filament\Support\Concerns\HasIconPosition;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Relaticle\Flowforge\Concerns\BelongsToBoard;
-use Relaticle\Flowforge\Concerns\CanBeVisible;
 use Relaticle\Flowforge\Concerns\HasStateFormatting;
 
 class Property extends ViewComponent
 {
     use BelongsToBoard;
-    use CanBeVisible;
     use HasColor;
     use HasIcon;
     use HasIconColor;

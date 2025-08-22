@@ -64,68 +64,6 @@ trait InteractsWithBoard
             ->query(fn (): Builder | Relation | null => $this->getBoardQuery());
     }
 
-    /**
-     * Get column actions for a specific column.
-     */
-    public function getColumnActionsForColumn(string $columnId): array
-    {
-        $board = $this->getBoard();
-        $actions = [];
-        
-        foreach ($board->getColumnActions() as $action) {
-            $actionClone = $action->getClone();
-            $actionClone->livewire($this);
-            $actionClone->arguments(['column' => $columnId]);
-            $actions[] = $actionClone;
-        }
-        
-        return $actions;
-    }
-
-    /**
-     * Get card actions for a record.
-     */
-    public function getCardActionsForRecord(array $record): array
-    {
-        $board = $this->getBoard();
-        $actions = [];
-        
-        // Get the actual model for the record - clone query to avoid consumption
-        $query = $board->getQuery();
-        if (!$query) {
-            return [];
-        }
-        
-        $model = (clone $query)->find($record['id']);
-        if (!$model) {
-            return [];
-        }
-        
-        foreach ($board->getRecordActions() as $action) {
-            $actionClone = $action->getClone();
-            $actionClone->livewire($this);
-            $actionClone->record($model);
-            $actions[] = $actionClone;
-        }
-        
-        return $actions;
-    }
-
-    /**
-     * Get card action for a record.
-     */
-    public function getCardActionForRecord(array $record): ?string
-    {
-        return $this->getBoard()->getCardAction();
-    }
-
-    /**
-     * Check if a card has an action.
-     */
-    public function hasCardAction(array $record): bool
-    {
-        return $this->getCardActionForRecord($record) !== null;
-    }
 
     /**
      * Update records order and column.
@@ -191,9 +129,9 @@ trait InteractsWithBoard
     }
 
     /**
-     * Get board records for a column (pagination-aware).
+     * Get board records for a column (standardized Filament naming).
      */
-    public function getBoardRecordsForColumn(string $columnId): array
+    public function getBoardColumnRecords(string $columnId): array
     {
         $board = $this->getBoard();
         $query = $board->getQuery();
@@ -203,63 +141,20 @@ trait InteractsWithBoard
         }
         
         $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
-        
-        // Clone query to avoid modification issues
-        $clonedQuery = clone $query;
-        
-        // Get pagination limit for this column
         $limit = $this->columnCardLimits[$columnId] ?? 10;
         
-        $models = $clonedQuery->where($statusField, $columnId)
+        return (clone $query)
+            ->where($statusField, $columnId)
             ->limit($limit)
-            ->get();
-
-        // Format records for display with properties
-        return $models->map(function ($model) use ($board) {
-            return $this->formatRecordForDisplay($model, $board);
-        })->toArray();
+            ->get()
+            ->toArray();
     }
 
-    /**
-     * Format a record for display with properties and actions.
-     */
-    protected function formatRecordForDisplay($model, Board $board): array
-    {
-        $titleField = $board->getCardTitleAttribute() ?? 'title';
-        $descriptionField = $board->getDescriptionAttribute() ?? 'description';
-        $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
-
-        $record = [
-            'id' => $model->getKey(),
-            'title' => data_get($model, $titleField),
-            'description' => data_get($model, $descriptionField),
-            'column' => data_get($model, $statusField),
-        ];
-
-        // Process card properties
-        $cardProperties = $board->getCardProperties() ?? [];
-        foreach ($cardProperties as $property) {
-            $name = $property->getName();
-            $value = $property->getFormattedState($model);
-
-            if ($value !== null && $value !== '') {
-                $record['attributes'][$name] = [
-                    'label' => $property->getLabel(),
-                    'value' => $value,
-                    'color' => $property->getColor(),
-                    'icon' => $property->getIcon(),
-                    'iconColor' => $property->getIconColor(),
-                ];
-            }
-        }
-
-        return $record;
-    }
 
     /**
-     * Get board record count for a column.
+     * Get board record count for a column (standardized Filament naming).
      */
-    public function getBoardRecordCountForColumn(string $columnId): int
+    public function getBoardColumnRecordCount(string $columnId): int
     {
         $board = $this->getBoard();
         $query = $board->getQuery();
@@ -270,9 +165,82 @@ trait InteractsWithBoard
         
         $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
         
-        // Clone query to avoid modification issues
-        $clonedQuery = clone $query;
+        return (clone $query)->where($statusField, $columnId)->count();
+    }
+
+    /**
+     * Get board record actions with proper context.
+     */
+    public function getBoardRecordActions(array $record): array
+    {
+        $board = $this->getBoard();
+        $actions = [];
         
-        return $clonedQuery->where($statusField, $columnId)->count();
+        // Get the actual model
+        $model = $board->getBoardRecord($record['id']);
+        if (!$model) {
+            return [];
+        }
+        
+        foreach ($board->getRecordActions() as $action) {
+            $actionClone = $action->getClone();
+            $actionClone->livewire($this);
+            $actionClone->record($model);
+            $actions[] = $actionClone;
+        }
+        
+        return $actions;
+    }
+
+    /**
+     * Get board column actions with proper context.
+     */
+    public function getBoardColumnActions(string $columnId): array
+    {
+        $board = $this->getBoard();
+        $actions = [];
+        
+        foreach ($board->getColumnActions() as $action) {
+            $actionClone = $action->getClone();
+            $actionClone->livewire($this);
+            $actionClone->arguments(['column' => $columnId]);
+            $actions[] = $actionClone;
+        }
+        
+        return $actions;
+    }
+
+    /**
+     * Get a board record by ID.
+     */
+    public function getBoardRecord(int | string $recordId): ?\Illuminate\Database\Eloquent\Model
+    {
+        $board = $this->getBoard();
+        $query = $board->getQuery();
+        
+        return $query ? (clone $query)->find($recordId) : null;
+    }
+
+    /**
+     * Legacy method names for view compatibility.
+     */
+    public function getColumnActionsForColumn(string $columnId): array
+    {
+        return $this->getBoardColumnActions($columnId);
+    }
+
+    public function getCardActionsForRecord(array $record): array
+    {
+        return $this->getBoardRecordActions($record);
+    }
+
+    public function getCardActionForRecord(array $record): ?string
+    {
+        return $this->getBoard()->getCardAction();
+    }
+
+    public function hasCardAction(array $record): bool
+    {
+        return $this->getCardActionForRecord($record) !== null;
     }
 }

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Relaticle\Flowforge;
 
 use Filament\Support\Components\ViewComponent;
+use Relaticle\Flowforge\Board\Concerns\CanSearchBoardRecords;
+use Relaticle\Flowforge\Board\Concerns\HasBoardActions;
+use Relaticle\Flowforge\Board\Concerns\HasBoardColumns;
+use Relaticle\Flowforge\Board\Concerns\HasBoardRecords;
 use Relaticle\Flowforge\Concerns\BelongsToLivewire;
-use Relaticle\Flowforge\Concerns\ManagesActions;
-use Relaticle\Flowforge\Concerns\ManagesColumns;
 use Relaticle\Flowforge\Concerns\HasProperties;
 use Relaticle\Flowforge\Concerns\InteractsWithKanbanQuery;
 use Relaticle\Flowforge\Contracts\HasBoard;
@@ -15,10 +17,15 @@ use Relaticle\Flowforge\Contracts\HasBoard;
 class Board extends ViewComponent
 {
     use BelongsToLivewire;
-    use ManagesActions;
-    use ManagesColumns;
+    use CanSearchBoardRecords;
+    use HasBoardActions;
+    use HasBoardColumns;
+    use HasBoardRecords;
     use HasProperties;
-    use InteractsWithKanbanQuery;
+    use InteractsWithKanbanQuery {
+        HasBoardRecords::recordTitleAttribute insteadof InteractsWithKanbanQuery;
+        HasBoardRecords::getRecordTitleAttribute insteadof InteractsWithKanbanQuery;
+    }
 
     /**
      * @var view-string
@@ -84,16 +91,21 @@ class Board extends ViewComponent
             }
         };
 
-        // Build columns data by delegating to Livewire
+        // Build columns data using new concerns
         $columns = [];
         foreach ($this->getColumns() as $column) {
             $columnId = $column->getName();
+            
+            // Get formatted records
+            $records = $this->getBoardRecords($columnId);
+            $formattedRecords = $records->map(fn($record) => $this->formatBoardRecord($record))->toArray();
+            
             $columns[$columnId] = [
                 'id' => $columnId,
                 'label' => $column->getLabel(),
                 'color' => $column->getColor(),
-                'items' => $this->getBoardRecordsForColumn($columnId),
-                'total' => $this->getBoardRecordCountForColumn($columnId),
+                'items' => $formattedRecords,
+                'total' => $this->getBoardRecordCount($columnId),
             ];
         }
 
@@ -148,35 +160,23 @@ class Board extends ViewComponent
     }
 
     /**
-     * Get card actions for a record (delegates to Livewire).
+     * Get card actions for a record (uses new concerns).
      */
     public function getCardActionsForRecord(array $record): array
     {
-        $livewire = $this->getLivewire();
-        
-        if (method_exists($livewire, 'getCardActionsForRecord')) {
-            return $livewire->getCardActionsForRecord($record);
-        }
-        
-        return $this->getRecordActions();
+        return $this->getBoardRecordActions($record);
     }
 
     /**
-     * Get card action for a record (delegates to Livewire).
+     * Get card action for a record (uses new concerns).
      */
     public function getCardActionForRecord(array $record): ?string
     {
-        $livewire = $this->getLivewire();
-        
-        if (method_exists($livewire, 'getCardActionForRecord')) {
-            return $livewire->getCardActionForRecord($record);
-        }
-        
         return $this->getCardAction();
     }
 
     /**
-     * Check if card has action (delegates to Livewire).
+     * Check if card has action (uses new concerns).
      */
     public function hasCardAction(array $record): bool
     {
@@ -184,17 +184,11 @@ class Board extends ViewComponent
     }
 
     /**
-     * Get column actions for a column (delegates to Livewire).
+     * Get column actions for a column (uses new concerns).
      */
     public function getColumnActionsForColumn(string $columnId): array
     {
-        $livewire = $this->getLivewire();
-        
-        if (method_exists($livewire, 'getColumnActionsForColumn')) {
-            return $livewire->getColumnActionsForColumn($columnId);
-        }
-        
-        return $this->getColumnActions();
+        return $this->getBoardColumnActions($columnId);
     }
 
     protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array

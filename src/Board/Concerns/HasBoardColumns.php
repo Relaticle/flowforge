@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Relaticle\Flowforge\Concerns;
+namespace Relaticle\Flowforge\Board\Concerns;
 
 use Closure;
 use Relaticle\Flowforge\Column;
 
 /**
- * Unified trait for managing board columns.
- * Consolidates HasColumns and related column functionality.
+ * Clean column management for Board (mirrors Filament's HasColumns).
  */
-trait ManagesColumns
+trait HasBoardColumns
 {
     /**
      * @var array<Column>
@@ -19,18 +18,12 @@ trait ManagesColumns
     protected array $columns = [];
 
     /**
-     * The database column that stores the status/column identifier.
-     */
-    protected string $columnIdentifier = 'status';
-
-    /**
-     * Configure the board columns.
+     * Configure board columns.
      */
     public function columns(array | Closure $columns): static
     {
         $this->columns = $this->evaluate($columns);
 
-        // Set board reference on each column
         foreach ($this->columns as $column) {
             if ($column instanceof Column && method_exists($column, 'board')) {
                 $column->board($this);
@@ -40,9 +33,8 @@ trait ManagesColumns
         return $this;
     }
 
-
     /**
-     * Get the configured columns.
+     * Get configured columns.
      */
     public function getColumns(): array
     {
@@ -63,9 +55,8 @@ trait ManagesColumns
         return null;
     }
 
-
     /**
-     * Get all column identifiers.
+     * Get column identifiers.
      */
     public function getColumnIdentifiers(): array
     {
