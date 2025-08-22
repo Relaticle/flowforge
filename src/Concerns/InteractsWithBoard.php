@@ -33,4 +33,60 @@ trait InteractsWithBoard
         return Board::make($this)
             ->query(fn (): Builder | Relation | null => $this->getBoardQuery());
     }
+
+    /**
+     * Get column actions for a specific column.
+     */
+    public function getColumnActionsForColumn(string $columnId): array
+    {
+        return [];
+    }
+
+    /**
+     * Get card actions for a record.
+     */
+    public function getCardActionsForRecord(array $record): array
+    {
+        return [];
+    }
+
+    /**
+     * Get card action for a record.
+     */
+    public function getCardActionForRecord(array $record): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Check if a card has an action.
+     */
+    public function hasCardAction(array $record): bool
+    {
+        return false;
+    }
+
+    /**
+     * Update records order and column.
+     */
+    public function updateRecordsOrderAndColumn(string $columnId, array $recordIds): bool
+    {
+        return true;
+    }
+
+    /**
+     * Load more items for a column.
+     */
+    public function loadMoreItems(string $columnId, ?int $count = null): void
+    {
+        // Default implementation
+    }
+
+    /**
+     * Get board query.
+     */
+    public function getBoardQuery(): ?Builder
+    {
+        return null;
+    }
 }
