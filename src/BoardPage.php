@@ -31,9 +31,4 @@ abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
      * Configure the board - implement in subclasses.
      */
     abstract public function board(Board $board): Board;
-
-    /**
-     * Get the base query - implement in subclasses.
-     */
-    abstract public function getEloquentQuery(): Builder;
 }
