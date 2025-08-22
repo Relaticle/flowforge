@@ -53,10 +53,15 @@ trait HasBoardRecords
             $limit = $livewire->columnCardLimits[$columnId] ?? 10;
         }
 
-        return (clone $query)
-            ->where($statusField, $columnId)
-            ->limit($limit)
-            ->get();
+        $queryClone = (clone $query)->where($statusField, $columnId);
+
+        // Apply ordering if configured
+        $reorderBy = $this->getReorderBy();
+        if ($reorderBy) {
+            $queryClone->orderBy($reorderBy['column'], $reorderBy['direction']);
+        }
+
+        return $queryClone->limit($limit)->get();
     }
 
     /**

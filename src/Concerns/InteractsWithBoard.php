@@ -97,9 +97,10 @@ trait InteractsWithBoard
 
                 $updateData = [$statusField => $statusValue];
 
-                // Add sort order if the model has that column
-                if ($this->modelHasSortOrder($record)) {
-                    $updateData['sort_order'] = $index;
+                // Add sort order if reordering is configured
+                $reorderBy = $board->getReorderBy();
+                if ($reorderBy && $this->modelHasOrderColumn($record, $reorderBy['column'])) {
+                    $updateData[$reorderBy['column']] = $index;
                 }
 
                 $success = $record->update($updateData) && $success;
@@ -110,15 +111,15 @@ trait InteractsWithBoard
     }
 
     /**
-     * Check if model has sort_order column.
+     * Check if model has the specified order column.
      */
-    protected function modelHasSortOrder($model): bool
+    protected function modelHasOrderColumn($model, string $columnName): bool
     {
         try {
             $table = $model->getTable();
             $schema = $model->getConnection()->getSchemaBuilder();
 
-            return $schema->hasColumn($table, 'sort_order');
+            return $schema->hasColumn($table, $columnName);
         } catch (Exception) {
             return false;
         }
@@ -194,11 +195,15 @@ trait InteractsWithBoard
         $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
         $limit = $this->columnCardLimits[$columnId] ?? 10;
 
-        return (clone $query)
-            ->where($statusField, $columnId)
-            ->limit($limit)
-            ->get()
-            ->toArray();
+        $queryClone = (clone $query)->where($statusField, $columnId);
+
+        // Apply ordering if configured
+        $reorderBy = $board->getReorderBy();
+        if ($reorderBy) {
+            $queryClone->orderBy($reorderBy['column'], $reorderBy['direction']);
+        }
+
+        return $queryClone->limit($limit)->get()->toArray();
     }
 
     /**
