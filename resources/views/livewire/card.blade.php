@@ -36,9 +36,9 @@
         </div>
 
         {{-- Render card schema with compact spacing --}}
-        @if(isset($record['schema_html']) && !empty($record['schema_html']))
+        @if(filled($record['schema']))
             <div class="space-y-1 [&_.fi-sc-flex]:gap-2 [&_.fi-sc-flex.fi-dense]:gap-1 [&_.fi-in-entry]:gap-y-0.5 [&_.fi-in-entry-content-ctn]:gap-x-1.5">
-                {!! $record['schema_html'] !!}
+                {{ $record['schema'] }}
             </div>
         @endif
     </div>

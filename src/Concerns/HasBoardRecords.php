@@ -136,9 +136,9 @@ trait HasBoardRecords
             if ($schema !== null) {
                 // The schema is already built and configured
                 $schema->model($record);
-
-                // Render the entire schema as HTML
-                $formatted['schema_html'] = $schema->toHtml();
+                
+                // Store the schema object with record context for proper Livewire rendering
+                $formatted['schema'] = $schema;
             }
         }
 
