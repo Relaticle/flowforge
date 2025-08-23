@@ -129,7 +129,11 @@ trait HasBoardFilters
      */
     public function getFiltersFormColumns(): int | array
     {
-        return $this->evaluate($this->filtersFormColumns) ?? 2; // Simple 2-column layout for dropdown
+        return $this->evaluate($this->filtersFormColumns) ?? [
+            'sm' => 1,
+            'md' => 2,
+            'lg' => 2,
+        ]; // Responsive layout that works well in dropdowns
     }
 
     /**

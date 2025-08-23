@@ -71,7 +71,7 @@ trait InteractWithBoardFilters
                 // SelectFilter uses 'value' for single, 'values' for multiple
                 $propertyName = $filter->isMultiple() ? 'values' : 'value';
                 $defaultValue = $filter->isMultiple() ? [] : null;
-                
+
                 // Only initialize if property doesn't exist (preserve existing values)
                 if (!isset($this->boardFilters[$filterName][$propertyName])) {
                     $this->boardFilters[$filterName][$propertyName] = $defaultValue;
@@ -82,11 +82,11 @@ trait InteractWithBoardFilters
             } elseif ($filter instanceof \Filament\Tables\Filters\Filter) {
                 // Regular Filter with custom schema - initialize based on schema
                 $schemaComponents = $filter->getSchemaComponents();
-                
+
                 foreach ($schemaComponents as $component) {
                     $componentName = $component->getName();
                     $defaultValue = null; // Safe default
-                    
+
                     // Only initialize if property doesn't exist (preserve existing values)
                     if (!isset($this->boardFilters[$filterName][$componentName])) {
                         $this->boardFilters[$filterName][$componentName] = $defaultValue;
@@ -317,10 +317,10 @@ trait InteractWithBoardFilters
     public function getBoardFilterState(string $name): ?array
     {
         $parsedName = $this->parseBoardFilterName($name);
-        
+
         // Check both deferred and active filters
         $state = Arr::get($this->boardFilters, $parsedName) ?? Arr::get($this->boardDeferredFilters, $parsedName);
-        
+
         return $state;
     }
 
