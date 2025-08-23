@@ -1,4 +1,4 @@
-@props(['config', 'columnId', 'record'])
+@props(['columnId', 'record'])
 
 @php
     $processedRecordActions = $this->getCardActionsForRecord($record);

@@ -61,35 +61,6 @@ class Board extends ViewComponent
      */
     public function getViewData(): array
     {
-        // Direct delegation to Livewire component (no adapter)
-        $livewire = $this->getLivewire();
-
-        // Create simple config object
-        $config = new class($this)
-        {
-            public function __construct(private Board $board) {}
-
-            public function getTitleField(): string
-            {
-                return $this->board->getRecordTitleAttribute();
-            }
-
-            public function getColumnField(): string
-            {
-                return $this->board->getColumnIdentifierAttribute() ?? 'status';
-            }
-
-            public function getSingularCardLabel(): string
-            {
-                return 'Card';
-            }
-
-            public function getPluralCardLabel(): string
-            {
-                return 'Cards';
-            }
-        };
-
         // Build columns data using new concerns
         $columns = [];
         foreach ($this->getColumns() as $column) {
@@ -110,7 +81,12 @@ class Board extends ViewComponent
 
         return [
             'columns' => $columns,
-            'config' => $config,
+            'config' => [
+                'recordTitleAttribute' => $this->getRecordTitleAttribute(),
+                'columnIdentifierAttribute' => $this->getColumnIdentifierAttribute(),
+                'cardLabel' => 'Record',
+                'pluralCardLabel' => 'Records',
+            ]
         ];
     }
 

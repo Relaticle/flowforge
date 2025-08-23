@@ -8,10 +8,10 @@
     x-data="flowforge({
         state: {
             columns: @js($columns),
-            titleField: '{{ $config->getTitleField() }}',
-            columnField: '{{ $config->getColumnField() }}',
-            cardLabel: '{{ $config->getSingularCardLabel() }}',
-            pluralCardLabel: '{{ $config->getPluralCardLabel() }}'
+            titleField: '{{ $config['recordTitleAttribute'] }}',
+            columnField: '{{ $config['columnIdentifierAttribute'] }}',
+            cardLabel: '{{ $config['cardLabel'] }}',
+            pluralCardLabel: '{{ $config['pluralCardLabel'] }}',
         }
     })"
 >
