@@ -8,7 +8,7 @@
                 placement="bottom-start"
                 :width="$this->getTable()->getFiltersFormWidth()"
                 :max-height="$this->getTable()->getFiltersFormMaxHeight()"
-                class="fi-ta-filters-dropdown z-50"
+                class="fi-ta-filters-dropdown z-40"
             >
                 <x-slot name="trigger">
                     {{ $this->getTable()->getFiltersTriggerAction()->badge($this->getTable()->getActiveFiltersCount()) }}

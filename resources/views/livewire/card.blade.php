@@ -29,7 +29,7 @@
 
             {{-- Render record actions --}}
             @if($hasActions)
-                <div class="relative z-10" @if($hasCardAction) @click.stop @endif>
+                <div class="relative" @if($hasCardAction) @click.stop @endif>
                     <x-filament-actions::group :actions="$processedRecordActions" />
                 </div>
             @endif
