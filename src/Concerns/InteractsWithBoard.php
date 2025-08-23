@@ -60,6 +60,19 @@ trait InteractsWithBoard
                 $this->cacheAction($action);
             }
         }
+
+        // Cache filter trigger action if filters are configured
+        if ($board->hasBoardFilters()) {
+            $filterActionGroup = $board->getBoardFiltersTriggerAction();
+            
+            if ($filterActionGroup instanceof ActionGroup) {
+                foreach ($filterActionGroup->getFlatActions() as $flatAction) {
+                    $this->cacheAction($flatAction);
+                }
+            } else {
+                $this->cacheAction($filterActionGroup);
+            }
+        }
     }
 
     protected function makeBoard(): Board
