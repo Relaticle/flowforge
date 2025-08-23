@@ -9,8 +9,6 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
-use Filament\Tables\Contracts\HasTable;
-use Relaticle\Flowforge\Concerns\HasTableFromBoard;
 use Relaticle\Flowforge\Concerns\InteractsWithBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
@@ -18,14 +16,13 @@ use Relaticle\Flowforge\Contracts\HasBoard;
  * Simplified BoardPage - just like Filament's pages.
  * No adapters, no complex caching - just clean delegation.
  */
-abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms, HasTable
+abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
 {
     use InteractsWithActions;
     use InteractsWithBoard {
         InteractsWithBoard::getDefaultActionRecord insteadof InteractsWithActions;
     }
     use InteractsWithForms;
-    use HasTableFromBoard;
 
     protected string $view = 'flowforge::filament.pages.board-page';
 

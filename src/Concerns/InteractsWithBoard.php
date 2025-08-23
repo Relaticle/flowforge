@@ -9,7 +9,6 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Relaticle\Flowforge\Board;
 
 trait InteractsWithBoard
@@ -67,7 +66,7 @@ trait InteractsWithBoard
     protected function makeBoard(): Board
     {
         return Board::make($this)
-            ->query(fn (): Builder | Relation | null => $this->getBoardQuery());
+            ->query(fn (): Builder | null => $this->getBoardQuery());
     }
 
     /**

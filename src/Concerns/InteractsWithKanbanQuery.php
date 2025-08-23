@@ -6,17 +6,16 @@ namespace Relaticle\Flowforge\Concerns;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 trait InteractsWithKanbanQuery
 {
-    protected Builder | Relation | Closure | null $query = null;
+    protected Builder |  Closure | null $query = null;
 
     protected string | Closure | null $columnIdentifierAttribute = null;
 
     protected array | Closure | null $reorderBy = null;
 
-    public function query(Builder | Relation | Closure $query): static
+    public function query(Builder |  Closure $query): static
     {
         $this->query = $query;
 
@@ -40,7 +39,7 @@ trait InteractsWithKanbanQuery
         return $this;
     }
 
-    public function getQuery(): Builder | Relation | null
+    public function getQuery(): Builder|null
     {
         return $this->evaluate($this->query);
     }
