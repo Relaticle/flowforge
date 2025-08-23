@@ -14,6 +14,8 @@ use Relaticle\Flowforge\Board;
 
 trait InteractsWithBoard
 {
+    use HasTableFromBoard;
+
     protected Board $board;
 
     /**

@@ -111,8 +111,6 @@ class Board extends ViewComponent
         return [
             'columns' => $columns,
             'config' => $config,
-            'boardFilters' => $this->getBoardFilters(),
-            'hasBoardFilters' => $this->hasBoardFilters(),
         ];
     }
 
