@@ -26,7 +26,6 @@ abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
 
     protected string $view = 'flowforge::filament.pages.board-page';
 
-
     /**
      * Configure the board - implement in subclasses.
      */

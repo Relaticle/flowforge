@@ -40,7 +40,7 @@ trait HasBoardRecords
         $query = $this->getQuery();
 
         if (! $query) {
-            return new Collection();
+            return new Collection;
         }
 
         $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
@@ -136,7 +136,7 @@ trait HasBoardRecords
             if ($schema !== null) {
                 // The schema is already built and configured
                 $schema->model($record);
-                
+
                 // Store the schema object with record context for proper Livewire rendering
                 $formatted['schema'] = $schema;
             }

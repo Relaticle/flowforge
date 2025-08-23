@@ -9,13 +9,13 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait InteractsWithKanbanQuery
 {
-    protected Builder |  Closure | null $query = null;
+    protected Builder | Closure | null $query = null;
 
     protected string | Closure | null $columnIdentifierAttribute = null;
 
     protected array | Closure | null $reorderBy = null;
 
-    public function query(Builder |  Closure $query): static
+    public function query(Builder | Closure $query): static
     {
         $this->query = $query;
 
@@ -39,7 +39,7 @@ trait InteractsWithKanbanQuery
         return $this;
     }
 
-    public function getQuery(): Builder|null
+    public function getQuery(): ?Builder
     {
         return $this->evaluate($this->query);
     }

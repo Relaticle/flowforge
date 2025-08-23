@@ -66,7 +66,7 @@ trait InteractsWithBoard
     protected function makeBoard(): Board
     {
         return Board::make($this)
-            ->query(fn (): Builder | null => $this->getBoardQuery());
+            ->query(fn (): ?Builder => $this->getBoardQuery());
     }
 
     /**

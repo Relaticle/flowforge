@@ -86,7 +86,7 @@ class Board extends ViewComponent
                 'columnIdentifierAttribute' => $this->getColumnIdentifierAttribute(),
                 'cardLabel' => 'Record',
                 'pluralCardLabel' => 'Records',
-            ]
+            ],
         ];
     }
 

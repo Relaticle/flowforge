@@ -120,7 +120,7 @@ class FilterBridge extends ViewComponent
 
             // Get the filter's form schema
             $filterSchema = $filter->getFormSchema();
-            
+
             if (! empty($filterSchema)) {
                 // Wrap each filter in a Section for better organization
                 $schema[] = Section::make($filter->getLabel())
@@ -163,7 +163,7 @@ class FilterBridge extends ViewComponent
             }
 
             $filterState = $this->filterData[$filter->getName()] ?? [];
-            
+
             if (empty($filterState)) {
                 continue;
             }

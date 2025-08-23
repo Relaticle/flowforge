@@ -18,7 +18,7 @@ use Relaticle\Flowforge\Contracts\HasBoard;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 
 /**
- * Example implementation showing how to integrate Filament table filters 
+ * Example implementation showing how to integrate Filament table filters
  * into a Flowforge board seamlessly.
  */
 class FilterableTaskBoard extends Component implements HasBoard
@@ -39,14 +39,14 @@ class FilterableTaskBoard extends Component implements HasBoard
                 ->schema([
                     \Filament\Forms\Components\TextInput::make('query')
                         ->placeholder('Search by title or description...')
-                        ->live()
+                        ->live(),
                 ])
                 ->query(function (Builder $query, array $data): Builder {
                     return $query->when(
                         $data['query'] ?? null,
                         fn (Builder $query, $search): Builder => $query->where(function (Builder $query) use ($search) {
                             $query->where('title', 'like', "%{$search}%")
-                                  ->orWhere('description', 'like', "%{$search}%");
+                                ->orWhere('description', 'like', "%{$search}%");
                         })
                     );
                 })
@@ -55,6 +55,7 @@ class FilterableTaskBoard extends Component implements HasBoard
                     if ($data['query'] ?? null) {
                         $indicators['search'] = 'Search: ' . $data['query'];
                     }
+
                     return $indicators;
                 }),
 
@@ -120,6 +121,7 @@ class FilterableTaskBoard extends Component implements HasBoard
                     if ($data['created_until'] ?? null) {
                         $indicators['created_until'] = 'Until: ' . \Carbon\Carbon::parse($data['created_until'])->toFormattedDateString();
                     }
+
                     return $indicators;
                 }),
 
@@ -140,7 +142,7 @@ class FilterableTaskBoard extends Component implements HasBoard
                             'enhancement' => 'Enhancement',
                             'documentation' => 'Documentation',
                         ])
-                        ->placeholder('Select tags...')
+                        ->placeholder('Select tags...'),
                 ])
                 ->query(function (Builder $query, array $data): Builder {
                     return $query->when(
@@ -151,16 +153,17 @@ class FilterableTaskBoard extends Component implements HasBoard
                 ->indicateUsing(function (array $data): array {
                     $indicators = [];
                     if ($tagIds = $data['tag_ids'] ?? null) {
-                        $tagNames = collect($tagIds)->map(fn($id) => ucfirst($id))->join(', ');
+                        $tagNames = collect($tagIds)->map(fn ($id) => ucfirst($id))->join(', ');
                         $indicators['tags'] = 'Tags: ' . $tagNames;
                     }
+
                     return $indicators;
                 }),
         ]);
 
         // Configure filter behavior
         $this->deferBoardFilters(true) // Require explicit apply action
-             ->boardFilterFormMaxWidth('2xl'); // Wider form for better UX
+            ->boardFilterFormMaxWidth('2xl'); // Wider form for better UX
     }
 
     public function getBoard(): Board
