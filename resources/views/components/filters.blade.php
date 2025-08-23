@@ -1,3 +1,4 @@
+@php use Illuminate\View\ComponentAttributeBag;use function Filament\Support\prepare_inherited_attributes; @endphp
 {{-- Native Filament table filters - zero custom code needed! --}}
 @if(method_exists($this, 'getTable') && $this->getTable()->isFilterable())
     <div class="fi-ta-header-toolbar mb-4">
@@ -7,18 +8,47 @@
                 placement="bottom-start"
                 width="2xl"
                 max-height="24rem"
-                class="fi-ta-filters-dropdown"
+                class="fi-ta-filters-dropdown z-50"
             >
                 <x-slot name="trigger">
                     {{ $this->getTable()->getFiltersTriggerAction()->badge($this->getTable()->getActiveFiltersCount()) }}
                 </x-slot>
 
-                {{-- Filament's native filter component --}}
-                <x-filament-tables::filters
-                    :apply-action="$this->getTable()->getFiltersApplyAction()"
-                    :form="$this->getTableFiltersForm()"
-                    heading-tag="h4"
-                />
+                <div class="fi-ta-filters-dropdown-panel" style="padding: calc(var(--spacing) * 6); ">
+                    <div class="fi-ta-filters-header mb-4 flex items-center justify-between">
+                        <h2 class="fi-ta-filters-heading font-medium">
+                            {{ __('filament-tables::table.filters.heading') }}
+                        </h2>
+
+                        <div>
+                            <x-filament::link
+                                :attributes="
+                    prepare_inherited_attributes(
+                        new ComponentAttributeBag([
+                            'color' => 'danger',
+                            'tag' => 'button',
+                            'wire:click' => 'resetTableFiltersForm',
+                            'wire:loading.remove.delay.' . config('filament.livewire_loading_delay', 'default') => '',
+                            'wire:target' => 'resetTableFiltersForm',
+                        ])
+                    )
+                "
+                            >
+                                {{ __('filament-tables::table.filters.actions.reset.label') }}
+                            </x-filament::link>
+                        </div>
+                    </div>
+
+                    {{ $this->getTableFiltersForm()  }}
+
+
+                    @if ($this->getTable()->getFiltersApplyAction()->isVisible())
+                        <div class="fi-ta-filters-apply-action-ctn" style="padding-top: calc(var(--spacing) * 4)">
+                            {{ $this->getTable()->getFiltersApplyAction() }}
+                        </div>
+                    @endif
+                </div>
+
             </x-filament::dropdown>
 
             {{-- Native filter indicators --}}
