@@ -24,6 +24,9 @@ trait HasTableFromBoard
 
         return $table
             ->query($board->getQuery())
-            ->filters($board->getBoardFilters());
+            ->filters($board->getBoardFilters())
+            ->filtersFormWidth($board->getFiltersFormWidth())
+            ->filtersFormColumns($board->getFiltersFormColumns())
+            ->filtersLayout($board->getFiltersLayout());
     }
 }

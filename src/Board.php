@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Relaticle\Flowforge;
 
 use Filament\Support\Components\ViewComponent;
-use Relaticle\Flowforge\Board\Concerns\CanSearchBoardRecords;
-use Relaticle\Flowforge\Board\Concerns\HasBoardActions;
-use Relaticle\Flowforge\Board\Concerns\HasBoardColumns;
-use Relaticle\Flowforge\Board\Concerns\HasBoardFilters;
-use Relaticle\Flowforge\Board\Concerns\HasBoardRecords;
 use Relaticle\Flowforge\Concerns\BelongsToLivewire;
+use Relaticle\Flowforge\Concerns\CanSearchBoardRecords;
+use Relaticle\Flowforge\Concerns\HasBoardActions;
+use Relaticle\Flowforge\Concerns\HasBoardColumns;
+use Relaticle\Flowforge\Concerns\HasBoardFilters;
+use Relaticle\Flowforge\Concerns\HasBoardRecords;
 use Relaticle\Flowforge\Concerns\HasCardSchema;
 use Relaticle\Flowforge\Concerns\InteractsWithKanbanQuery;
 use Relaticle\Flowforge\Contracts\HasBoard;

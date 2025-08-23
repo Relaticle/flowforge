@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Relaticle\Flowforge\Board\Concerns;
+namespace Relaticle\Flowforge\Concerns;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -79,7 +79,7 @@ trait HasBoardRecords
     public function getBoardRecordCount(string $columnId): int
     {
         $query = $this->getQuery();
-        
+
         if (! $query) {
             return 0;
         }

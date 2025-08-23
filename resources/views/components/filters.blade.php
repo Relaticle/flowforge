@@ -1,13 +1,13 @@
 @php use Illuminate\View\ComponentAttributeBag;use function Filament\Support\prepare_inherited_attributes; @endphp
-{{-- Native Filament table filters - zero custom code needed! --}}
+{{-- Native Filament table filters with dynamic width support --}}
 @if(method_exists($this, 'getTable') && $this->getTable()->isFilterable())
     <div class="fi-ta-header-toolbar mb-4">
         <div class="fi-ta-actions fi-align-start fi-wrapped">
-            {{-- Use Filament's exact filter system --}}
+            {{-- Use Filament's exact filter system with configurable width --}}
             <x-filament::dropdown
                 placement="bottom-start"
-                width="2xl"
-                max-height="24rem"
+                :width="$this->getTable()->getFiltersFormWidth()"
+                :max-height="$this->getTable()->getFiltersFormMaxHeight()"
                 class="fi-ta-filters-dropdown z-50"
             >
                 <x-slot name="trigger">

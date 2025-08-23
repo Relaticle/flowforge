@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Relaticle\Flowforge\Board\Concerns;
+namespace Relaticle\Flowforge\Concerns;
 
 use Closure;
 use Filament\Actions\Action;

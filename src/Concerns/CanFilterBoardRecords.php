@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Relaticle\Flowforge\Board\Concerns;
+namespace Relaticle\Flowforge\Concerns;
 
 use Closure;
 use Filament\Tables\Filters\BaseFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 
 /**
  * Integrates Filament table filters into Flowforge boards.
@@ -103,7 +102,7 @@ trait CanFilterBoardRecords
             }
 
             $filterState = $filterData[$filter->getName()] ?? [];
-            
+
             if (empty($filterState)) {
                 continue;
             }
@@ -156,7 +155,7 @@ trait CanFilterBoardRecords
             }
 
             $filterState = $this->filterData[$filter->getName()] ?? [];
-            
+
             if (empty($filterState)) {
                 continue;
             }
