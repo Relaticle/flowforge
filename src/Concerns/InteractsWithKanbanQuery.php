@@ -46,9 +46,9 @@ trait InteractsWithKanbanQuery
         return $this->evaluate($this->columnIdentifierAttribute);
     }
 
-    public function getPositionIdentifierAttribute(): string
+    public function getPositionIdentifierAttribute(): ?string
     {
-        return $this->evaluate($this->positionIdentifierAttribute) ?? 'position';
+        return $this->evaluate($this->positionIdentifierAttribute);
     }
 
     /**
