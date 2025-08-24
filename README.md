@@ -62,7 +62,7 @@ php artisan flowforge:make-board TaskBoard --model=Task
 - **PHP:** 8.3+
 - **Laravel:** 11+  
 - **Filament:** 4.x
-- **Database:** MySQL, PostgreSQL, SQLite
+- **Database:** MySQL, PostgreSQL, SQLite, SQL Server, MariaDB
 
 ---
 
@@ -341,6 +341,19 @@ Schema::create('tasks', function (Blueprint $table) {
 // Custom column name
 $table->flowforgePositionColumn('sort_order');      // Creates 'sort_order' column instead
 ```
+
+### Database-Specific Collations
+
+The `flowforgePositionColumn()` method automatically applies the correct binary collation for each database:
+
+| Database | Collation | Purpose |
+|----------|-----------|---------|
+| **MySQL/MariaDB** | `utf8mb4_bin` | Binary comparison by character code values |
+| **PostgreSQL** | `C` | Binary byte comparison (POSIX locale) |
+| **SQL Server** | `Latin1_General_BIN2` | Unicode code-point comparison |
+| **SQLite** | None | Uses `BINARY` collation by default |
+
+These collations ensure consistent fractional ranking behavior across all database systems.
 
 ### Factory Integration
 

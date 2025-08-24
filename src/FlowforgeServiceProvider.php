@@ -157,7 +157,8 @@ class FlowforgeServiceProvider extends PackageServiceProvider
             return match ($driver) {
                 'pgsql' => $column->collation('C'),
                 'mysql' => $column->collation('utf8mb4_bin'),
-                default => $column,
+                'sqlsrv' => $column->collation('Latin1_General_BIN2'),
+                default => $column,  // No collation needed - BINARY by default, e.g. SQLite
             };
         });
     }
