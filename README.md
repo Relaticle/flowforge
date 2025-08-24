@@ -1,6 +1,6 @@
 # Flowforge
 
-**Transform any Laravel model into a drag-and-drop Kanban board in minutes.**
+**Transform any Laravel model into a production-ready drag-and-drop Kanban board.**
 
 [![Latest Version](https://img.shields.io/packagist/v/relaticle/flowforge.svg?style=for-the-badge)](https://packagist.org/packages/relaticle/flowforge)
 [![Total Downloads](https://img.shields.io/packagist/dt/relaticle/flowforge.svg?style=for-the-badge)](https://packagist.org/packages/relaticle/flowforge)
@@ -14,55 +14,64 @@
 
 ## Why Flowforge?
 
-✅ **Works with existing models** - No new tables or migrations required  
-🚀 **2-minute setup** - From installation to working board  
-🎯 **Filament-native** - Integrates seamlessly with your admin panel
+🎯 **3 Integration Patterns** - Filament Pages, Resources, or standalone Livewire  
+⚡ **Production-Ready** - Handles 100+ cards per column with intelligent pagination  
+🔧 **Zero Configuration** - Works with your existing models and database  
+🎨 **Fully Customizable** - Actions, schemas, filters, and themes
 
 ---
 
-> **Note:** For Filament v3 compatibility, use version 1.x of this package.
-> 
-> **⚠️ Beta Warning:** This is a beta version (2.x) and may contain breaking changes.
+## 🚀 Quick Start (90 seconds)
 
-## 🚀 Quick Start (2 minutes)
-
-### Step 1: Install
+### 1. Install
 ```bash
 composer require relaticle/flowforge
 ```
 
-### Step 2: Create Migration (if needed)
+### 2. Add Position Column
 ```bash
 php artisan make:migration add_position_to_tasks_table
 ```
 
 ```php
-// migration file
-public function up(): void
-{
-    Schema::table('tasks', function (Blueprint $table) {
-        $table->string('order_position', 64)->nullable();
-    });
-}
+// migration
+Schema::table('tasks', function (Blueprint $table) {
+    $table->string('position')->nullable();
+});
 ```
 
-### Step 3: Generate Board
+### 3. Generate Board
 ```bash
 php artisan flowforge:make-board TaskBoard --model=Task
 ```
 
-### Step 4: Register Page
+### 4. Register Page
 ```php
-// app/Providers/Filament/AdminPanelProvider.php
+// AdminPanelProvider.php
 ->pages([
     App\Filament\Pages\TaskBoard::class,
 ])
 ```
 
-**✅ Done!** Visit `/admin` to see your Kanban board in action.
+**🎉 Done!** Visit your Filament panel to see your Kanban board in action.
+
+---
+
+## 📋 Requirements
+
+- **PHP:** 8.3+
+- **Laravel:** 11+  
+- **Filament:** 4.x
+- **Database:** MySQL, PostgreSQL, SQLite
+
+---
+
+## 🎯 Integration Patterns
 
 <details>
-<summary>📋 <strong>Show complete example</strong></summary>
+<summary><strong>🔹 Pattern 1: Filament Page (Recommended)</strong></summary>
+
+Perfect for dedicated board pages in your admin panel.
 
 ```php
 <?php
@@ -70,164 +79,183 @@ php artisan flowforge:make-board TaskBoard --model=Task
 namespace App\Filament\Pages;
 
 use App\Models\Task;
-use Illuminate\Database\Eloquent\Builder;
 use Relaticle\Flowforge\Board;
 use Relaticle\Flowforge\BoardPage;
 use Relaticle\Flowforge\Column;
 
-class TaskBoardPage extends BoardPage
+class TaskBoard extends BoardPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-view-columns';
-
-    public function getEloquentQuery(): Builder
-    {
-        return Task::query();
-    }
-
+    
     public function board(Board $board): Board
     {
         return $board
-            ->query($this->getEloquentQuery())
-            ->recordTitleAttribute('title')
+            ->query(Task::query())
             ->columnIdentifier('status')
-            ->positionIdentifier('order_position')
+            ->positionIdentifier('position')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
-                Column::make('completed')->label('Completed')->color('green'),
+                Column::make('done')->label('Done')->color('green'),
             ]);
     }
 }
 ```
+
+**✅ Use when:** You want a standalone Kanban page in your admin panel  
+**✅ Benefits:** Full Filament integration, automatic registration, built-in actions
+</details>
+
+<details>
+<summary><strong>🔹 Pattern 2: Resource Integration</strong></summary>
+
+Integrate with your existing Filament resources.
+
+```php
+<?php
+
+namespace App\Filament\Resources\TaskResource\Pages;
+
+use App\Filament\Resources\TaskResource;
+use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\BoardResourcePage;
+use Relaticle\Flowforge\Column;
+
+class TaskBoardPage extends BoardResourcePage
+{
+    protected static string $resource = TaskResource::class;
+    
+    public function board(Board $board): Board
+    {
+        return $board
+            ->query($this->getResource()::getEloquentQuery())
+            ->columnIdentifier('status')
+            ->positionIdentifier('position')
+            ->columns([
+                Column::make('todo')->label('To Do')->color('gray'),
+                Column::make('in_progress')->label('In Progress')->color('blue'),
+                Column::make('done')->label('Done')->color('green'),
+            ]);
+    }
+}
+
+// Register in your TaskResource
+public static function getPages(): array
+{
+    return [
+        'index' => Pages\ListTasks::route('/'),
+        'create' => Pages\CreateTask::route('/create'),
+        'edit' => Pages\EditTask::route('/{record}/edit'),
+        'board' => Pages\TaskBoardPage::route('/board'), // Add this line
+    ];
+}
+```
+
+**✅ Use when:** You want to add Kanban to existing Filament resources  
+**✅ Benefits:** Inherits resource permissions, policies, and global scopes
+</details>
+
+<details>
+<summary><strong>🔹 Pattern 3: Standalone Livewire</strong></summary>
+
+Use outside of Filament or in custom applications.
+
+```php
+<?php
+
+namespace App\Livewire;
+
+use App\Models\Task;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Livewire\Component;
+use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\Column;
+use Relaticle\Flowforge\Concerns\InteractsWithBoard;
+use Relaticle\Flowforge\Contracts\HasBoard;
+
+class TaskBoard extends Component implements HasBoard, HasActions, HasForms
+{
+    use InteractsWithBoard;
+    use InteractsWithActions;
+    use InteractsWithForms;
+
+    public function board(Board $board): Board
+    {
+        return $board
+            ->query(Task::query())
+            ->columnIdentifier('status')
+            ->positionIdentifier('position')
+            ->columns([
+                Column::make('todo')->label('To Do')->color('gray'),
+                Column::make('in_progress')->label('In Progress')->color('blue'),
+                Column::make('done')->label('Done')->color('green'),
+            ]);
+    }
+
+    public function render()
+    {
+        return view('livewire.task-board');
+    }
+}
+```
+
+```blade
+{{-- resources/views/livewire/task-board.blade.php --}}
+<div>
+    <h1 class="text-2xl font-bold mb-6">Task Board</h1>
+    {{ $this->board }}
+</div>
+```
+
+**✅ Use when:** Building custom interfaces or non-Filament applications  
+**✅ Benefits:** Maximum flexibility, custom styling, independent routing
 </details>
 
 ---
 
-## Requirements
+## 🎨 Customization
 
-- **PHP:** 8.3+
-- **Laravel:** 11+
-- **Filament:** 4.x
-
----
-
-## Features
-
-| Feature | Description |
-|---------|-------------|
-| 🔄 **Model Agnostic** | Works with any Eloquent model |
-| 🏗️ **No New Tables** | Uses your existing database structure |
-| 🖱️ **Drag & Drop** | Intuitive card movement between columns |
-| ⚡ **Minimal Setup** | 2 methods = working board |
-| 🎨 **Customizable** | Colors, properties, actions |
-| 📱 **Responsive** | Works on all screen sizes |
-| 🔍 **Built-in Search** | Find cards instantly |
-
----
-
-## Installation & Setup
-
-### 1. Install the Package
-
-```bash
-composer require relaticle/flowforge
-```
-
-### 2. Prepare Your Model
-
-Your model needs these fields:
-- **Title field** (e.g., `title`, `name`)
-- **Status field** (e.g., `status`, `state`) 
-- **Position field** (e.g., `order_position`) - for drag & drop positioning
-
-**Example migration:**
-```php
-use Illuminate\Support\Facades\DB;
-
-Schema::create('tasks', function (Blueprint $table) {
-    $table->id();
-    $table->string('title');
-    $table->string('status')->default('todo');
-    
-    // Position field for drag & drop (required for proper ordering)
-    $driver = DB::connection()->getDriverName();
-    $positionColumn = $table->string('order_position', 64)->nullable();
-    
-    match ($driver) {
-        'pgsql' => $positionColumn->collation('C'),
-        'mysql' => $positionColumn->collation('utf8mb4_bin'),
-        default => null,
-    };
-    
-    $table->timestamps();
-});
-```
-
-### 3. Generate Board Page
-
-```bash
-php artisan flowforge:make-board TaskBoard --model=Task
-```
-
-### 4. Register with Filament
+### Rich Card Content
 
 ```php
-// app/Providers/Filament/AdminPanelProvider.php
-->pages([
-    App\Filament\Pages\TaskBoardPage::class,
-])
-```
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Schema;
 
-**Done!** Visit your Filament panel to see your new Kanban board.
-
----
-
-## Configuration Examples
-
-### Basic Read-Only Board
-Perfect for dashboards and overview pages:
-
-```php
 public function board(Board $board): Board
 {
     return $board
-        ->query($this->getEloquentQuery())
-        ->recordTitleAttribute('title')
-        ->columnIdentifier('status')
-        ->columns([
-            Column::make('backlog')->label('Backlog'),
-            Column::make('active')->label('Active'),
-            Column::make('done')->label('Done')->color('green'),
-        ]);
+        ->cardSchema(fn (Schema $schema) => $schema->components([
+            TextEntry::make('priority')->badge()->color(fn ($state) => match($state) {
+                'high' => 'danger',
+                'medium' => 'warning',
+                'low' => 'success',
+                default => 'gray'
+            }),
+            TextEntry::make('due_date')->date()->icon('heroicon-o-calendar'),
+            TextEntry::make('assignee.name')->icon('heroicon-o-user'),
+        ]));
 }
 ```
 
-### Interactive Board with Actions
-Add create and edit capabilities:
+### Actions and Interactions
+
+<details>
+<summary><strong>Column Actions (Create, Bulk Operations)</strong></summary>
 
 ```php
 use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 
 public function board(Board $board): Board
 {
     return $board
-        ->query($this->getEloquentQuery())
-        ->recordTitleAttribute('title')
-        ->columnIdentifier('status')
-        ->reorderBy('order_column')
-        ->columns([
-            Column::make('todo')->label('To Do')->color('gray'),
-            Column::make('in_progress')->label('In Progress')->color('blue'),
-            Column::make('completed')->label('Completed')->color('green'),
-        ])
         ->columnActions([
-            CreateAction::make('create')
+            CreateAction::make()
                 ->label('Add Task')
-                ->icon('heroicon-o-plus')
                 ->model(Task::class)
                 ->form([
                     TextInput::make('title')->required(),
@@ -235,305 +263,244 @@ public function board(Board $board): Board
                         ->options(['low' => 'Low', 'medium' => 'Medium', 'high' => 'High'])
                         ->default('medium'),
                 ])
-                ->mutateFormDataUsing(function (array $data, string $columnId): array {
-                    $data['status'] = $columnId;
+                ->mutateFormDataUsing(function (array $data, array $arguments): array {
+                    if (isset($arguments['column'])) {
+                        $data['status'] = $arguments['column'];
+                        $data['position'] = $this->getBoardPositionInColumn($arguments['column']);
+                    }
                     return $data;
                 }),
-        ])
-        ->cardActions([
-            EditAction::make('edit')->model(Task::class),
-            DeleteAction::make('delete')->model(Task::class),
-        ])
-        ->cardAction('edit'); // Make cards clickable
+        ]);
 }
 ```
+</details>
 
-### Advanced Board with Schema
-Use Filament's Schema system for rich card content:
+<details>
+<summary><strong>Card Actions (Edit, Delete, Custom)</strong></summary>
 
 ```php
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 
 public function board(Board $board): Board
 {
     return $board
-        ->query($this->getEloquentQuery())
-        ->recordTitleAttribute('title')
-        ->columnIdentifier('status')
-        ->cardSchema(fn (Schema $schema) => $schema
-            ->components([
-                TextEntry::make('priority')
-                    ->badge()
-                    ->color(fn ($state) => match ($state) {
-                        'high' => 'danger',
-                        'medium' => 'warning',
-                        'low' => 'success',
-                        default => 'gray',
-                    }),
-                TextEntry::make('due_date')
-                    ->date()
-                    ->icon('heroicon-o-calendar'),
-                TextEntry::make('assignee.name')
-                    ->icon('heroicon-o-user')
-                    ->placeholder('Unassigned'),
-            ])
-        )
-        ->columns([...]);
+        ->cardActions([
+            EditAction::make()->model(Task::class),
+            DeleteAction::make()->model(Task::class),
+        ])
+        ->cardAction('edit'); // Makes cards clickable
 }
 ```
+</details>
+
+### Search and Filtering
+
+<details>
+<summary><strong>Advanced Filtering</strong></summary>
+
+```php
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+
+public function board(Board $board): Board
+{
+    return $board
+        ->searchable(['title', 'description', 'assignee.name'])
+        ->filters([
+            SelectFilter::make('priority')
+                ->options(TaskPriority::class)
+                ->multiple(),
+            SelectFilter::make('assigned_to')
+                ->relationship('assignee', 'name')
+                ->searchable()
+                ->preload(),
+            Filter::make('overdue')
+                ->label('Overdue')
+                ->query(fn (Builder $query) => $query->where('due_date', '<', now()))
+                ->toggle(),
+        ]);
+}
+```
+</details>
 
 ---
 
-## API Reference
+## 🏗️ Database Schema
 
-### Board Configuration Methods
-
-| Method | Description | Required |
-|--------|-------------|----------|
-| `query(Builder\|Closure)` | Set the data source | ✅ |
-| `recordTitleAttribute(string)` | Field used for card titles | ✅ |
-| `columnIdentifier(string)` | Field that determines column placement | ✅ |
-| `positionIdentifier(string)` | Field used for drag & drop positioning | ✅ |
-| `columns(array)` | Define board columns | ✅ |
-| `cardSchema(Closure)` | Configure card content with Filament Schema | |
-| `cardActions(array)` | Actions for individual cards | |
-| `columnActions(array)` | Actions for column headers | |
-| `cardAction(string)` | Default action when cards are clicked | |
-| `searchable(array)` | Enable search across specified fields | |
-
-### Livewire Methods (Available in your BoardPage)
-
-| Method | Description | Usage |
-|--------|-------------|-------|
-| `moveCard(string, string, ?string, ?string)` | Move card between columns with positioning | Automatic |
-| `loadMoreItems(string, ?int)` | Load more cards for pagination | Automatic |
-| `getBoardRecord(int\|string)` | Get single record by ID | Manual |
-| `getBoardColumnRecords(string)` | Get all records for a column | Manual |
-| `getBoardColumnRecordCount(string)` | Count records in a column | Manual |
-
-### Available Colors
-
-`gray`, `red`, `orange`, `yellow`, `green`, `blue`, `indigo`, `purple`, `pink`
-
----
-
-## Troubleshooting
-
-### 🔧 Cards not draggable
-**Cause:** Missing position column or positionIdentifier configuration
-**Solution:**
-1. Add position column to your migration: `$table->string('order_position', 64)->nullable();`
-2. Add `->positionIdentifier('order_position')` to your board configuration
-3. Ensure your model's `$fillable` includes the position column
-4. For better performance, add proper collation as shown in the migration example
-
-### 📭 Empty board showing
-**Cause:** Query returns no results or status field mismatch
-**Debug steps:**
-1. Check query: `dd($this->getEloquentQuery()->get());`
-2. Verify status values match column names exactly
-3. Check database field type (string vs enum)
-
-### ❌ Actions not working
-**Cause:** Missing Filament traits or action configuration
-**Solution:**
-1. Ensure your BoardPage implements `HasActions`, `HasForms`
-2. Use these traits in your class:
+### Required Fields
 ```php
-use InteractsWithActions;
-use InteractsWithForms;
-use InteractsWithBoard;
-```
-3. Configure actions properly with `->model(YourModel::class)`
-
-### 🔄 Drag & drop updates not saving
-**Cause:** Missing position field or incorrect configuration
-**Solution:**
-1. Ensure `order_position` field exists and is fillable
-2. Add `->positionIdentifier('order_position')` to board configuration
-3. Verify position field is string type (not integer) - required for Rank service
-4. Check that status field accepts the column identifier values
-
-### 💥 "No default Filament panel" error
-**Cause:** Missing panel configuration in tests/development
-**Solution:** Add to your panel provider:
-```php
-Panel::make()->default()->id('admin')
+Schema::create('tasks', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');                    // Card title
+    $table->string('status');                   // Column identifier
+    $table->string('position')->nullable();     // Drag-and-drop ordering
+    $table->timestamps();
+});
 ```
 
-### 🎨 Styling not loading
-**Cause:** Assets not built or registered
-**Solution:**
-1. Run `npm run build` to compile assets
-2. Ensure Filament can load the assets with proper permissions
+### Factory Integration
 
-## Real-World Examples
-
-### Complete Task Management Board
+<details>
+<summary><strong>Proper Position Generation</strong></summary>
 
 ```php
 <?php
 
-namespace App\Filament\Pages;
+namespace Database\Factories;
 
 use App\Models\Task;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Builder;
-use Relaticle\Flowforge\Board;
-use Relaticle\Flowforge\BoardPage;
-use Relaticle\Flowforge\Column;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Relaticle\Flowforge\Services\Rank;
 
-class TaskBoardPage extends BoardPage
+class TaskFactory extends Factory
 {
-    protected static ?string $navigationIcon = 'heroicon-o-view-columns';
-    protected static ?string $navigationLabel = 'Task Board';
+    private static array $statusCounters = ['todo' => 0, 'in_progress' => 0, 'done' => 0];
+    private static array $lastRanks = [];
 
-    public function getEloquentQuery(): Builder
+    public function definition(): array
     {
-        return Task::query()->with('assignee');
+        $status = $this->faker->randomElement(['todo', 'in_progress', 'done']);
+        
+        return [
+            'title' => $this->faker->sentence(3),
+            'status' => $status,
+            'position' => $this->generatePositionForStatus($status),
+        ];
     }
 
-    public function board(Board $board): Board
+    private function generatePositionForStatus(string $status): string
     {
-        return $board
-            ->query($this->getEloquentQuery())
-            ->recordTitleAttribute('title')
-            ->columnIdentifier('status')
-            ->reorderBy('order_column', 'desc')
-            ->searchable(['title', 'description', 'assignee.name'])
-            ->columns([
-                Column::make('todo')->label('📋 To Do')->color('gray'),
-                Column::make('in_progress')->label('🔄 In Progress')->color('blue'),
-                Column::make('review')->label('👁️ Review')->color('purple'),
-                Column::make('completed')->label('✅ Completed')->color('green'),
-            ])
-            ->cardSchema(fn (Schema $schema) => $schema
-                ->components([
-                    TextEntry::make('priority')
-                        ->badge()
-                        ->color(fn ($state) => match ($state) {
-                            'high' => 'danger',
-                            'medium' => 'warning',
-                            'low' => 'success',
-                            default => 'gray',
-                        }),
-                    TextEntry::make('due_date')
-                        ->date()
-                        ->icon('heroicon-o-calendar')
-                        ->color('orange'),
-                    TextEntry::make('assignee.name')
-                        ->icon('heroicon-o-user')
-                        ->placeholder('Unassigned'),
-                ])
-            )
-            ->columnActions([
-                CreateAction::make('create')
-                    ->label('Add Task')
-                    ->icon('heroicon-o-plus')
-                    ->model(Task::class)
-                    ->form([
-                        TextInput::make('title')->required(),
-                        Select::make('priority')
-                            ->options(['low' => 'Low', 'medium' => 'Medium', 'high' => 'High'])
-                            ->default('medium'),
-                        DatePicker::make('due_date'),
-                    ])
-                    ->mutateFormDataUsing(function (array $data, string $columnId): array {
-                        $data['status'] = $columnId;
-                        return $data;
-                    }),
-            ])
-            ->cardActions([
-                EditAction::make('edit')
-                    ->model(Task::class)
-                    ->form([
-                        TextInput::make('title')->required(),
-                        Select::make('status')
-                            ->options([
-                                'todo' => 'To Do',
-                                'in_progress' => 'In Progress', 
-                                'review' => 'Review',
-                                'completed' => 'Completed',
-                            ]),
-                        Select::make('priority')
-                            ->options(['low' => 'Low', 'medium' => 'Medium', 'high' => 'High']),
-                        DatePicker::make('due_date'),
-                    ]),
-                DeleteAction::make('delete')
-                    ->model(Task::class)
-                    ->requiresConfirmation(),
-            ])
-            ->cardAction('edit'); // Make cards clickable to edit
+        if (self::$statusCounters[$status] === 0) {
+            $rank = Rank::forEmptySequence();
+        } else {
+            $rank = isset(self::$lastRanks[$status]) 
+                ? Rank::after(self::$lastRanks[$status])
+                : Rank::forEmptySequence();
+        }
+
+        self::$statusCounters[$status]++;
+        self::$lastRanks[$status] = $rank;
+        
+        return $rank->get();
     }
 }
 ```
 
-### Required Database Schema
+**Why?** Flowforge uses a fractional ranking system. This factory ensures proper position generation for seeding and testing.
+</details>
 
-```sql
-CREATE TABLE tasks (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    status VARCHAR(255) DEFAULT 'todo',
-    order_column INT NULL,  -- Required for drag & drop
-    priority VARCHAR(255) DEFAULT 'medium',
-    due_date DATE NULL,
-    assignee_id BIGINT UNSIGNED NULL,
-    created_at TIMESTAMP NULL,
-    updated_at TIMESTAMP NULL
-);
-```
+---
 
-### Testing Your Board
+## 🧪 Testing
+
+<details>
+<summary><strong>Testing Your Boards</strong></summary>
 
 ```php
-// tests/Feature/TaskBoardTest.php
 use Livewire\Livewire;
 
 test('task board renders successfully', function () {
-    Task::create(['title' => 'Test Task', 'status' => 'todo']);
+    Task::factory()->count(10)->create();
     
-    Livewire::test(TaskBoardPage::class)
+    Livewire::test(TaskBoard::class)
         ->assertSuccessful()
-        ->assertSee('Test Task')
-        ->assertSee('To Do');
+        ->assertSee('To Do')
+        ->assertSee('In Progress')
+        ->assertSee('Done');
 });
 
 test('can move tasks between columns', function () {
-    $task = Task::create(['title' => 'Test Task', 'status' => 'todo']);
+    $task = Task::factory()->todo()->create();
     
-    Livewire::test(TaskBoardPage::class)
-        ->call('updateRecordsOrderAndColumn', 'completed', [$task->getKey()])
+    Livewire::test(TaskBoard::class)
+        ->call('moveCard', $task->id, 'in_progress')
         ->assertSuccessful();
     
-    expect($task->fresh()->status)->toBe('completed');
+    expect($task->fresh()->status)->toBe('in_progress');
 });
 ```
+</details>
 
 ---
 
-## Need Help?
+## 🚀 Performance Features
 
-- 📖 [Complete Implementation Guide](docs/IMPLEMENTATION_GUIDE.md) - Comprehensive developer guide
-- 🧪 [Testing Examples](tests/Feature/DragDropFunctionalityTest.php) - Production-ready test patterns
-- 🐛 [Report Issues](https://github.com/relaticle/flowforge/issues)
-- 💬 [Discussions](https://github.com/relaticle/flowforge/discussions)
+- **Intelligent Pagination**: Efficiently handles 100+ cards per column
+- **Infinite Scroll**: Smooth loading with 80% scroll threshold
+- **Optimistic UI**: Immediate feedback with rollback on errors
+- **Position Algorithm**: Fractional ranking prevents database locks
+- **Query Optimization**: Cursor-based pagination with relationship eager loading
 
 ---
 
-## Contributing
+## 🎛️ API Reference
+
+<details>
+<summary><strong>Board Configuration</strong></summary>
+
+| Method | Description | Required |
+|--------|-------------|----------|
+| `query(Builder)` | Set data source | ✅ |
+| `columnIdentifier(string)` | Status field name | ✅ |
+| `positionIdentifier(string)` | Position field name | ✅ |
+| `columns(array)` | Define board columns | ✅ |
+| `recordTitleAttribute(string)` | Card title field | |
+| `cardSchema(Closure)` | Rich card content | |
+| `cardActions(array)` | Card-level actions | |
+| `columnActions(array)` | Column-level actions | |
+| `searchable(array)` | Enable search | |
+| `filters(array)` | Add filters | |
+</details>
+
+<details>
+<summary><strong>Column Configuration</strong></summary>
+
+```php
+Column::make('todo')
+    ->label('To Do')
+    ->color('gray')        // gray, blue, red, green, amber, purple, pink
+    ->icon('heroicon-o-queue-list')
+```
+</details>
+
+---
+
+## 🐛 Troubleshooting
+
+<details>
+<summary><strong>Common Issues & Solutions</strong></summary>
+
+### Cards not draggable
+**Cause:** Missing `positionIdentifier` or position column  
+**Solution:** Add `->positionIdentifier('position')` and ensure database column exists
+
+### Empty board
+**Cause:** Status values don't match column identifiers  
+**Debug:** `dd($this->getEloquentQuery()->get())` to verify data
+
+### Actions not working
+**Cause:** Missing traits or action configuration  
+**Solution:** Ensure your class uses `InteractsWithActions`, `InteractsWithForms`
+
+### New cards appear randomly
+**Cause:** Missing position in create actions  
+**Solution:** Add `$data['position'] = $this->getBoardPositionInColumn($arguments['column']);`
+</details>
+
+---
+
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
+- [Implementation Guide](docs/IMPLEMENTATION_GUIDE.md) - Complete developer guide  
+- [Testing Examples](tests/Feature/) - Production-ready test patterns
+- [Report Issues](https://github.com/relaticle/flowforge/issues)
+
+---
+
+## 📄 License
 
 MIT License. See [LICENSE.md](LICENSE.md) for details.
 
