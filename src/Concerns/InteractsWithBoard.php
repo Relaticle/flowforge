@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 use Relaticle\Flowforge\Board;
 use Relaticle\Flowforge\Services\Rank;
 
@@ -21,11 +22,6 @@ trait InteractsWithBoard
      * Cards per column pagination state.
      */
     public array $columnCardLimits = [];
-
-    /**
-     * Cursor positions for pagination.
-     */
-    public array $columnCursors = [];
 
     /**
      * Loading states for columns.
@@ -92,16 +88,16 @@ trait InteractsWithBoard
         $query = $board->getQuery();
 
         if (! $query) {
-            throw new \InvalidArgumentException('Board query not available');
+            throw new InvalidArgumentException('Board query not available');
         }
 
         $card = (clone $query)->find($cardId);
         if (! $card) {
-            throw new \InvalidArgumentException("Card not found: {$cardId}");
+            throw new InvalidArgumentException("Card not found: {$cardId}");
         }
 
         // Calculate new position using Rank service
-        $newPosition = $this->calculateNewPosition($query, $afterCardId, $beforeCardId);
+        $newPosition = $this->calculatePositionBetweenCards($afterCardId, $beforeCardId, $targetColumnId);
 
         // Update card with new column and position
         $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
@@ -120,9 +116,6 @@ trait InteractsWithBoard
         ]);
     }
 
-    /**
-     * Load more items for a column with cursor-based pagination.
-     */
     public function loadMoreItems(string $columnId, ?int $count = null): void
     {
         $count = $count ?? $this->cardsIncrement;
@@ -131,7 +124,6 @@ trait InteractsWithBoard
         $this->loadingStates[$columnId] = true;
 
         try {
-            // Just increase limit for UI display - no cursor needed for "load more"
             $currentLimit = $this->columnCardLimits[$columnId] ?? 20;
             $this->columnCardLimits[$columnId] = $currentLimit + $count;
 
@@ -161,9 +153,6 @@ trait InteractsWithBoard
             // Set limit to total count to load everything
             $this->columnCardLimits[$columnId] = $totalCount;
 
-            // Clear cursor since we're loading everything
-            unset($this->columnCursors[$columnId]);
-
             $this->dispatch('kanban-all-items-loaded', [
                 'columnId' => $columnId,
                 'totalCount' => $totalCount,
@@ -187,41 +176,37 @@ trait InteractsWithBoard
     }
 
     /**
-     * Calculate new position based on adjacent cards.
+     * Calculate position between specific cards (for drag-drop).
      */
-    protected function calculateNewPosition(
-        Builder $query,
+    protected function calculatePositionBetweenCards(
         ?string $afterCardId = null,
-        ?string $beforeCardId = null
+        ?string $beforeCardId = null,
+        ?string $columnId = null
     ): string {
-        // Get adjacent positions
-        $beforePosition = $beforeCardId ? (clone $query)->find($beforeCardId)?->position : null;
-        $afterPosition = $afterCardId ? (clone $query)->find($afterCardId)?->position : null;
-
-        // Calculate position using Rank service
-        if ($beforePosition && $afterPosition) {
-            // Between two positions
-            $beforeRank = Rank::fromString($beforePosition);
-            $afterRank = Rank::fromString($afterPosition);
-
-            return Rank::betweenRanks($beforeRank, $afterRank)->get();
+        if (! $afterCardId && ! $beforeCardId && $columnId) {
+            return $this->getBoardPositionInColumn($columnId, 'bottom');
         }
 
-        if ($beforePosition) {
-            // After a position
-            $beforeRank = Rank::fromString($beforePosition);
-
-            return Rank::after($beforeRank)->get();
+        $query = $this->getBoard()->getQuery();
+        if (! $query) {
+            return Rank::forEmptySequence()->get();
         }
 
-        if ($afterPosition) {
-            // Before a position
-            $afterRank = Rank::fromString($afterPosition);
+        $beforePos = $beforeCardId ? (clone $query)->find($beforeCardId)?->position : null;
+        $afterPos = $afterCardId ? (clone $query)->find($afterCardId)?->position : null;
 
-            return Rank::before($afterRank)->get();
+        if ($beforePos && $afterPos) {
+            return Rank::betweenRanks(Rank::fromString($beforePos), Rank::fromString($afterPos))->get();
         }
 
-        // First position in empty column
+        if ($beforePos) {
+            return Rank::after(Rank::fromString($beforePos))->get();
+        }
+
+        if ($afterPos) {
+            return Rank::before(Rank::fromString($afterPos))->get();
+        }
+
         return Rank::forEmptySequence()->get();
     }
 
@@ -282,60 +267,6 @@ trait InteractsWithBoard
     }
 
     /**
-     * Get board records for a column (standardized Filament naming).
-     */
-    public function getBoardColumnRecords(string $columnId): array
-    {
-        $board = $this->getBoard();
-        $query = $board->getQuery();
-
-        if (! $query) {
-            return [];
-        }
-
-        $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
-        $limit = $this->columnCardLimits[$columnId] ?? 10;
-
-        $queryClone = (clone $query)->where($statusField, $columnId);
-
-        // Apply board filters if available and active
-        if (method_exists($this, 'applyFiltersToBoardQuery') && $board->hasBoardFilters()) {
-            $queryClone = $this->applyFiltersToBoardQuery($queryClone);
-        }
-
-        // Apply ordering if configured
-        $reorderBy = $board->getReorderBy();
-        if ($reorderBy) {
-            $queryClone->orderBy($reorderBy['column'], $reorderBy['direction']);
-        }
-
-        return $queryClone->limit($limit)->get()->toArray();
-    }
-
-    /**
-     * Get board record count for a column (standardized Filament naming).
-     */
-    public function getBoardColumnRecordCount(string $columnId): int
-    {
-        $board = $this->getBoard();
-        $query = $board->getQuery();
-
-        if (! $query) {
-            return 0;
-        }
-
-        $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
-        $queryClone = (clone $query)->where($statusField, $columnId);
-
-        // Apply board filters if available and active
-        if (method_exists($this, 'applyFiltersToBoardQuery') && $board->hasBoardFilters()) {
-            $queryClone = $this->applyFiltersToBoardQuery($queryClone);
-        }
-
-        return $queryClone->count();
-    }
-
-    /**
      * Get board record actions with proper context.
      */
     public function getBoardRecordActions(array $record): array
@@ -389,34 +320,30 @@ trait InteractsWithBoard
     }
 
     /**
-     * Get column actions for a column (delegates to Board).
+     * Get next board position for a column with direction control.
      */
-    public function getColumnActionsForColumn(string $columnId): array
+    public function getBoardPositionInColumn(string $columnId, string $position = 'top'): string
     {
-        return $this->getBoard()->getBoardColumnActions($columnId);
-    }
+        $query = $this->getBoard()->getQuery();
+        if (! $query) {
+            return Rank::forEmptySequence()->get();
+        }
 
-    /**
-     * Get card actions for a record (delegates to Board).
-     */
-    public function getCardActionsForRecord(array $record): array
-    {
-        return $this->getBoard()->getBoardRecordActions($record);
-    }
+        $statusField = $this->getBoard()->getColumnIdentifierAttribute() ?? 'status';
+        $queryClone = (clone $query)->where($statusField, $columnId);
 
-    /**
-     * Get card action for a record (delegates to Board).
-     */
-    public function getCardActionForRecord(array $record): ?string
-    {
-        return $this->getBoard()->getCardAction();
-    }
+        if ($position === 'top') {
+            $firstRecord = $queryClone->orderBy('position', 'asc')->first();
 
-    /**
-     * Check if card has action.
-     */
-    public function hasCardAction(array $record): bool
-    {
-        return $this->getCardActionForRecord($record) !== null;
+            return $firstRecord
+                ? Rank::before(Rank::fromString($firstRecord->position))->get()
+                : Rank::forEmptySequence()->get();
+        }
+
+        $lastRecord = $queryClone->orderBy('position', 'desc')->first();
+
+        return $lastRecord
+            ? Rank::after(Rank::fromString($lastRecord->position))->get()
+            : Rank::forEmptySequence()->get();
     }
 }

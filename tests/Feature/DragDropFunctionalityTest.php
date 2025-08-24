@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use Livewire\Livewire;
+use Relaticle\Flowforge\Services\Rank;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 use Relaticle\Flowforge\Tests\Fixtures\TestBoard;
-use Relaticle\Flowforge\Services\Rank;
 
 describe('Real Drag & Drop Functionality', function () {
     beforeEach(function () {
@@ -15,13 +15,13 @@ describe('Real Drag & Drop Functionality', function () {
             'status' => 'todo',
             'position' => 'A',
         ]);
-        
+
         Task::create([
-            'title' => 'Task B', 
+            'title' => 'Task B',
             'status' => 'todo',
             'position' => 'B',
         ]);
-        
+
         Task::create([
             'title' => 'Task C',
             'status' => 'in_progress',
@@ -61,7 +61,7 @@ describe('Real Drag & Drop Functionality', function () {
             $taskA = Task::where('title', 'Task A')->first();
             $taskB = Task::where('title', 'Task B')->first();
 
-            // Move B before A 
+            // Move B before A
             Livewire::test(TestBoard::class)
                 ->call('moveCard', (string) $taskB->id, 'todo', null, (string) $taskA->id);
 
@@ -76,7 +76,7 @@ describe('Real Drag & Drop Functionality', function () {
             // Create third task
             $taskD = Task::create([
                 'title' => 'Task D',
-                'status' => 'todo', 
+                'status' => 'todo',
                 'position' => 'D',
             ]);
 
@@ -99,7 +99,7 @@ describe('Real Drag & Drop Functionality', function () {
 
     describe('Error Handling', function () {
         it('throws exception for nonexistent card', function () {
-            expect(fn() => Livewire::test(TestBoard::class)
+            expect(fn () => Livewire::test(TestBoard::class)
                 ->call('moveCard', '999', 'todo'))
                 ->toThrow(InvalidArgumentException::class);
         });
@@ -130,7 +130,7 @@ describe('Real Drag & Drop Functionality', function () {
             Livewire::test(TestBoard::class)
                 ->call('moveCard', (string) $taskA->id, 'todo', (string) $taskB->id);
 
-            // B -> before A  
+            // B -> before A
             Livewire::test(TestBoard::class)
                 ->call('moveCard', (string) $taskB->id, 'todo', null, (string) $taskA->id);
 

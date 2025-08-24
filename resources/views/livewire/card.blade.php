@@ -1,10 +1,10 @@
 @props(['columnId', 'record'])
 
 @php
-    $processedRecordActions = $this->getCardActionsForRecord($record);
+    $processedRecordActions = $this->getBoard()->getBoardRecordActions($record);
     $hasActions = !empty($processedRecordActions);
-    $cardAction = $this->getCardActionForRecord($record);
-    $hasCardAction = $this->hasCardAction($record);
+    $cardAction = $this->getBoard()->getCardAction();
+    $hasCardAction = $cardAction !== null;
 @endphp
 
 <div

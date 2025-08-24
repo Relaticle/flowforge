@@ -49,12 +49,6 @@ trait HasBoardRecords
         $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
         $livewire = $this->getLivewire();
 
-        // Get cursor position for pagination
-        $cursor = null;
-        if (property_exists($livewire, 'columnCursors')) {
-            $cursor = $livewire->columnCursors[$columnId] ?? null;
-        }
-
         $limit = property_exists($livewire, 'columnCardLimits')
             ? ($livewire->columnCardLimits[$columnId] ?? 20)
             : 20;
@@ -69,7 +63,7 @@ trait HasBoardRecords
             }
         }
 
-        $positionField = $this->getPositionField();
+        $positionField = $this->getBoardPositionField();
 
         if ($this->modelHasColumn($queryClone->getModel(), $positionField)) {
             $queryClone->orderBy($positionField, 'asc');
@@ -131,7 +125,7 @@ trait HasBoardRecords
             'id' => $record->getKey(),
             'title' => data_get($record, $this->getRecordTitleAttribute()),
             'column' => data_get($record, $this->getColumnIdentifierAttribute() ?? 'status'),
-            'position' => data_get($record, $this->getPositionField()),
+            'position' => data_get($record, $this->getBoardPositionField()),
             'model' => $record,
         ];
 
@@ -186,7 +180,7 @@ trait HasBoardRecords
         }
 
         $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-        $positionField = $this->getPositionField();
+        $positionField = $this->getBoardPositionField();
 
         return (clone $query)
             ->where($statusField, $columnId)
@@ -208,7 +202,7 @@ trait HasBoardRecords
         }
 
         $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-        $positionField = $this->getPositionField();
+        $positionField = $this->getBoardPositionField();
 
         return (clone $query)
             ->where($statusField, $columnId)
@@ -230,7 +224,7 @@ trait HasBoardRecords
         }
 
         $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-        $positionField = $this->getPositionField();
+        $positionField = $this->getBoardPositionField();
 
         $record = (clone $query)
             ->where($statusField, $columnId)

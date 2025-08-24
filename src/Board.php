@@ -90,6 +90,18 @@ class Board extends ViewComponent
         ];
     }
 
+    /**
+     * Get the field used for board position ordering (delegates to Livewire).
+     */
+    public function getBoardPositionField(): string
+    {
+        $livewire = $this->getLivewire();
+
+        return method_exists($livewire, 'getBoardPositionField')
+            ? $livewire->getBoardPositionField()
+            : 'position';
+    }
+
     protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
     {
         return match ($parameterName) {

@@ -23,7 +23,7 @@
 
         {{-- Column actions are always visible --}}
         @php
-            $processedActions = $this->getColumnActionsForColumn($columnId);
+            $processedActions = $this->getBoardColumnActions($columnId);
         @endphp
 
         @if(count($processedActions) > 0)
