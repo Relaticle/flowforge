@@ -31,11 +31,6 @@ trait InteractsWithBoard
     public array $loadingStates = [];
 
     /**
-     * Default cards per column.
-     */
-    public int $cardsIncrement = 20;
-
-    /**
      * Get the board configuration.
      */
     public function getBoard(): Board
@@ -125,13 +120,14 @@ trait InteractsWithBoard
 
     public function loadMoreItems(string $columnId, ?int $count = null): void
     {
-        $count = $count ?? $this->cardsIncrement;
+        $count = $count ?? $this->getBoard()->getCardsPerColumn();
 
         // Set loading state
         $this->loadingStates[$columnId] = true;
 
         try {
-            $currentLimit = $this->columnCardLimits[$columnId] ?? 20;
+            $board = $this->getBoard();
+            $currentLimit = $this->columnCardLimits[$columnId] ?? $board->getCardsPerColumn();
             $this->columnCardLimits[$columnId] = $currentLimit + $count;
 
             // Emit event for frontend update
@@ -177,7 +173,7 @@ trait InteractsWithBoard
     {
         $board = $this->getBoard();
         $totalCount = $board->getBoardRecordCount($columnId);
-        $loadedCount = $this->columnCardLimits[$columnId] ?? 20;
+        $loadedCount = $this->columnCardLimits[$columnId] ?? $board->getCardsPerColumn();
 
         return $loadedCount >= $totalCount;
     }

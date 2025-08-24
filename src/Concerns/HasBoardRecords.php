@@ -16,6 +16,8 @@ trait HasBoardRecords
 {
     protected string $recordTitleAttribute = 'title';
 
+    protected int $cardsPerColumn = 20;
+
     /**
      * Set the record title attribute.
      */
@@ -35,6 +37,24 @@ trait HasBoardRecords
     }
 
     /**
+     * Set the number of cards per column.
+     */
+    public function cardsPerColumn(int $count): static
+    {
+        $this->cardsPerColumn = $count;
+
+        return $this;
+    }
+
+    /**
+     * Get the number of cards per column.
+     */
+    public function getCardsPerColumn(): int
+    {
+        return $this->cardsPerColumn;
+    }
+
+    /**
      * Get records for a specific column with cursor-based pagination.
      * Uses position field for optimal performance with large datasets.
      */
@@ -50,8 +70,8 @@ trait HasBoardRecords
         $livewire = $this->getLivewire();
 
         $limit = property_exists($livewire, 'columnCardLimits')
-            ? ($livewire->columnCardLimits[$columnId] ?? 20)
-            : 20;
+            ? ($livewire->columnCardLimits[$columnId] ?? $this->getCardsPerColumn())
+            : $this->getCardsPerColumn();
 
         $queryClone = (clone $query)->where($statusField, $columnId);
 
