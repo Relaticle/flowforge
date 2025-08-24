@@ -348,11 +348,12 @@ use InteractsWithBoard;
 3. Configure actions properly with `->model(YourModel::class)`
 
 ### 🔄 Drag & drop updates not saving
-**Cause:** Missing primary key handling or invalid field names
+**Cause:** Missing position field or incorrect configuration
 **Solution:**
-1. Ensure your model uses standard primary key or override `getKeyName()`
-2. Check status field accepts the column identifier values
-3. Verify order column exists and is fillable
+1. Ensure `order_position` field exists and is fillable
+2. Add `->positionIdentifier('order_position')` to board configuration
+3. Verify position field is string type (not integer) - required for Rank service
+4. Check that status field accepts the column identifier values
 
 ### 💥 "No default Filament panel" error
 **Cause:** Missing panel configuration in tests/development
@@ -521,7 +522,8 @@ test('can move tasks between columns', function () {
 
 ## Need Help?
 
-- 📖 [Documentation](#) (coming soon)
+- 📖 [Complete Implementation Guide](docs/IMPLEMENTATION_GUIDE.md) - Comprehensive developer guide
+- 🧪 [Testing Examples](tests/Feature/DragDropFunctionalityTest.php) - Production-ready test patterns
 - 🐛 [Report Issues](https://github.com/relaticle/flowforge/issues)
 - 💬 [Discussions](https://github.com/relaticle/flowforge/discussions)
 
