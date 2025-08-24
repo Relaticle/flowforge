@@ -40,7 +40,7 @@
     <!-- Column Content -->
     <div
         data-column-id="{{ $columnId }}"
-        @if($this->getBoard()->getReorderBy() !== null)
+        @if($this->getBoard()->getPositionIdentifierAttribute())
             x-sortable
             x-sortable-group="cards"
             @end.stop="handleSortableEnd($event)"

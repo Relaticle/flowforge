@@ -146,14 +146,6 @@ trait HasBoardRecords
     }
 
     /**
-     * Get the position field name for ordering.
-     */
-    public function getPositionField(): string
-    {
-        return 'position';
-    }
-
-    /**
      * Check if model has the specified column.
      */
     protected function modelHasColumn($model, string $columnName): bool

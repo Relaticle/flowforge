@@ -100,12 +100,14 @@ trait InteractsWithBoard
         $newPosition = $this->calculatePositionBetweenCards($afterCardId, $beforeCardId, $targetColumnId);
 
         // Update card with new column and position
-        $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
-        $statusValue = $this->resolveStatusValue($card, $statusField, $targetColumnId);
+        $columnIdentifier = $board->getColumnIdentifierAttribute();
+        $columnValue = $this->resolveStatusValue($card, $columnIdentifier, $targetColumnId);
+
+        $positionIdentifier = $board->getPositionIdentifierAttribute();
 
         $card->update([
-            $statusField => $statusValue,
-            'position' => $newPosition,
+            $columnIdentifier => $columnValue,
+            $positionIdentifier => $newPosition,
         ]);
 
         // Emit success event
@@ -330,7 +332,7 @@ trait InteractsWithBoard
         }
 
         $board = $this->getBoard();
-        $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
+        $statusField = $board->getColumnIdentifierAttribute();
         $positionField = $board->getPositionIdentifierAttribute();
         $queryClone = (clone $query)->where($statusField, $columnId);
 

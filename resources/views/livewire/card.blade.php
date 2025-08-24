@@ -5,6 +5,7 @@
     $hasActions = !empty($processedRecordActions);
     $cardAction = $this->getBoard()->getCardAction();
     $hasCardAction = $cardAction !== null;
+    $hasPositionIdentifier = $this->getBoard()->getPositionIdentifierAttribute() !== null;
 @endphp
 
 <div
@@ -12,10 +13,10 @@
         'mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-200 hover:shadow-md',
         'cursor-pointer' => $hasActions || $hasCardAction,
         'cursor-pointer transition-all duration-100 ease-in-out hover:shadow-lg hover:border-neutral-400 active:shadow-md' => $hasCardAction,
-        'cursor-grab hover:cursor-grabbing' => $this->getBoard()->getReorderBy() !== null,
-        'cursor-default' => !$hasActions && !$hasCardAction && $this->getBoard()->getReorderBy() === null,
+        'cursor-grab hover:cursor-grabbing' => $hasPositionIdentifier,
+        'cursor-default' => !$hasActions && !$hasCardAction && !$hasPositionIdentifier,
     ])
-    @if($this->getBoard()->getReorderBy() !== null)
+    @if($hasPositionIdentifier)
         x-sortable-handle
         x-sortable-item="{{ $record['id'] }}"
     @endif
