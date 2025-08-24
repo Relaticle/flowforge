@@ -84,8 +84,8 @@ class Board extends ViewComponent
             'config' => [
                 'recordTitleAttribute' => $this->getRecordTitleAttribute(),
                 'columnIdentifierAttribute' => $this->getColumnIdentifierAttribute(),
-                'cardLabel' => 'Record',
-                'pluralCardLabel' => 'Records',
+                'cardLabel' => __('flowforge::flowforge.card_label'),
+                'pluralCardLabel' => __('flowforge::flowforge.plural_card_label'),
             ],
         ];
     }
