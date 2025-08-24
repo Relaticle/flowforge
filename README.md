@@ -55,6 +55,12 @@ php artisan flowforge:make-board TaskBoard --model=Task
 
 **🎉 Done!** Visit your Filament panel to see your Kanban board in action.
 
+### 5. Repair Positions (Optional)
+If you need to fix corrupted or missing position data:
+```bash
+php artisan flowforge:repair-positions
+```
+
 ---
 
 ## 📋 Requirements
@@ -459,6 +465,10 @@ Column::make('todo')
 ### New cards appear randomly
 **Cause:** Missing position in create actions  
 **Solution:** Add `$data['position'] = $this->getBoardPositionInColumn($arguments['column']);`
+
+### Corrupted or missing position data
+**Cause:** Database issues, manual edits, or migration problems  
+**Solution:** Run `php artisan flowforge:repair-positions` to fix position data
 </details>
 
 ---

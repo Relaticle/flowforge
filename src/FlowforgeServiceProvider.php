@@ -10,6 +10,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Relaticle\Flowforge\Commands\MakeKanbanBoardCommand;
+use Relaticle\Flowforge\Commands\RepairPositionsCommand;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -114,6 +115,7 @@ class FlowforgeServiceProvider extends PackageServiceProvider
     {
         return [
             MakeKanbanBoardCommand::class,
+            RepairPositionsCommand::class,
         ];
     }
 
