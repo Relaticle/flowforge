@@ -39,13 +39,13 @@
 
     <!-- Column Content -->
     <div
+        data-column-id="{{ $columnId }}"
         @if($this->getBoard()->getReorderBy() !== null)
             x-sortable
             x-sortable-group="cards"
-            data-column-id="{{ $columnId }}"
-            @end.stop="$wire.updateRecordsOrderAndColumn($event.to.getAttribute('data-column-id'), $event.to.sortable.toArray())"
+            @end.stop="handleSortableEnd($event)"
         @endif
-        class="p-3 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
+        class="p-3 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain kanban-cards"
         style="max-height: calc(100vh - 13rem);"
     >
         @if (isset($column['items']) && count($column['items']) > 0)

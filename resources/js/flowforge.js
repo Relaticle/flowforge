@@ -5,66 +5,106 @@ export default function flowforge({state}) {
         currentColumn: null,
         isLoading: {},
 
-        init: function () {
-            // Listen for card creation
-            this.$wire.$on('kanban-record-created', (data) => {
-                const id = data[0].id;
-                const column = data[0].column;
+        init: function () {},
 
-                this.$dispatch('close-modal', { id: 'create-record-modal' });
+        /**
+         * Handle x-sortable end event with enterprise positioning
+         */
+        handleSortableEnd(event) {
+            // Get x-sortable's calculated order
+            const newOrder = event.to.sortable.toArray();
+            const cardId = event.item.getAttribute('x-sortable-item');
+            const targetColumn = event.to.getAttribute('data-column-id');
 
-                // Highlight the new card
-                setTimeout(() => {
-                    const cardElement = document.querySelector(`[x-sortable-item="${id}"]`);
-                    if (cardElement) {
-                        cardElement.classList.add('animate-kanban-card-add');
-                        setTimeout(() => {
-                            cardElement.classList.remove('animate-kanban-card-add');
-                        }, 500);
-                    }
-                }, 300);
+            // Add visual feedback during enterprise processing
+            const cardElement = event.item;
+            cardElement.style.opacity = '0.7';
+            cardElement.style.pointerEvents = 'none';
+
+            // Convert x-sortable order to enterprise positioning
+            const cardIndex = newOrder.indexOf(cardId);
+            const afterCardId = cardIndex > 0 ? newOrder[cardIndex - 1] : null;
+            const beforeCardId = cardIndex < newOrder.length - 1 ? newOrder[cardIndex + 1] : null;
+
+            // Debug logging
+            console.log('Flowforge Debug:', {
+                cardId,
+                targetColumn,
+                cardIndex,
+                newOrder,
+                afterCardId,
+                beforeCardId
             });
 
-            // Listen for card update
-            this.$wire.$on('kanban-record-updated', (data) => {
-                // const recordData = data[0].record;
-                // const id = recordData.id;
-                // const titleField = this.state.titleField;
-                // const descriptionField = this.state.descriptionField;
+            // Send to enterprise backend (this will trigger Livewire re-render when complete)
+            this.$wire.moveCard(cardId, targetColumn, beforeCardId, afterCardId).then(() => {
+                // Re-enable card after successful move
+                cardElement.style.opacity = '';
+                cardElement.style.pointerEvents = '';
+            }).catch(() => {
+                // Re-enable card after failed move
+                cardElement.style.opacity = '';
+                cardElement.style.pointerEvents = '';
             });
+        },
 
-            // Listen for card deletion
-            this.$wire.$on('kanban-record-deleted', (data) => {
-                const id = data[0].id;
-
-                this.$dispatch('close-modal', { id: 'edit-record-modal' });
-
-                // Highlight the deleted card
+        /**
+         * Handle successful move confirmation
+         */
+        handleMoveSuccess(cardId, columnId, position) {
+            const cardElement = document.querySelector(`[x-sortable-item="${cardId}"]`);
+            if (cardElement) {
+                cardElement.classList.add('animate-kanban-card-success');
                 setTimeout(() => {
-                    const cardElement = document.querySelector(`[x-sortable-item="${id}"]`);
-                    if (cardElement) {
-                        cardElement.classList.add('animate-kanban-card-delete');
-                        setTimeout(() => {
-                            cardElement.classList.remove('animate-kanban-card-delete');
-                        }, 500);
-                    }
-                }, 300);
-            })
+                    cardElement.classList.remove('animate-kanban-card-success');
+                }, 500);
+            }
+        },
 
-            // Listen for when items are loaded
-            this.$wire.$on('kanban-items-loaded', (data) => {
-                // Get the specific column that was updated
-                const columnId = data[0]?.columnId;
+        /**
+         * Handle move failure with rollback
+         */
+        handleMoveFailure(cardId, message) {
+            // Show error notification
+            this.$dispatch('kanban-error', { message });
 
-                // Clear loading state for this column
-                if (columnId) {
-                    this.isLoading[columnId] = false;
+            const cardElement = document.querySelector(`[x-sortable-item="${cardId}"]`);
+            if (cardElement) {
+                cardElement.classList.add('animate-kanban-card-error');
+                setTimeout(() => {
+                    cardElement.classList.remove('animate-kanban-card-error');
+                }, 500);
+            }
+        },
+
+        /**
+         * Animate card addition
+         */
+        animateCardAdd(cardId) {
+            setTimeout(() => {
+                const cardElement = document.querySelector(`[x-sortable-item="${cardId}"]`);
+                if (cardElement) {
+                    cardElement.classList.add('animate-kanban-card-add');
+                    setTimeout(() => {
+                        cardElement.classList.remove('animate-kanban-card-add');
+                    }, 500);
                 }
-            });
+            }, 300);
+        },
 
-            this.$wire.$on('close-modal', (data) => {
-                // this.$wire.resetEditForm()
-            })
+        /**
+         * Animate card deletion
+         */
+        animateCardDelete(cardId) {
+            setTimeout(() => {
+                const cardElement = document.querySelector(`[x-sortable-item="${cardId}"]`);
+                if (cardElement) {
+                    cardElement.classList.add('animate-kanban-card-delete');
+                    setTimeout(() => {
+                        cardElement.classList.remove('animate-kanban-card-delete');
+                    }, 500);
+                }
+            }, 300);
         },
 
         /**

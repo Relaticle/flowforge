@@ -10,6 +10,7 @@ use Filament\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\Services\Rank;
 
 trait InteractsWithBoard
 {
@@ -23,9 +24,20 @@ trait InteractsWithBoard
     public array $columnCardLimits = [];
 
     /**
+     * Cursor positions for pagination.
+     */
+    public array $columnCursors = [];
+
+
+    /**
+     * Loading states for columns.
+     */
+    public array $loadingStates = [];
+
+    /**
      * Default cards per column.
      */
-    public int $cardsIncrement = 10;
+    public int $cardsIncrement = 20;
 
     /**
      * Get the board configuration.
@@ -70,79 +82,160 @@ trait InteractsWithBoard
     }
 
     /**
-     * Update records order and column.
+     * Move card to new position using Rank-based positioning.
      */
-    public function updateRecordsOrderAndColumn(string $columnId, array $recordIds): bool
-    {
+    public function moveCard(
+        string $cardId,
+        string $targetColumnId,
+        ?string $afterCardId = null,
+        ?string $beforeCardId = null
+    ): void {
         $board = $this->getBoard();
-        $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
         $query = $board->getQuery();
 
         if (! $query) {
-            return false;
+            throw new \InvalidArgumentException('Board query not available');
         }
 
-        $success = true;
-
-        // Update each record's status and order
-        foreach ($recordIds as $index => $recordId) {
-            $record = (clone $query)->find($recordId);
-
-            if ($record) {
-                // Handle enum status field properly
-                $statusValue = $columnId;
-                if (enum_exists($record->getCasts()[$statusField] ?? '')) {
-                    $enumClass = $record->getCasts()[$statusField];
-                    $statusValue = $enumClass::from($columnId);
-                }
-
-                $updateData = [$statusField => $statusValue];
-
-                // Add sort order if reordering is configured
-                $reorderBy = $board->getReorderBy();
-                if ($reorderBy && $this->modelHasOrderColumn($record, $reorderBy['column'])) {
-                    // For DESC order: first item (index 0) gets highest value
-                    // For ASC order: first item (index 0) gets lowest value (0)
-                    if ($reorderBy['direction'] === 'desc') {
-                        $updateData[$reorderBy['column']] = count($recordIds) - 1 - $index;
-                    } else {
-                        $updateData[$reorderBy['column']] = $index;
-                    }
-                }
-
-                $success = $record->update($updateData) && $success;
-            }
+        $card = (clone $query)->find($cardId);
+        if (! $card) {
+            throw new \InvalidArgumentException("Card not found: {$cardId}");
         }
 
-        return $success;
+        // Calculate new position using Rank service
+        $newPosition = $this->calculateNewPosition($query, $afterCardId, $beforeCardId);
+
+        // Update card with new column and position
+        $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
+        $statusValue = $this->resolveStatusValue($card, $statusField, $targetColumnId);
+
+        $card->update([
+            $statusField => $statusValue,
+            'position' => $newPosition,
+        ]);
+
+        // Emit success event
+        $this->dispatch('kanban-card-moved', [
+            'cardId' => $cardId,
+            'columnId' => $targetColumnId,
+            'position' => $newPosition,
+        ]);
     }
 
     /**
-     * Check if model has the specified order column.
-     */
-    protected function modelHasOrderColumn($model, string $columnName): bool
-    {
-        try {
-            $table = $model->getTable();
-            $schema = $model->getConnection()->getSchemaBuilder();
-
-            return $schema->hasColumn($table, $columnName);
-        } catch (Exception) {
-            return false;
-        }
-    }
-
-    /**
-     * Load more items for a column.
+     * Load more items for a column with cursor-based pagination.
      */
     public function loadMoreItems(string $columnId, ?int $count = null): void
     {
         $count = $count ?? $this->cardsIncrement;
-        $currentLimit = $this->columnCardLimits[$columnId] ?? 10;
-        $this->columnCardLimits[$columnId] = $currentLimit + $count;
 
-        // Just refresh without dispatching events that might reset filter state
-        // The board will automatically refresh to show more items
+        // Set loading state
+        $this->loadingStates[$columnId] = true;
+
+        try {
+            // Just increase limit for UI display - no cursor needed for "load more"
+            $currentLimit = $this->columnCardLimits[$columnId] ?? 20;
+            $this->columnCardLimits[$columnId] = $currentLimit + $count;
+
+            // Emit event for frontend update
+            $this->dispatch('kanban-items-loaded', [
+                'columnId' => $columnId,
+                'loadedCount' => $count,
+            ]);
+
+        } finally {
+            // Clear loading state
+            $this->loadingStates[$columnId] = false;
+        }
+    }
+
+    /**
+     * Load all items in a column (disables pagination for that column).
+     */
+    public function loadAllItems(string $columnId): void
+    {
+        $this->loadingStates[$columnId] = true;
+
+        try {
+            $board = $this->getBoard();
+            $totalCount = $board->getBoardRecordCount($columnId);
+
+            // Set limit to total count to load everything
+            $this->columnCardLimits[$columnId] = $totalCount;
+
+            // Clear cursor since we're loading everything
+            unset($this->columnCursors[$columnId]);
+
+            $this->dispatch('kanban-all-items-loaded', [
+                'columnId' => $columnId,
+                'totalCount' => $totalCount,
+            ]);
+
+        } finally {
+            $this->loadingStates[$columnId] = false;
+        }
+    }
+
+    /**
+     * Check if a column is fully loaded.
+     */
+    public function isColumnFullyLoaded(string $columnId): bool
+    {
+        $board = $this->getBoard();
+        $totalCount = $board->getBoardRecordCount($columnId);
+        $loadedCount = $this->columnCardLimits[$columnId] ?? 20;
+
+        return $loadedCount >= $totalCount;
+    }
+
+    /**
+     * Calculate new position based on adjacent cards.
+     */
+    protected function calculateNewPosition(
+        Builder $query,
+        ?string $afterCardId = null,
+        ?string $beforeCardId = null
+    ): string {
+        // Get adjacent positions
+        $beforePosition = $beforeCardId ? (clone $query)->find($beforeCardId)?->position : null;
+        $afterPosition = $afterCardId ? (clone $query)->find($afterCardId)?->position : null;
+
+        // Calculate position using Rank service
+        if ($beforePosition && $afterPosition) {
+            // Between two positions
+            $beforeRank = Rank::fromString($beforePosition);
+            $afterRank = Rank::fromString($afterPosition);
+            return Rank::betweenRanks($beforeRank, $afterRank)->get();
+        }
+
+        if ($beforePosition) {
+            // After a position
+            $beforeRank = Rank::fromString($beforePosition);
+            return Rank::after($beforeRank)->get();
+        }
+
+        if ($afterPosition) {
+            // Before a position
+            $afterRank = Rank::fromString($afterPosition);
+            return Rank::before($afterRank)->get();
+        }
+
+        // First position in empty column
+        return Rank::forEmptySequence()->get();
+    }
+
+    /**
+     * Resolve status value, handling enums properly.
+     */
+    protected function resolveStatusValue(Model $card, string $statusField, string $targetColumnId): mixed
+    {
+        $castType = $card->getCasts()[$statusField] ?? null;
+        
+        if ($castType && enum_exists($castType)) {
+            return $castType::from($targetColumnId);
+        }
+
+        return $targetColumnId;
     }
 
     /**
@@ -162,7 +255,7 @@ trait InteractsWithBoard
 
         // Extract recordKey from context or arguments
         $recordKey = $currentMountedAction['context']['recordKey'] ??
-                    $currentMountedAction['arguments']['recordKey'] ?? null;
+            $currentMountedAction['arguments']['recordKey'] ?? null;
 
         if (! $recordKey) {
             return null;

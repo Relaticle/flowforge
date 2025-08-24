@@ -9,10 +9,11 @@
 
 <div
     @class([
-        'mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-100 hover:shadow-md',
+        'mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-200 hover:shadow-md',
         'cursor-pointer' => $hasActions || $hasCardAction,
         'cursor-pointer transition-all duration-100 ease-in-out hover:shadow-lg hover:border-neutral-400 active:shadow-md' => $hasCardAction,
-        'cursor-default' => !$hasActions && !$hasCardAction,
+        'cursor-grab hover:cursor-grabbing' => $this->getBoard()->getReorderBy() !== null,
+        'cursor-default' => !$hasActions && !$hasCardAction && $this->getBoard()->getReorderBy() === null,
     ])
     @if($this->getBoard()->getReorderBy() !== null)
         x-sortable-handle
@@ -22,6 +23,8 @@
         wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
         style="cursor: pointer;"
     @endif
+    data-card-id="{{ $record['id'] }}"
+    data-position="{{ $record['position'] ?? '' }}"
 >
     <div class="p-3">
         <div class="flex items-center justify-between mb-2">

@@ -30,12 +30,13 @@ final class Rank
 
     /**
      * @var non-empty-string
+     *
      * @psalm-readonly
      */
     private string $rank;
 
     /**
-     * @param non-empty-string $rank
+     * @param  non-empty-string  $rank
      */
     private function __construct(string $rank)
     {
@@ -45,7 +46,7 @@ final class Rank
     }
 
     /**
-     * @param non-empty-string $rank
+     * @param  non-empty-string  $rank
      *
      * @psalm-pure
      */
@@ -81,7 +82,7 @@ final class Rank
     }
 
     /**
-     * @param non-empty-string $rank
+     * @param  non-empty-string  $rank
      *
      * @psalm-pure
      */
@@ -150,7 +151,7 @@ final class Rank
         }
 
         $rank = '';
-        $i    = 0;
+        $i = 0;
         while ($i <= self::MAX_RANK_LEN) {
             $prevChar = $prevRank->getChar($i, self::MIN_CHAR);
             $nextChar = $nextRank->getChar($i, self::MAX_CHAR);
@@ -159,10 +160,12 @@ final class Rank
             $midChar = self::mid($prevChar, $nextChar);
             if (in_array($midChar, [$prevChar, $nextChar])) {
                 $rank .= $prevChar;
+
                 continue;
             }
 
             $rank .= $midChar;
+
             break;
         }
 
@@ -172,9 +175,8 @@ final class Rank
     }
 
     /**
-     * @param 0|positive-int   $i
-     * @param non-empty-string $defaultChar
-     *
+     * @param  0|positive-int  $i
+     * @param  non-empty-string  $defaultChar
      * @return non-empty-string
      */
     private function getChar(int $i, string $defaultChar): string
@@ -187,9 +189,8 @@ final class Rank
     }
 
     /**
-     * @param non-empty-string $prev
-     * @param non-empty-string $next
-     *
+     * @param  non-empty-string  $prev
+     * @param  non-empty-string  $next
      * @return non-empty-string
      *
      * @psalm-pure

@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Clean record management for Board (mirrors Filament's HasRecords).
+ * Enterprise-grade record management for Board with cursor-based pagination.
+ * Implements position-based ordering for optimal performance at scale.
  */
 trait HasBoardRecords
 {
@@ -33,7 +34,8 @@ trait HasBoardRecords
     }
 
     /**
-     * Get records for a specific column (simplified - direct query).
+     * Get records for a specific column with cursor-based pagination.
+     * Uses position field for optimal performance with large datasets.
      */
     public function getBoardRecords(string $columnId): Collection
     {
@@ -44,30 +46,32 @@ trait HasBoardRecords
         }
 
         $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-
-        // Get pagination limit from Livewire if available
         $livewire = $this->getLivewire();
-        $limit = 10; // default
 
-        if (property_exists($livewire, 'columnCardLimits')) {
-            $limit = $livewire->columnCardLimits[$columnId] ?? 10;
+        // Get cursor position for pagination
+        $cursor = null;
+        if (property_exists($livewire, 'columnCursors')) {
+            $cursor = $livewire->columnCursors[$columnId] ?? null;
         }
+
+        $limit = property_exists($livewire, 'columnCardLimits')
+            ? ($livewire->columnCardLimits[$columnId] ?? 20)
+            : 20;
 
         $queryClone = (clone $query)->where($statusField, $columnId);
 
         // Apply table filters using Filament's native system
         if (method_exists($livewire, 'getTable') && $livewire->getTable()->isFilterable()) {
-            // Use Filament's native filtered query
             $baseQuery = $livewire->getFilteredTableQuery();
             if ($baseQuery) {
                 $queryClone = (clone $baseQuery)->where($statusField, $columnId);
             }
         }
 
-        // Apply ordering if configured
-        $reorderBy = $this->getReorderBy();
-        if ($reorderBy) {
-            $queryClone->orderBy($reorderBy['column'], $reorderBy['direction']);
+        $positionField = $this->getPositionField();
+
+        if ($this->modelHasColumn($queryClone->getModel(), $positionField)) {
+            $queryClone->orderBy($positionField, 'asc');
         }
 
         return $queryClone->limit($limit)->get();
@@ -126,6 +130,7 @@ trait HasBoardRecords
             'id' => $record->getKey(),
             'title' => data_get($record, $this->getRecordTitleAttribute()),
             'column' => data_get($record, $this->getColumnIdentifierAttribute() ?? 'status'),
+            'position' => data_get($record, $this->getPositionField()),
             'model' => $record,
         ];
 
@@ -143,5 +148,128 @@ trait HasBoardRecords
         }
 
         return $formatted;
+    }
+
+    /**
+     * Get the position field name for ordering.
+     */
+    public function getPositionField(): string
+    {
+        return 'position';
+    }
+
+    /**
+     * Check if model has the specified column.
+     */
+    protected function modelHasColumn($model, string $columnName): bool
+    {
+        try {
+            $table = $model->getTable();
+            $schema = $model->getConnection()->getSchemaBuilder();
+
+            return $schema->hasColumn($table, $columnName);
+        } catch (\Exception) {
+            return false;
+        }
+    }
+
+    /**
+     * Load more records for a column using cursor-based pagination.
+     */
+    public function loadMoreRecordsForColumn(string $columnId, ?string $cursor = null, int $limit = 20): Collection
+    {
+        $query = $this->getQuery();
+
+        if (! $query) {
+            return new Collection;
+        }
+
+        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
+        $queryClone = (clone $query)->where($statusField, $columnId);
+
+        // Apply filters
+        $livewire = $this->getLivewire();
+        if (method_exists($livewire, 'getTable') && $livewire->getTable()->isFilterable()) {
+            $baseQuery = $livewire->getFilteredTableQuery();
+            if ($baseQuery) {
+                $queryClone = (clone $baseQuery)->where($statusField, $columnId);
+            }
+        }
+
+        $positionField = $this->getPositionField();
+        if ($this->modelHasColumn($queryClone->getModel(), $positionField)) {
+            if ($cursor) {
+                $queryClone->where($positionField, '>', $cursor);
+            }
+            $queryClone->orderBy($positionField, 'asc');
+        }
+
+        return $queryClone->limit($limit)->get();
+    }
+
+    /**
+     * Get records before a specific position (for inserting cards).
+     */
+    public function getRecordsBeforePosition(string $columnId, string $position, int $limit = 5): Collection
+    {
+        $query = $this->getQuery();
+
+        if (! $query) {
+            return new Collection;
+        }
+
+        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
+        $positionField = $this->getPositionField();
+
+        return (clone $query)
+            ->where($statusField, $columnId)
+            ->where($positionField, '<', $position)
+            ->orderBy($positionField, 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get records after a specific position (for inserting cards).
+     */
+    public function getRecordsAfterPosition(string $columnId, string $position, int $limit = 5): Collection
+    {
+        $query = $this->getQuery();
+
+        if (! $query) {
+            return new Collection;
+        }
+
+        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
+        $positionField = $this->getPositionField();
+
+        return (clone $query)
+            ->where($statusField, $columnId)
+            ->where($positionField, '>', $position)
+            ->orderBy($positionField, 'asc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get the last position in a column.
+     */
+    public function getLastPositionInColumn(string $columnId): ?string
+    {
+        $query = $this->getQuery();
+
+        if (! $query) {
+            return null;
+        }
+
+        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
+        $positionField = $this->getPositionField();
+
+        $record = (clone $query)
+            ->where($statusField, $columnId)
+            ->orderBy($positionField, 'desc')
+            ->first();
+
+        return $record?->getAttribute($positionField);
     }
 }

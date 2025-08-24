@@ -4,13 +4,10 @@ namespace Relaticle\Flowforge;
 
 use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
-use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Support\Facades\Blade;
-use Livewire\Livewire;
 use Relaticle\Flowforge\Commands\MakeKanbanBoardCommand;
-// use Relaticle\Flowforge\Livewire\KanbanBoard;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -73,12 +70,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
 
         // Register Blade Components
         $this->registerBladeComponents();
-
-        // Register Livewire Components
-        // Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
-
-        // Testing
-        // Testable::mixin(new TestsFlowforge);
     }
 
     /**
@@ -108,7 +99,6 @@ class FlowforgeServiceProvider extends PackageServiceProvider
     {
         return [
             AlpineComponent::make('flowforge', __DIR__ . '/../resources/dist/flowforge.js'),
-            Css::make('flowforge', __DIR__ . '/../resources/dist/flowforge.css')->loadedOnRequest(),
         ];
     }
 

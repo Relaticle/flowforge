@@ -9,13 +9,13 @@ use function strlen;
 
 class MaxRankLength extends InvalidArgumentException
 {
-    private function __construct(string $message = '', int $code = 0, Throwable|null $previous = null)
+    private function __construct(string $message = '', int $code = 0, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
 
     /**
-     * @param non-empty-string $rank
+     * @param  non-empty-string  $rank
      */
     public static function forInputRank(string $rank, int $maxRankLength): self
     {

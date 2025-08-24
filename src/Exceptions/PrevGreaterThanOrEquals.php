@@ -2,13 +2,13 @@
 
 namespace Relaticle\Flowforge\Exceptions;
 
-use Relaticle\Flowforge\Services\Rank;
 use InvalidArgumentException;
+use Relaticle\Flowforge\Services\Rank;
 use Throwable;
 
 class PrevGreaterThanOrEquals extends InvalidArgumentException
 {
-    private function __construct(string $message = '', int $code = 0, Throwable|null $previous = null)
+    private function __construct(string $message = '', int $code = 0, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
