@@ -42,8 +42,8 @@
         data-column-id="{{ $columnId }}"
         @if($this->getBoard()->getPositionIdentifierAttribute())
             x-sortable
-        x-sortable-group="cards"
-        @end.stop="handleSortableEnd($event)"
+            x-sortable-group="cards"
+            @end.stop="handleSortableEnd($event)"
         @endif
         @if(isset($column['total']) && $column['total'] > count($column['items']))
             @scroll.throttle.100ms="handleColumnScroll($event, '{{ $columnId }}')"
@@ -74,14 +74,6 @@
                              class="text-xs text-primary-600 dark:text-primary-400 flex items-center justify-center gap-2">
                             {{ __('flowforge::flowforge.loading_more_cards') }}
                         </div>
-                    </div>
-                @else
-                    {{-- All items loaded --}}
-                    <div class="text-xs text-green-600 dark:text-green-400">
-                        {{ __('flowforge::flowforge.all_cards_loaded', [
-                            'total' => $column['total'] ?? count($column['items']),
-                            'cards' => strtolower($config['pluralCardLabel'])
-                        ]) }}
                     </div>
                 @endif
             </div>

@@ -85,7 +85,7 @@ trait HasBoardRecords
 
         $positionField = $this->getPositionIdentifierAttribute();
 
-        if ($this->modelHasColumn($queryClone->getModel(), $positionField)) {
+        if ($positionField && $this->modelHasColumn($queryClone->getModel(), $positionField)) {
             $queryClone->orderBy($positionField, 'asc');
         }
 
