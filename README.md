@@ -109,44 +109,52 @@ class TaskBoard extends BoardPage
 <details>
 <summary><strong>🔹 Pattern 2: Resource Integration</strong></summary>
 
-Integrate with your existing Filament resources.
+Integrate with your existing Filament resources. Perfect for campaign management where teams track tasks within campaigns.
 
 ```php
 <?php
 
-namespace App\Filament\Resources\TaskResource\Pages;
+namespace App\Filament\Resources\CampaignResource\Pages;
 
-use App\Filament\Resources\TaskResource;
+use App\Filament\Resources\CampaignResource;
+use App\Models\Campaign;
 use Relaticle\Flowforge\Board;
 use Relaticle\Flowforge\BoardResourcePage;
 use Relaticle\Flowforge\Column;
 
-class TaskBoardPage extends BoardResourcePage
+class CampaignTaskBoard extends BoardResourcePage
 {
-    protected static string $resource = TaskResource::class;
+    protected static string $resource = CampaignResource::class;
     
     public function board(Board $board): Board
     {
         return $board
-            ->query($this->getResource()::getEloquentQuery())
+            ->query(
+                // Get tasks for this specific campaign and current user's team
+                $this->getRecord()
+                    ->tasks()
+                    ->whereHas('team', fn($q) => $q->where('id', auth()->user()->current_team_id))
+                    ->getQuery()
+            )
             ->columnIdentifier('status')
             ->positionIdentifier('position')
             ->columns([
-                Column::make('todo')->label('To Do')->color('gray'),
+                Column::make('backlog')->label('Backlog')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
+                Column::make('review')->label('Review')->color('amber'),
                 Column::make('completed')->label('Completed')->color('green'),
             ]);
     }
 }
 
-// Register in your TaskResource
+// Register in your CampaignResource
 public static function getPages(): array
 {
     return [
-        'index' => Pages\ListTasks::route('/'),
-        'create' => Pages\CreateTask::route('/create'),
-        'edit' => Pages\EditTask::route('/{record}/edit'),
-        'board' => Pages\TaskBoardPage::route('/board'), // Add this line
+        'index' => Pages\ListCampaigns::route('/'),
+        'create' => Pages\CreateCampaign::route('/create'),
+        'edit' => Pages\EditCampaign::route('/{record}/edit'),
+        'tasks' => Pages\CampaignTaskBoard::route('/{record}/tasks'), // Add this line
     ];
 }
 ```
@@ -354,57 +362,6 @@ The `flowforgePositionColumn()` method automatically applies the correct binary 
 | **SQLite** | None | Uses `BINARY` collation by default |
 
 These collations ensure consistent fractional ranking behavior across all database systems.
-
-### Factory Integration
-
-<details>
-<summary><strong>Proper Position Generation</strong></summary>
-
-```php
-<?php
-
-namespace Database\Factories;
-
-use App\Models\Task;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Relaticle\Flowforge\Services\Rank;
-
-class TaskFactory extends Factory
-{
-    private static array $statusCounters = ['todo' => 0, 'in_progress' => 0, 'done' => 0];
-    private static array $lastRanks = [];
-
-    public function definition(): array
-    {
-        $status = $this->faker->randomElement(['todo', 'in_progress', 'done']);
-        
-        return [
-            'title' => $this->faker->sentence(3),
-            'status' => $status,
-            'position' => $this->generatePositionForStatus($status),
-        ];
-    }
-
-    private function generatePositionForStatus(string $status): string
-    {
-        if (self::$statusCounters[$status] === 0) {
-            $rank = Rank::forEmptySequence();
-        } else {
-            $rank = isset(self::$lastRanks[$status]) 
-                ? Rank::after(self::$lastRanks[$status])
-                : Rank::forEmptySequence();
-        }
-
-        self::$statusCounters[$status]++;
-        self::$lastRanks[$status] = $rank;
-        
-        return $rank->get();
-    }
-}
-```
-
-**Why?** Flowforge uses a fractional ranking system. This factory ensures proper position generation for seeding and testing.
-</details>
 
 ---
 
