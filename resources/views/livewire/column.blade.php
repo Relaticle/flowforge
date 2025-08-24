@@ -74,15 +74,6 @@
                              class="text-xs text-primary-600 dark:text-primary-400 flex items-center justify-center gap-2">
                             {{ __('flowforge::flowforge.loading_more_cards') }}
                         </div>
-
-                        <div x-show="!isLoadingColumn('{{ $columnId }}')"
-                             class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('flowforge::flowforge.cards_pagination', [
-                                'current' => count($column['items']),
-                                'total' => $column['total'],
-                                'cards' => strtolower($config['pluralCardLabel'])
-                            ]) }}
-                        </div>
                     </div>
                 @else
                     {{-- All items loaded --}}
