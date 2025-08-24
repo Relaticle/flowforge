@@ -23,12 +23,24 @@
 
 ## 🚀 Quick Start (90 seconds)
 
-### 1. Install
+### 1. Install Package
 ```bash
 composer require relaticle/flowforge
 ```
 
-### 2. Add Position Column
+### 2. Include CSS Assets
+
+> [!IMPORTANT]
+> If you have not set up a custom theme and are using Filament Panels follow the instructions in the [Filament Docs](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme) first.
+
+After setting up a custom theme add the plugin's views to your theme css file.
+
+```css
+/* In your main CSS file (e.g., resources/css/app.css) */
+@source "../../../../vendor/relaticle/flowforge/resources/views/**/*.blade.php";
+```
+
+### 3. Add Position Column
 ```bash
 php artisan make:migration add_position_to_tasks_table
 ```
