@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -168,43 +169,9 @@ trait HasBoardRecords
             $schema = $model->getConnection()->getSchemaBuilder();
 
             return $schema->hasColumn($table, $columnName);
-        } catch (\Exception) {
+        } catch (Exception) {
             return false;
         }
-    }
-
-    /**
-     * Load more records for a column using cursor-based pagination.
-     */
-    public function loadMoreRecordsForColumn(string $columnId, ?string $cursor = null, int $limit = 20): Collection
-    {
-        $query = $this->getQuery();
-
-        if (! $query) {
-            return new Collection;
-        }
-
-        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-        $queryClone = (clone $query)->where($statusField, $columnId);
-
-        // Apply filters
-        $livewire = $this->getLivewire();
-        if (method_exists($livewire, 'getTable') && $livewire->getTable()->isFilterable()) {
-            $baseQuery = $livewire->getFilteredTableQuery();
-            if ($baseQuery) {
-                $queryClone = (clone $baseQuery)->where($statusField, $columnId);
-            }
-        }
-
-        $positionField = $this->getPositionField();
-        if ($this->modelHasColumn($queryClone->getModel(), $positionField)) {
-            if ($cursor) {
-                $queryClone->where($positionField, '>', $cursor);
-            }
-            $queryClone->orderBy($positionField, 'asc');
-        }
-
-        return $queryClone->limit($limit)->get();
     }
 
     /**

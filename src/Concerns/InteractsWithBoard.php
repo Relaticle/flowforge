@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
-use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,7 +26,6 @@ trait InteractsWithBoard
      * Cursor positions for pagination.
      */
     public array $columnCursors = [];
-
 
     /**
      * Loading states for columns.
@@ -205,18 +203,21 @@ trait InteractsWithBoard
             // Between two positions
             $beforeRank = Rank::fromString($beforePosition);
             $afterRank = Rank::fromString($afterPosition);
+
             return Rank::betweenRanks($beforeRank, $afterRank)->get();
         }
 
         if ($beforePosition) {
             // After a position
             $beforeRank = Rank::fromString($beforePosition);
+
             return Rank::after($beforeRank)->get();
         }
 
         if ($afterPosition) {
             // Before a position
             $afterRank = Rank::fromString($afterPosition);
+
             return Rank::before($afterRank)->get();
         }
 
@@ -230,7 +231,7 @@ trait InteractsWithBoard
     protected function resolveStatusValue(Model $card, string $statusField, string $targetColumnId): mixed
     {
         $castType = $card->getCasts()[$statusField] ?? null;
-        
+
         if ($castType && enum_exists($castType)) {
             return $castType::from($targetColumnId);
         }
