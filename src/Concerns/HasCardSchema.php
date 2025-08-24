@@ -6,6 +6,7 @@ namespace Relaticle\Flowforge\Concerns;
 
 use Closure;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
 trait HasCardSchema
 {
@@ -22,16 +23,16 @@ trait HasCardSchema
     }
 
     /**
-     * Get the configured card schema.
+     * Get the configured card schema for a specific record.
      */
-    public function getCardSchema(): ?Schema
+    public function getCardSchema(Model $record): ?Schema
     {
         if ($this->cardSchemaBuilder === null) {
             return null;
         }
 
         $livewire = $this->getLivewire();
-        $schema = Schema::make($livewire);
+        $schema = Schema::make($livewire)->record($record);
 
         return $this->evaluate($this->cardSchemaBuilder, ['schema' => $schema]);
     }
