@@ -282,16 +282,10 @@ trait InteractsWithBoard
         $board = $this->getBoard();
         $actions = [];
 
-        // Get the actual model
-        $model = $board->getBoardRecord($record['id']);
-        if (! $model) {
-            return [];
-        }
-
         foreach ($board->getRecordActions() as $action) {
             $actionClone = $action->getClone();
             $actionClone->livewire($this);
-            $actionClone->record($model);
+            $actionClone->record($record['model']);
             $actions[] = $actionClone;
         }
 
@@ -314,17 +308,6 @@ trait InteractsWithBoard
         }
 
         return $actions;
-    }
-
-    /**
-     * Get a board record by ID.
-     */
-    public function getBoardRecord(int | string $recordId): ?Model
-    {
-        $board = $this->getBoard();
-        $query = $board->getQuery();
-
-        return $query ? (clone $query)->find($recordId) : null;
     }
 
     /**

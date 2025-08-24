@@ -24,16 +24,42 @@
 > 
 > **⚠️ Beta Warning:** This is a beta version (2.x) and may contain breaking changes.
 
-## Quick Start
+## 🚀 Quick Start (2 minutes)
 
-Install and create your first Kanban board:
-
+### Step 1: Install
 ```bash
 composer require relaticle/flowforge
+```
+
+### Step 2: Create Migration (if needed)
+```bash
+php artisan make:migration add_position_to_tasks_table
+```
+
+```php
+// migration file
+public function up(): void
+{
+    Schema::table('tasks', function (Blueprint $table) {
+        $table->string('order_position', 64)->nullable();
+    });
+}
+```
+
+### Step 3: Generate Board
+```bash
 php artisan flowforge:make-board TaskBoard --model=Task
 ```
 
-That's it! Add the generated page to your Filament panel and you have a working Kanban board.
+### Step 4: Register Page
+```php
+// app/Providers/Filament/AdminPanelProvider.php
+->pages([
+    App\Filament\Pages\TaskBoard::class,
+])
+```
+
+**✅ Done!** Visit `/admin` to see your Kanban board in action.
 
 <details>
 <summary>📋 <strong>Show complete example</strong></summary>
@@ -64,7 +90,7 @@ class TaskBoardPage extends BoardPage
             ->query($this->getEloquentQuery())
             ->recordTitleAttribute('title')
             ->columnIdentifier('status')
-            ->reorderBy('order_column')
+            ->positionIdentifier('order_position')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
@@ -112,15 +138,27 @@ composer require relaticle/flowforge
 Your model needs these fields:
 - **Title field** (e.g., `title`, `name`)
 - **Status field** (e.g., `status`, `state`) 
-- **Order field** (e.g., `order_column`) - for drag & drop
+- **Position field** (e.g., `order_position`) - for drag & drop positioning
 
 **Example migration:**
 ```php
+use Illuminate\Support\Facades\DB;
+
 Schema::create('tasks', function (Blueprint $table) {
     $table->id();
     $table->string('title');
     $table->string('status')->default('todo');
-    $table->integer('order_column')->nullable();
+    
+    // Position field for drag & drop (required for proper ordering)
+    $driver = DB::connection()->getDriverName();
+    $positionColumn = $table->string('order_position', 64)->nullable();
+    
+    match ($driver) {
+        'pgsql' => $positionColumn->collation('C'),
+        'mysql' => $positionColumn->collation('utf8mb4_bin'),
+        default => null,
+    };
+    
     $table->timestamps();
 });
 ```
@@ -256,8 +294,8 @@ public function board(Board $board): Board
 | `query(Builder\|Closure)` | Set the data source | ✅ |
 | `recordTitleAttribute(string)` | Field used for card titles | ✅ |
 | `columnIdentifier(string)` | Field that determines column placement | ✅ |
+| `positionIdentifier(string)` | Field used for drag & drop positioning | ✅ |
 | `columns(array)` | Define board columns | ✅ |
-| `reorderBy(string, string)` | Enable drag & drop with field and direction | |
 | `cardSchema(Closure)` | Configure card content with Filament Schema | |
 | `cardActions(array)` | Actions for individual cards | |
 | `columnActions(array)` | Actions for column headers | |
@@ -268,7 +306,7 @@ public function board(Board $board): Board
 
 | Method | Description | Usage |
 |--------|-------------|-------|
-| `updateRecordsOrderAndColumn(string, array)` | Handle drag & drop updates | Automatic |
+| `moveCard(string, string, ?string, ?string)` | Move card between columns with positioning | Automatic |
 | `loadMoreItems(string, ?int)` | Load more cards for pagination | Automatic |
 | `getBoardRecord(int\|string)` | Get single record by ID | Manual |
 | `getBoardColumnRecords(string)` | Get all records for a column | Manual |
@@ -283,11 +321,12 @@ public function board(Board $board): Board
 ## Troubleshooting
 
 ### 🔧 Cards not draggable
-**Cause:** Missing order column or reorderBy configuration
+**Cause:** Missing position column or positionIdentifier configuration
 **Solution:**
-1. Add integer column to your migration: `$table->integer('order_column')->nullable();`
-2. Add `->reorderBy('order_column')` to your board configuration
-3. Ensure your model's `$fillable` includes the order column
+1. Add position column to your migration: `$table->string('order_position', 64)->nullable();`
+2. Add `->positionIdentifier('order_position')` to your board configuration
+3. Ensure your model's `$fillable` includes the position column
+4. For better performance, add proper collation as shown in the migration example
 
 ### 📭 Empty board showing
 **Cause:** Query returns no results or status field mismatch

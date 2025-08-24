@@ -2,18 +2,10 @@
 
 namespace Relaticle\Flowforge\Exceptions;
 
-use InvalidArgumentException;
-use Throwable;
-
 use function implode;
 
-class InvalidChars extends InvalidArgumentException
+class InvalidChars extends FlowforgeException
 {
-    private function __construct(string $message = '', int $code = 0, ?Throwable $previous = null)
-    {
-        parent::__construct($message, $code, $previous);
-    }
-
     /**
      * @param  non-empty-string  $rank
      * @param  non-empty-list<string>  $chars

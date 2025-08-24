@@ -120,23 +120,6 @@ trait HasBoardRecords
     }
 
     /**
-     * Get a single record by ID (delegates to Livewire).
-     */
-    public function getBoardRecord(int | string $recordId): ?Model
-    {
-        $livewire = $this->getLivewire();
-
-        if (method_exists($livewire, 'getBoardRecord')) {
-            return $livewire->getBoardRecord($recordId);
-        }
-
-        // Fallback: direct query
-        $query = $this->getQuery();
-
-        return $query ? (clone $query)->find($recordId) : null;
-    }
-
-    /**
      * Format a record for display with Infolist entries.
      */
     public function formatBoardRecord(Model $record): array

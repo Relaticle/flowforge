@@ -4,30 +4,19 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge;
 
-use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
-use Relaticle\Flowforge\Concerns\InteractsWithBoard;
+use Relaticle\Flowforge\Concerns\BaseBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
 /**
- * Simplified BoardPage - just like Filament's pages.
- * No adapters, no complex caching - just clean delegation.
+ * Board page for Filament resource pages.
+ * Extends Filament's resource Page class with kanban board functionality.
  */
 abstract class BoardResourcePage extends Page implements HasActions, HasBoard, HasForms
 {
-    use InteractsWithActions;
-    use InteractsWithBoard {
-        InteractsWithBoard::getDefaultActionRecord insteadof InteractsWithActions;
-    }
-    use InteractsWithForms;
+    use BaseBoard;
 
     protected string $view = 'flowforge::filament.pages.board-page';
-
-    /**
-     * Configure the board - implement in subclasses.
-     */
-    abstract public function board(Board $board): Board;
 }
