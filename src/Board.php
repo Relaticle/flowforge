@@ -26,9 +26,6 @@ class Board extends ViewComponent
     use HasCardSchema;
     use InteractsWithKanbanQuery;
 
-    /**
-     * @var view-string
-     */
     protected string $view = 'flowforge::index';
 
     protected string $viewIdentifier = 'board';

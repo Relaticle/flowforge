@@ -12,9 +12,6 @@ use Illuminate\Contracts\Support\Htmlable;
 
 class CardFlex extends Component
 {
-    /**
-     * @var view-string
-     */
     protected string $view = 'flowforge::components.card-flex';
 
     protected string $gap = 'xs';

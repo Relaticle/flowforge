@@ -22,9 +22,6 @@ class Column extends ViewComponent
     use HasIconColor;
     use HasIconPosition;
 
-    /**
-     * @var view-string
-     */
     protected string $view = 'flowforge::column';
 
     protected string $viewIdentifier = 'column';
@@ -96,7 +93,8 @@ class Column extends ViewComponent
         return str($this->getName())
             ->kebab()
             ->replace(['-', '_'], ' ')
-            ->title();
+            ->title()
+            ->toString();
     }
 
     public function getName(): string
