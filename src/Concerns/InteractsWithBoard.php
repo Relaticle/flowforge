@@ -8,9 +8,11 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Relaticle\Flowforge\Board;
 use Relaticle\Flowforge\Services\Rank;
+use Throwable;
 
 trait InteractsWithBoard
 {
@@ -77,6 +79,8 @@ trait InteractsWithBoard
 
     /**
      * Move card to new position using Rank-based positioning.
+     *
+     * @throws Throwable
      */
     public function moveCard(
         string $cardId,
@@ -99,18 +103,19 @@ trait InteractsWithBoard
         // Calculate new position using Rank service
         $newPosition = $this->calculatePositionBetweenCards($afterCardId, $beforeCardId, $targetColumnId);
 
-        // Update card with new column and position
-        $columnIdentifier = $board->getColumnIdentifierAttribute();
-        $columnValue = $this->resolveStatusValue($card, $columnIdentifier, $targetColumnId);
+        // Use transaction for data consistency
+        DB::transaction(function () use ($card, $board, $targetColumnId, $newPosition) {
+            $columnIdentifier = $board->getColumnIdentifierAttribute();
+            $columnValue = $this->resolveStatusValue($card, $columnIdentifier, $targetColumnId);
+            $positionIdentifier = $board->getPositionIdentifierAttribute();
 
-        $positionIdentifier = $board->getPositionIdentifierAttribute();
+            $card->update([
+                $columnIdentifier => $columnValue,
+                $positionIdentifier => $newPosition,
+            ]);
+        });
 
-        $card->update([
-            $columnIdentifier => $columnValue,
-            $positionIdentifier => $newPosition,
-        ]);
-
-        // Emit success event
+        // Emit success event after successful transaction
         $this->dispatch('kanban-card-moved', [
             'cardId' => $cardId,
             'columnId' => $targetColumnId,
@@ -194,18 +199,19 @@ trait InteractsWithBoard
             return Rank::forEmptySequence()->get();
         }
 
-        $beforePos = $beforeCardId ? (clone $query)->find($beforeCardId)?->position : null;
-        $afterPos = $afterCardId ? (clone $query)->find($afterCardId)?->position : null;
+        $positionField = $this->getBoard()->getPositionIdentifierAttribute();
+        $beforePos = $beforeCardId ? (clone $query)->find($beforeCardId)?->getAttribute($positionField) : null;
+        $afterPos = $afterCardId ? (clone $query)->find($afterCardId)?->getAttribute($positionField) : null;
 
-        if ($beforePos && $afterPos) {
+        if ($beforePos && $afterPos && is_string($beforePos) && is_string($afterPos)) {
             return Rank::betweenRanks(Rank::fromString($beforePos), Rank::fromString($afterPos))->get();
         }
 
-        if ($beforePos) {
+        if ($beforePos && is_string($beforePos)) {
             return Rank::after(Rank::fromString($beforePos))->get();
         }
 
-        if ($afterPos) {
+        if ($afterPos && is_string($afterPos)) {
             return Rank::before(Rank::fromString($afterPos))->get();
         }
 
