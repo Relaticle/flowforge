@@ -128,12 +128,23 @@ trait InteractsWithBoard
         try {
             $board = $this->getBoard();
             $currentLimit = $this->columnCardLimits[$columnId] ?? $board->getCardsPerColumn();
-            $this->columnCardLimits[$columnId] = $currentLimit + $count;
+            $newLimit = $currentLimit + $count;
+
+            // Check if we have more items to load
+            $totalCount = $board->getBoardRecordCount($columnId);
+            $actualNewLimit = min($newLimit, $totalCount);
+
+            $this->columnCardLimits[$columnId] = $actualNewLimit;
+
+            // Calculate how many items were actually loaded
+            $actualLoadedCount = $actualNewLimit - $currentLimit;
 
             // Emit event for frontend update
             $this->dispatch('kanban-items-loaded', [
                 'columnId' => $columnId,
-                'loadedCount' => $count,
+                'loadedCount' => $actualLoadedCount,
+                'totalCount' => $totalCount,
+                'isFullyLoaded' => $actualNewLimit >= $totalCount,
             ]);
 
         } finally {
