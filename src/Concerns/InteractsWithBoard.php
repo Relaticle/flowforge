@@ -200,8 +200,12 @@ trait InteractsWithBoard
         }
 
         $positionField = $this->getBoard()->getPositionIdentifierAttribute();
-        $beforePos = $beforeCardId ? (clone $query)->find($beforeCardId)?->getAttribute($positionField) : null;
-        $afterPos = $afterCardId ? (clone $query)->find($afterCardId)?->getAttribute($positionField) : null;
+
+        $beforeCard = $beforeCardId ? (clone $query)->find($beforeCardId) : null;
+        $beforePos = $beforeCard?->getAttribute($positionField);
+
+        $afterCard = $afterCardId ? (clone $query)->find($afterCardId) : null;
+        $afterPos = $afterCard?->getAttribute($positionField);
 
         if ($beforePos && $afterPos && is_string($beforePos) && is_string($afterPos)) {
             return Rank::betweenRanks(Rank::fromString($beforePos), Rank::fromString($afterPos))->get();
@@ -329,6 +333,7 @@ trait InteractsWithBoard
 
     /**
      * Get next board position for a column with direction control.
+     * Handles null positions gracefully and ensures valid position assignment.
      */
     public function getBoardPositionInColumn(string $columnId, string $position = 'top'): string
     {
@@ -343,17 +348,35 @@ trait InteractsWithBoard
         $queryClone = (clone $query)->where($statusField, $columnId);
 
         if ($position === 'top') {
-            $firstRecord = $queryClone->orderBy($positionField, 'asc')->first();
+            // Get first valid position (ignore null positions)
+            $firstRecord = $queryClone
+                ->whereNotNull($positionField)
+                ->orderBy($positionField, 'asc')
+                ->first();
 
-            return $firstRecord
-                ? Rank::before(Rank::fromString($firstRecord->getAttribute($positionField)))->get()
-                : Rank::forEmptySequence()->get();
+            if ($firstRecord) {
+                $firstPosition = $firstRecord->getAttribute($positionField);
+                if (is_string($firstPosition)) {
+                    return Rank::before(Rank::fromString($firstPosition))->get();
+                }
+            }
+
+            return Rank::forEmptySequence()->get();
         }
 
-        $lastRecord = $queryClone->orderBy($positionField, 'desc')->first();
+        // Get last valid position (ignore null positions)
+        $lastRecord = $queryClone
+            ->whereNotNull($positionField)
+            ->orderBy($positionField, 'desc')
+            ->first();
 
-        return $lastRecord
-            ? Rank::after(Rank::fromString($lastRecord->getAttribute($positionField)))->get()
-            : Rank::forEmptySequence()->get();
+        if ($lastRecord) {
+            $lastPosition = $lastRecord->getAttribute($positionField);
+            if (is_string($lastPosition)) {
+                return Rank::after(Rank::fromString($lastPosition))->get();
+            }
+        }
+
+        return Rank::forEmptySequence()->get();
     }
 }

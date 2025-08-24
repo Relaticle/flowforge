@@ -12,14 +12,24 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('status')->default('todo');
-            $table->integer('order_column')->nullable();
+
+            $this->definePositionColumn($table);
+
             $table->string('priority')->default('medium');
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    private function definePositionColumn(Blueprint $table): void
     {
-        Schema::dropIfExists('tasks');
+        $driver = DB::connection()->getDriverName();
+
+        $positionColumn = $table->string('order_position', 64)->nullable();
+
+        match ($driver) {
+            'pgsql' => $positionColumn->collation('C'),
+            'mysql' => $positionColumn->collation('utf8mb4_bin'),
+            default => null,
+        };
     }
 };

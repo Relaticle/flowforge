@@ -20,6 +20,7 @@ use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Relaticle\Flowforge\FlowforgeServiceProvider;
+use Relaticle\Flowforge\Tests\Fixtures\TestPanelProvider;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
 
 class TestCase extends Orchestra
@@ -53,7 +54,7 @@ class TestCase extends Orchestra
             TablesServiceProvider::class,
             WidgetsServiceProvider::class,
             FlowforgeServiceProvider::class,
-            \Relaticle\Flowforge\Tests\Fixtures\TestPanelProvider::class,
+            TestPanelProvider::class,
         ];
 
         sort($providers);

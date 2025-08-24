@@ -29,9 +29,8 @@ test('package assets are defined', function () {
     $method->setAccessible(true);
     $assets = $method->invoke($serviceProvider);
 
-    expect($assets)->toHaveCount(2); // CSS and JS
+    expect($assets)->toHaveCount(1); // Only JS asset exists now
     expect($assets[0]->getId())->toBe('flowforge');
-    expect($assets[1]->getId())->toBe('flowforge');
 });
 
 test('blade component namespace is registered', function () {
@@ -85,6 +84,5 @@ test('core classes exist and are autoloadable', function () {
     expect(class_exists(\Relaticle\Flowforge\Board::class))->toBeTrue();
     expect(class_exists(\Relaticle\Flowforge\BoardPage::class))->toBeTrue();
     expect(class_exists(\Relaticle\Flowforge\Column::class))->toBeTrue();
-    expect(class_exists(\Relaticle\Flowforge\Property::class))->toBeTrue();
     expect(class_exists(\Relaticle\Flowforge\Commands\MakeKanbanBoardCommand::class))->toBeTrue();
 });

@@ -130,6 +130,7 @@ trait HasBoardRecords
         ];
 
         // Process card schema if available
+        $formatted['schema'] = null;
         if (method_exists($this, 'getCardSchema')) {
             $schema = $this->getCardSchema();
 

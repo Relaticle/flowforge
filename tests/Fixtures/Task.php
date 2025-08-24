@@ -11,8 +11,8 @@ class Task extends Model
     protected $fillable = [
         'title',
         'status',
-        'order_column',
         'priority',
+        'order_position',
     ];
 
     protected $table = 'tasks';

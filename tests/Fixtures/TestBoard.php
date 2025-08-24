@@ -22,7 +22,7 @@ class TestBoard extends BoardPage
             ->query($this->getEloquentQuery())
             ->recordTitleAttribute('title')
             ->columnIdentifier('status')
-            ->positionIdentifier('position')
+            ->positionIdentifier('order_position')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
