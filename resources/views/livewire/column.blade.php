@@ -61,27 +61,39 @@
                 />
             @endforeach
 
-            @if(isset($column['total']) && $column['total'] > count($column['items']))
-                <div
-                    x-intersect.margin.300px="handleSmoothScroll('{{ $columnId }}')"
-                    class="py-3 text-center">
+            {{-- Always show status message at bottom --}}
+            <div class="py-3 text-center">
+                @if(isset($column['total']) && $column['total'] > count($column['items']))
+                    {{-- More items available --}}
+                    <div
+                        x-intersect.margin.300px="handleSmoothScroll('{{ $columnId }}')"
+                        class="w-full">
 
-                    <div x-show="isLoadingColumn('{{ $columnId }}')"
-                         x-transition
-                         class="text-xs text-primary-600 dark:text-primary-400 flex items-center justify-center gap-2">
-                        {{ __('flowforge::flowforge.loading_more_cards') }}
+                        <div x-show="isLoadingColumn('{{ $columnId }}')"
+                             x-transition
+                             class="text-xs text-primary-600 dark:text-primary-400 flex items-center justify-center gap-2">
+                            {{ __('flowforge::flowforge.loading_more_cards') }}
+                        </div>
+
+                        <div x-show="!isLoadingColumn('{{ $columnId }}')"
+                             class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('flowforge::flowforge.cards_pagination', [
+                                'current' => count($column['items']),
+                                'total' => $column['total'],
+                                'cards' => strtolower($config['pluralCardLabel'])
+                            ]) }}
+                        </div>
                     </div>
-
-                    <div x-show="!isLoadingColumn('{{ $columnId }}')"
-                         class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ __('flowforge::flowforge.cards_pagination', [
-                            'current' => count($column['items']),
-                            'total' => $column['total'],
+                @else
+                    {{-- All items loaded --}}
+                    <div class="text-xs text-green-600 dark:text-green-400">
+                        {{ __('flowforge::flowforge.all_cards_loaded', [
+                            'total' => $column['total'] ?? count($column['items']),
                             'cards' => strtolower($config['pluralCardLabel'])
                         ]) }}
                     </div>
-                </div>
-            @endif
+                @endif
+            </div>
         @else
             <x-flowforge::empty-column
                 :columnId="$columnId"

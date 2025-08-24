@@ -7,4 +7,5 @@ return [
     'card_label' => 'Record',
     'plural_card_label' => 'Records',
     'cards_pagination' => ':current of :total :cards',
+    'all_cards_loaded' => 'All :total :cards loaded',
 ];
