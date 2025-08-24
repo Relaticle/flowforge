@@ -46,7 +46,7 @@ trait HasBoardRecords
             return new Collection;
         }
 
-        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
+        $statusField = $this->getColumnIdentifierAttribute();
         $livewire = $this->getLivewire();
 
         $limit = property_exists($livewire, 'columnCardLimits')
@@ -63,7 +63,7 @@ trait HasBoardRecords
             }
         }
 
-        $positionField = $this->getBoardPositionField();
+        $positionField = $this->getPositionIdentifierAttribute();
 
         if ($this->modelHasColumn($queryClone->getModel(), $positionField)) {
             $queryClone->orderBy($positionField, 'asc');
@@ -83,7 +83,7 @@ trait HasBoardRecords
             return 0;
         }
 
-        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
+        $statusField = $this->getColumnIdentifierAttribute();
         $queryClone = (clone $query)->where($statusField, $columnId);
 
         // Apply table filters using Filament's native system
@@ -124,8 +124,8 @@ trait HasBoardRecords
         $formatted = [
             'id' => $record->getKey(),
             'title' => data_get($record, $this->getRecordTitleAttribute()),
-            'column' => data_get($record, $this->getColumnIdentifierAttribute() ?? 'status'),
-            'position' => data_get($record, $this->getBoardPositionField()),
+            'column' => data_get($record, $this->getColumnIdentifierAttribute()),
+            'position' => data_get($record, $this->getPositionIdentifierAttribute()),
             'model' => $record,
         ];
 
@@ -179,8 +179,8 @@ trait HasBoardRecords
             return new Collection;
         }
 
-        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-        $positionField = $this->getBoardPositionField();
+        $statusField = $this->getColumnIdentifierAttribute();
+        $positionField = $this->getPositionIdentifierAttribute();
 
         return (clone $query)
             ->where($statusField, $columnId)
@@ -201,8 +201,8 @@ trait HasBoardRecords
             return new Collection;
         }
 
-        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-        $positionField = $this->getBoardPositionField();
+        $statusField = $this->getColumnIdentifierAttribute();
+        $positionField = $this->getPositionIdentifierAttribute();
 
         return (clone $query)
             ->where($statusField, $columnId)
@@ -223,8 +223,8 @@ trait HasBoardRecords
             return null;
         }
 
-        $statusField = $this->getColumnIdentifierAttribute() ?? 'status';
-        $positionField = $this->getBoardPositionField();
+        $statusField = $this->getColumnIdentifierAttribute();
+        $positionField = $this->getPositionIdentifierAttribute();
 
         $record = (clone $query)
             ->where($statusField, $columnId)

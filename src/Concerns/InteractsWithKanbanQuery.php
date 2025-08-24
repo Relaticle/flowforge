@@ -13,7 +13,7 @@ trait InteractsWithKanbanQuery
 
     protected string | Closure | null $columnIdentifierAttribute = null;
 
-    protected array | Closure | null $reorderBy = null;
+    protected string | Closure | null $positionIdentifierAttribute = null;
 
     public function query(Builder | Closure $query): static
     {
@@ -29,12 +29,9 @@ trait InteractsWithKanbanQuery
         return $this;
     }
 
-    public function reorderBy(string $column, string $direction = 'asc'): static
+    public function positionIdentifier(string | Closure $attribute): static
     {
-        $this->reorderBy = [
-            'column' => $column,
-            'direction' => $direction,
-        ];
+        $this->positionIdentifierAttribute = $attribute;
 
         return $this;
     }
@@ -49,9 +46,9 @@ trait InteractsWithKanbanQuery
         return $this->evaluate($this->columnIdentifierAttribute);
     }
 
-    public function getReorderBy(): ?array
+    public function getPositionIdentifierAttribute(): string
     {
-        return $this->evaluate($this->reorderBy);
+        return $this->evaluate($this->positionIdentifierAttribute) ?? 'position';
     }
 
     /**
@@ -62,7 +59,7 @@ trait InteractsWithKanbanQuery
         return match ($parameterName) {
             'query' => [$this->getQuery()],
             'columnIdentifierAttribute' => [$this->getColumnIdentifierAttribute()],
-            'reorderBy' => [$this->getReorderBy()],
+            'positionIdentifierAttribute' => [$this->getPositionIdentifierAttribute()],
             default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),
         };
     }

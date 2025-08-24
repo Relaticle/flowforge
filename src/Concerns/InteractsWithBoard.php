@@ -329,21 +329,23 @@ trait InteractsWithBoard
             return Rank::forEmptySequence()->get();
         }
 
-        $statusField = $this->getBoard()->getColumnIdentifierAttribute() ?? 'status';
+        $board = $this->getBoard();
+        $statusField = $board->getColumnIdentifierAttribute() ?? 'status';
+        $positionField = $board->getPositionIdentifierAttribute();
         $queryClone = (clone $query)->where($statusField, $columnId);
 
         if ($position === 'top') {
-            $firstRecord = $queryClone->orderBy('position', 'asc')->first();
+            $firstRecord = $queryClone->orderBy($positionField, 'asc')->first();
 
             return $firstRecord
-                ? Rank::before(Rank::fromString($firstRecord->position))->get()
+                ? Rank::before(Rank::fromString($firstRecord->getAttribute($positionField)))->get()
                 : Rank::forEmptySequence()->get();
         }
 
-        $lastRecord = $queryClone->orderBy('position', 'desc')->first();
+        $lastRecord = $queryClone->orderBy($positionField, 'desc')->first();
 
         return $lastRecord
-            ? Rank::after(Rank::fromString($lastRecord->position))->get()
+            ? Rank::after(Rank::fromString($lastRecord->getAttribute($positionField)))->get()
             : Rank::forEmptySequence()->get();
     }
 }
