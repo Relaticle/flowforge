@@ -36,7 +36,15 @@ php artisan make:migration add_position_to_tasks_table
 ```php
 // migration
 Schema::table('tasks', function (Blueprint $table) {
-    $table->string('position')->nullable()->collation('utf8mb4_bin');
+    // Database-specific collations for binary sorting
+    $driver = DB::connection()->getDriverName();
+    $positionColumn = $table->string('position')->nullable();
+    
+    match ($driver) {
+        'pgsql' => $positionColumn->collation('C'),
+        'mysql' => $positionColumn->collation('utf8mb4_bin'),
+        default => null,
+    };
 });
 ```
 
@@ -62,7 +70,7 @@ php artisan flowforge:make-board TaskBoard --model=Task
 - **PHP:** 8.3+
 - **Laravel:** 11+  
 - **Filament:** 4.x
-- **Database:** MySQL, PostgreSQL (14+), SQLite
+- **Database:** MySQL, PostgreSQL, SQLite
 
 ---
 
@@ -334,7 +342,17 @@ Schema::create('tasks', function (Blueprint $table) {
     $table->id();
     $table->string('title');                         // Card title
     $table->string('status');                        // Column identifier
-    $table->string('position')->nullable()->collation('utf8mb4_bin'); 
+    
+    // Position column with database-specific collations for binary sorting
+    $driver = DB::connection()->getDriverName();
+    $positionColumn = $table->string('position')->nullable();
+    
+    match ($driver) {
+        'pgsql' => $positionColumn->collation('C'),        // PostgreSQL binary
+        'mysql' => $positionColumn->collation('utf8mb4_bin'), // MySQL binary
+        default => null,
+    };
+    
     $table->timestamps();
 });
 ```
