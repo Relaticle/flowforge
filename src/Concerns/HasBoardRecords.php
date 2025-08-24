@@ -76,7 +76,7 @@ trait HasBoardRecords
         $queryClone = (clone $query)->where($statusField, $columnId);
 
         // Apply table filters using Filament's native system
-        if (method_exists($livewire, 'getTable') && $livewire->getTable()->isFilterable()) {
+        if ($livewire->getTable()->isFilterable()) {
             $baseQuery = $livewire->getFilteredTableQuery();
             if ($baseQuery) {
                 $queryClone = (clone $baseQuery)->where($statusField, $columnId);
@@ -108,7 +108,7 @@ trait HasBoardRecords
 
         // Apply table filters using Filament's native system
         $livewire = $this->getLivewire();
-        if (method_exists($livewire, 'getTable') && $livewire->getTable()->isFilterable()) {
+        if ($livewire->getTable()->isFilterable()) {
             // Use Filament's native filtered query
             $baseQuery = $livewire->getFilteredTableQuery();
             if ($baseQuery) {
@@ -134,16 +134,14 @@ trait HasBoardRecords
 
         // Process card schema if available
         $formatted['schema'] = null;
-        if (method_exists($this, 'getCardSchema')) {
-            $schema = $this->getCardSchema($record);
+        $schema = $this->getCardSchema($record);
 
-            if ($schema !== null) {
-                // The schema is already built and configured
-                $schema->model($record);
+        if ($schema !== null) {
+            // The schema is already built and configured
+            $schema->model($record);
 
-                // Store the schema object with record context for proper Livewire rendering
-                $formatted['schema'] = $schema;
-            }
+            // Store the schema object with record context for proper Livewire rendering
+            $formatted['schema'] = $schema;
         }
 
         return $formatted;

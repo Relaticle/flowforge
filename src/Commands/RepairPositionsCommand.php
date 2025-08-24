@@ -322,15 +322,17 @@ class RepairPositionsCommand extends Command
     /**
      * @return array<int, string>
      */
-    private function generatePositions(Collection $records, string $strategy): array
+    private function generatePositions(iterable $records, string $strategy): array
     {
         $positions = [];
         $lastRank = null;
 
         foreach ($records as $record) {
-            if ($strategy === 'regenerate' || is_null($record->position)) {
+            $positionValue = $record instanceof Model ? $record->getAttribute('position') : $record->position ?? null;
+            if ($strategy === 'regenerate' || is_null($positionValue)) {
                 $rank = $lastRank ? Rank::after($lastRank) : Rank::forEmptySequence();
-                $positions[$record->id] = $rank->get();
+                $recordId = $record instanceof Model ? $record->getKey() : $record->id;
+                $positions[$recordId] = $rank->get();
                 $lastRank = $rank;
             }
         }

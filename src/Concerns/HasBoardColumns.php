@@ -25,7 +25,7 @@ trait HasBoardColumns
         $this->columns = $this->evaluate($columns);
 
         foreach ($this->columns as $column) {
-            if ($column instanceof Column && method_exists($column, 'board')) {
+            if ($column instanceof Column) {
                 $column->board($this);
             }
         }

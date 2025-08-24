@@ -47,8 +47,6 @@ final class Rank
 
     /**
      * @param  non-empty-string  $rank
-     *
-     * @psalm-pure
      */
     private static function rankValidator(string $rank): void
     {
@@ -83,25 +81,17 @@ final class Rank
 
     /**
      * @param  non-empty-string  $rank
-     *
-     * @psalm-pure
      */
     public static function fromString(string $rank): self
     {
         return new self($rank);
     }
 
-    /**
-     * @psalm-pure
-     */
     public static function forEmptySequence(): self
     {
         return self::fromString(self::mid(self::MIN_CHAR, self::MAX_CHAR));
     }
 
-    /**
-     * @psalm-pure
-     */
     public static function after(self $prevRank): self
     {
         $char = substr($prevRank->get(), -1);
@@ -119,9 +109,6 @@ final class Rank
         return self::fromString($return);
     }
 
-    /**
-     * @psalm-pure
-     */
     public static function before(self $nextRank): self
     {
         $char = substr($nextRank->get(), -1);
@@ -141,9 +128,6 @@ final class Rank
         return self::fromString($return);
     }
 
-    /**
-     * @psalm-pure
-     */
     public static function betweenRanks(self $prevRank, self $nextRank): self
     {
         if (strcmp($prevRank->get(), $nextRank->get()) >= 0) {

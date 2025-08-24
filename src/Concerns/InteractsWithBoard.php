@@ -236,7 +236,8 @@ trait InteractsWithBoard
     {
         $castType = $card->getCasts()[$statusField] ?? null;
 
-        if ($castType && enum_exists($castType)) {
+        if ($castType && enum_exists($castType) && is_subclass_of($castType, \BackedEnum::class)) {
+            /** @var class-string<\BackedEnum> $castType */
             return $castType::from($targetColumnId);
         }
 
