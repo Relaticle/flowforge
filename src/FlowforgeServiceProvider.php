@@ -6,7 +6,9 @@ use Filament\Support\Assets\AlpineComponent;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB;
 use Relaticle\Flowforge\Commands\MakeKanbanBoardCommand;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -70,6 +72,9 @@ class FlowforgeServiceProvider extends PackageServiceProvider
 
         // Register Blade Components
         $this->registerBladeComponents();
+
+        // Register Blueprint Macros
+        $this->registerBlueprintMacros();
     }
 
     /**
@@ -138,5 +143,22 @@ class FlowforgeServiceProvider extends PackageServiceProvider
                 'baseUrl' => url('/'),
             ],
         ];
+    }
+
+    /**
+     * Register Blueprint macros for Flowforge.
+     */
+    private function registerBlueprintMacros(): void
+    {
+        Blueprint::macro('flowforgePositionColumn', function (string $name = 'position') {
+            $driver = DB::connection()->getDriverName();
+            $column = $this->string($name)->nullable();
+
+            return match ($driver) {
+                'pgsql' => $column->collation('C'),
+                'mysql' => $column->collation('utf8mb4_bin'),
+                default => $column,
+            };
+        });
     }
 }

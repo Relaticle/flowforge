@@ -36,15 +36,7 @@ php artisan make:migration add_position_to_tasks_table
 ```php
 // migration
 Schema::table('tasks', function (Blueprint $table) {
-    // Database-specific collations for binary sorting
-    $driver = DB::connection()->getDriverName();
-    $positionColumn = $table->string('position')->nullable();
-    
-    match ($driver) {
-        'pgsql' => $positionColumn->collation('C'),
-        'mysql' => $positionColumn->collation('utf8mb4_bin'),
-        default => null,
-    };
+    $table->flowforgePositionColumn('position'); // Handles database-specific collations automatically
 });
 ```
 
@@ -342,19 +334,12 @@ Schema::create('tasks', function (Blueprint $table) {
     $table->id();
     $table->string('title');                         // Card title
     $table->string('status');                        // Column identifier
-    
-    // Position column with database-specific collations for binary sorting
-    $driver = DB::connection()->getDriverName();
-    $positionColumn = $table->string('position')->nullable();
-    
-    match ($driver) {
-        'pgsql' => $positionColumn->collation('C'),        // PostgreSQL binary
-        'mysql' => $positionColumn->collation('utf8mb4_bin'), // MySQL binary
-        default => null,
-    };
-    
+    $table->flowforgePositionColumn();               // Drag-and-drop ordering (handles DB-specific collations)
     $table->timestamps();
 });
+
+// Custom column name
+$table->flowforgePositionColumn('sort_order');      // Creates 'sort_order' column instead
 ```
 
 ### Factory Integration
