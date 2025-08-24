@@ -36,7 +36,7 @@ php artisan make:migration add_position_to_tasks_table
 ```php
 // migration
 Schema::table('tasks', function (Blueprint $table) {
-    $table->string('position')->nullable();
+    $table->string('position')->nullable()->collation('utf8mb4_bin');
 });
 ```
 
@@ -62,7 +62,7 @@ php artisan flowforge:make-board TaskBoard --model=Task
 - **PHP:** 8.3+
 - **Laravel:** 11+  
 - **Filament:** 4.x
-- **Database:** MySQL, PostgreSQL, SQLite
+- **Database:** MySQL, PostgreSQL (14+), SQLite
 
 ---
 
@@ -96,7 +96,7 @@ class TaskBoard extends BoardPage
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
-                Column::make('done')->label('Done')->color('green'),
+                Column::make('completed')->label('Completed')->color('green'),
             ]);
     }
 }
@@ -134,7 +134,7 @@ class TaskBoardPage extends BoardResourcePage
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
-                Column::make('done')->label('Done')->color('green'),
+                Column::make('completed')->label('Completed')->color('green'),
             ]);
     }
 }
@@ -191,7 +191,7 @@ class TaskBoard extends Component implements HasBoard, HasActions, HasForms
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
-                Column::make('done')->label('Done')->color('green'),
+                Column::make('completed')->label('Completed')->color('green'),
             ]);
     }
 
@@ -332,9 +332,9 @@ public function board(Board $board): Board
 ```php
 Schema::create('tasks', function (Blueprint $table) {
     $table->id();
-    $table->string('title');                    // Card title
-    $table->string('status');                   // Column identifier
-    $table->string('position')->nullable();     // Drag-and-drop ordering
+    $table->string('title');                         // Card title
+    $table->string('status');                        // Column identifier
+    $table->string('position')->nullable()->collation('utf8mb4_bin'); 
     $table->timestamps();
 });
 ```

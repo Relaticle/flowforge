@@ -24,7 +24,7 @@ class {{ class }} extends BoardPage
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
-                Column::make('done')->label('Done')->color('green'),
+                Column::make('completed')->label('Completed')->color('green'),
             ]);
     }
 
