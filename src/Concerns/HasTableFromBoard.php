@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 
@@ -22,11 +23,14 @@ trait HasTableFromBoard
     {
         $board = $this->getBoard();
 
+        $searchableColumns = collect($board->getSearchableFields())->map(fn ($field) => Column::make($field)->searchable())->toArray();
+
         return $table
             ->query($board->getQuery())
             ->filters($board->getBoardFilters())
             ->filtersFormWidth($board->getFiltersFormWidth())
             ->filtersFormColumns($board->getFiltersFormColumns())
-            ->filtersLayout($board->getFiltersLayout());
+            ->filtersLayout($board->getFiltersLayout())
+            ->columns($searchableColumns);
     }
 }

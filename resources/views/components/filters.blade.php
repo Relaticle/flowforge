@@ -1,9 +1,14 @@
-@php use Illuminate\View\ComponentAttributeBag;use function Filament\Support\prepare_inherited_attributes; @endphp
-{{-- Native Filament table filters with dynamic width support --}}
-@if(method_exists($this, 'getTable') && $this->getTable()->isFilterable())
-    <div class="fi-ta-header-toolbar mb-4">
-        <div class="fi-ta-actions fi-align-start fi-wrapped">
-            {{-- Use Filament's exact filter system with configurable width --}}
+@php
+    use Illuminate\View\ComponentAttributeBag;use function Filament\Support\prepare_inherited_attributes;
+    $isFilterable = $this->getTable()->isFilterable();
+    $isFiltered = $this->getTable()->isFiltered();
+    $isSearchable = $this->getTable()->isSearchable();
+@endphp
+
+
+<div class="fi-ta-header-toolbar mb-4 ms-2">
+    <div class="fi-ta-actions fi-align-start fi-wrapped space-x-4 mb-2">
+        @if($isFilterable)
             <x-filament::dropdown
                 placement="bottom-start"
                 :width="$this->getTable()->getFiltersFormWidth()"
@@ -50,17 +55,25 @@
                 </div>
 
             </x-filament::dropdown>
+        @endif
 
-            {{-- Native filter indicators --}}
-            @if($this->getTable()->isFiltered())
-                <div class="fi-ta-filter-indicators flex gap-1">
-                    @foreach($this->getTable()->getFilterIndicators() as $indicator)
-                        <x-filament::badge color="primary" size="sm">
-                            {{ $indicator->getLabel() }}
-                        </x-filament::badge>
-                    @endforeach
-                </div>
-            @endif
-        </div>
+        @if($isSearchable)
+            {{-- Search input --}}
+            <x-filament-tables::search-field
+                :debounce="$this->getTable()->getSearchDebounce()"
+                :on-blur="$this->getTable()->isSearchOnBlur()"
+                :placeholder="$this->getTable()->getSearchPlaceholder()"
+            />
+        @endif
     </div>
-@endif
+
+    @if($isFiltered)
+        <div class="fi-ta-filter-indicators flex gap-1">
+            @foreach($this->getTable()->getFilterIndicators() as $indicator)
+                <x-filament::badge color="primary" size="sm">
+                    {{ $indicator->getLabel() }}
+                </x-filament::badge>
+            @endforeach
+        </div>
+    @endif
+</div>
