@@ -12,7 +12,7 @@ use Filament\Tables\Table;
  * Provides table functionality to any Livewire component that has a Board.
  * This allows pure Livewire components to use Board filters without extending BoardPage.
  */
-trait HasTableFromBoard
+trait InteractsWithBoardTable
 {
     use InteractsWithTable;
 
