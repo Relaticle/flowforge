@@ -77,13 +77,13 @@
         @if (filled($filterIndicatorsView = FilamentView::renderHook(TablesRenderHook::FILTER_INDICATORS, scopes: static::class, data: ['filterIndicators' => $filterIndicators])))
             {{ $filterIndicatorsView }}
         @else
-            <div class="fi-ta-filter-indicators">
-                <div>
-                        <span class="fi-ta-filter-indicators-label">
+            <div class="fi-ta-filter-indicators flex items-start justify-between gap-x-3 bg-gray-50 pt-3 dark:bg-white/5">
+                <div class="flex flex-col gap-x-3 gap-y-1 sm:flex-row">
+                        <span class="fi-ta-filter-indicators-label text-sm leading-6 font-medium whitespace-nowrap text-gray-700 dark:text-gray-200">
                             {{ __('filament-tables::table.filters.indicator') }}
                         </span>
 
-                    <div class="fi-ta-filter-indicators-badges-ctn">
+                    <div class="fi-ta-filter-indicators-badges-ctn flex flex-wrap gap-1.5">
                         @foreach ($filterIndicators as $indicator)
                             @php
                                 $indicatorColor = $indicator->getColor();
@@ -120,7 +120,7 @@
                         wire:click="removeTableFilters"
                         wire:loading.attr="disabled"
                         wire:target="removeTableFilters,removeTableFilter"
-                        class="fi-icon-btn fi-size-sm"
+                        class="fi-icon-btn fi-size-sm -mt-1"
                     >
                         {{ generate_icon_html(Heroicon::XMark, alias: TablesIconAlias::FILTERS_REMOVE_ALL_BUTTON, size: IconSize::Small) }}
                     </button>
