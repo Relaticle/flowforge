@@ -1,14 +1,15 @@
 @props(['columnId', 'column', 'config'])
 
 @php
-    use Filament\Support\Colors\Color;
-    $colors = Color::all();
+    use Filament\Support\Colors\Color;use Filament\Support\Facades\FilamentColor;
 
-    if(filled($column['color'])) {
-        $color = $colors[$column['color']] ?? Color::generateV3Palette($column['color']);
-    }
-    else {
-        $color = $colors['neutral'];
+    $filamentColors = FilamentColor::getColors();
+    $nativeColor = null;
+
+    if(filled($column['color']) && isset($filamentColors[$column['color']])) {
+        $nativeColor = $column['color'];
+    }else{
+        $color = Color::hex($column['color']);
     }
 @endphp
 
@@ -20,13 +21,31 @@
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-200">
                 {{ $column['label'] }}
             </h3>
-            <div
-                    style="background-color: {{ $color[500] }};  color: {{ $color[50] }};"
-                    @class([
-                    'ms-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                ])>
-                {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
-            </div>
+            @if($nativeColor)
+                <x-filament::badge
+                        tag="div"
+                        :color="$nativeColor"
+                        class="ms-2"
+                >
+                    {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
+                </x-filament::badge>
+            @else
+                <div
+                        @style([
+                            "--light-bg-color: $color[50]",
+                            "--light-text-color: $color[700]",
+                            "--dark-bg-color: $color[600]",
+                            "--dark-text-color: $color[300]",
+                        ])
+                        @class([
+                        'ms-2 items-center border px-2 py-0.5 rounded-md text-xs font-semibold',
+                        "bg-[var(--light-bg-color)] dark:bg-[var(--dark-bg-color)]/20",
+                        "text-[var(--light-text-color)] dark:text-[var(--dark-text-color)]",
+                        'border-[var(--light-text-color)]/30 dark:border-[var(--dark-text-color)]/30',
+                    ])>
+                    {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
+                </div>
+            @endif
         </div>
 
 
