@@ -10,7 +10,7 @@
 
 <div
     @class([
-        'mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md',
+        'flowforge-card mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md',
         'cursor-pointer' => $hasActions || $hasCardAction,
         'cursor-pointer transition-all duration-100 ease-in-out hover:shadow-lg hover:border-gray-400 active:shadow-md' => $hasCardAction,
         'cursor-grab hover:cursor-grabbing' => $hasPositionIdentifier,
@@ -27,7 +27,7 @@
     data-card-id="{{ $record['id'] }}"
     data-position="{{ $record['position'] ?? '' }}"
 >
-    <div class="p-3">
+    <div class="flowforge-card-content p-3">
         <div class="flex items-center justify-between mb-2">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record['title'] }}</h4>
 

@@ -23,7 +23,8 @@ trait HasTableFromBoard
     {
         $board = $this->getBoard();
 
-        $searchableColumns = collect($board->getSearchableFields())->map(fn ($field) => Column::make($field)->searchable())->toArray();
+        $searchableColumns = collect($board->getSearchableFields())
+            ->map(fn ($field) => Column::make($field)->searchable())->toArray();
 
         return $table
             ->query($board->getQuery())

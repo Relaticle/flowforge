@@ -16,9 +16,9 @@
 @endphp
 
 <div
-    class="w-[300px] min-w-[300px] flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden">
+    class="flowforge-column w-[300px] min-w-[300px] flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden">
     <!-- Column Header -->
-    <div class="flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="flowforge-column-header flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center">
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-200">
                 {{ $column['label'] }}
@@ -78,7 +78,7 @@
         @if(isset($column['total']) && $column['total'] > count($column['items']))
             @scroll.throttle.100ms="handleColumnScroll($event, '{{ $columnId }}')"
         @endif
-        class="p-3 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain kanban-cards"
+        class="flowforge-column-content p-3 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain kanban-cards"
         style="max-height: calc(100vh - 13rem);"
     >
         @if (isset($column['items']) && count($column['items']) > 0)
