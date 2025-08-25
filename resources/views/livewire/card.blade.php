@@ -18,32 +18,29 @@
     ])
     @if($hasPositionIdentifier)
         x-sortable-handle
-        x-sortable-item="{{ $record['id'] }}"
+    x-sortable-item="{{ $record['id'] }}"
     @endif
     @if($hasCardAction && $cardAction)
         wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
-        style="cursor: pointer;"
+    style="cursor: pointer;"
     @endif
     data-card-id="{{ $record['id'] }}"
     data-position="{{ $record['position'] ?? '' }}"
 >
     <div class="flowforge-card-content p-3">
-        <div class="flex items-center justify-between mb-2">
+        <div class="flex items-start justify-between mb-2">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record['title'] }}</h4>
 
-            {{-- Render record actions --}}
             @if($hasActions)
                 <div class="relative" @if($hasCardAction) @click.stop @endif>
-                    <x-filament-actions::group :actions="$processedRecordActions" />
+                    <x-filament-actions::group :actions="$processedRecordActions"/>
                 </div>
             @endif
         </div>
 
         {{-- Render card schema with compact spacing --}}
         @if(filled($record['schema']))
-            <div class="space-y-1 [&_.fi-sc-flex]:gap-2 [&_.fi-sc-flex.fi-dense]:gap-1 [&_.fi-in-entry]:gap-y-0.5 [&_.fi-in-entry-content-ctn]:gap-x-1.5">
-                {{ $record['schema'] }}
-            </div>
+            {{ $record['schema'] }}
         @endif
     </div>
 </div>
