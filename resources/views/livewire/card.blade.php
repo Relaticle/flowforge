@@ -29,7 +29,7 @@
 >
     <div class="p-3">
         <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ $record['title'] }}</h4>
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record['title'] }}</h4>
 
             {{-- Render record actions --}}
             @if($hasActions)
