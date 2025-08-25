@@ -2,7 +2,14 @@
 
 @php
     use Filament\Support\Colors\Color;
-    $color = Color::generateV3Palette($column['color']);
+    $colors = Color::all();
+
+    if(filled($column['color'])) {
+        $color = $colors[$column['color']] ?? Color::generateV3Palette($column['color']);
+    }
+    else {
+        $color = $colors['neutral'];
+    }
 @endphp
 
 <div
@@ -17,11 +24,6 @@
                     style="background-color: {{ $color[500] }};  color: {{ $color[50] }};"
                     @class([
                     'ms-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
-                    'bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200 dark:bg-gray-700/60 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700' => ($column['color'] ?? 'default') === 'gray' || ($column['color'] ?? 'default') === 'default',
-                    'bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-800/60 dark:hover:bg-blue-900/60' => ($column['color'] ?? 'default') === 'blue',
-                    'bg-green-50 text-green-800 border border-green-200 hover:bg-green-100 dark:bg-green-900/40 dark:text-green-200 dark:border-green-800/60 dark:hover:bg-green-900/60' => ($column['color'] ?? 'default') === 'green',
-                    'bg-red-50 text-red-800 border border-red-200 hover:bg-red-100 dark:bg-red-900/40 dark:text-red-200 dark:border-red-800/60 dark:hover:bg-red-900/60' => ($column['color'] ?? 'default') === 'red',
-                    'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800/60 dark:hover:bg-amber-900/60' => ($column['color'] ?? 'default') === 'amber',
                 ])>
                 {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
             </div>
