@@ -54,7 +54,7 @@ Schema::table('tasks', function (Blueprint $table) {
 
 ### 3. Generate Board
 ```bash
-php artisan flowforge:make-board Task --model=Task
+php artisan flowforge:make-board TaskBoard --model=Task
 ```
 
 ### 4. Register Page
