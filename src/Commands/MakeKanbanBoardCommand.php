@@ -61,7 +61,7 @@ class MakeKanbanBoardCommand extends Command
         }
 
         // Generate class name
-        $className = Str::studly($name) . 'BoardPage';
+        $className = Str::studly($name);
         $modelClass = Str::studly($model);
 
         // Determine file path
