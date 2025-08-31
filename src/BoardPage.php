@@ -9,6 +9,8 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Relaticle\Flowforge\Concerns\BaseBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
+use UnitEnum;
+use BackedEnum;
 
 /**
  * Board page for standard Filament pages.
@@ -19,8 +21,8 @@ abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
     use BaseBoard;
 
     // Fix for Filament v4 navigation property types
-    protected static string|\UnitEnum|null $navigationGroup = null;
-    protected static string|\BackedEnum|null $navigationIcon = null;
+    protected static string|UnitEnum|null $navigationGroup = null;
+    protected static string|BackedEnum|null $navigationIcon = null;
     protected static ?string $navigationLabel = null;
     protected static ?int $navigationSort = null;
 
