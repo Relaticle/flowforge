@@ -18,5 +18,11 @@ abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
 {
     use BaseBoard;
 
+    // Fix for Filament v4 navigation property types
+    protected static string|\UnitEnum|null $navigationGroup = null;
+    protected static string|\BackedEnum|null $navigationIcon = null;
+    protected static ?string $navigationLabel = null;
+    protected static ?int $navigationSort = null;
+
     protected string $view = 'flowforge::filament.pages.board-page';
 }
