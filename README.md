@@ -87,7 +87,7 @@ php artisan flowforge:repair-positions
 ## 🎯 Integration Patterns
 
 <details>
-<summary><strong>🔹 Pattern 1: Filament Page (Recommended)</strong></summary>
+<summary><strong>🔹 Pattern 1: Filament Page</strong></summary>
 
 Perfect for dedicated board pages in your admin panel.
 
