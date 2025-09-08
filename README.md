@@ -14,14 +14,14 @@
 
 ## Why Flowforge?
 
-🎯 **3 Integration Patterns** - Filament Pages, Resources, or standalone Livewire  
-⚡ **Production-Ready** - Handles 100+ cards per column with intelligent pagination  
-🔧 **Zero Configuration** - Works with your existing models and database  
-🎨 **Fully Customizable** - Actions, schemas, filters, and themes
+- **3 Integration Patterns** - Filament Pages, Resources, or standalone Livewire  
+- **Production-Ready** - Handles 100+ cards per column with intelligent pagination  
+- **Zero Configuration** - Works with your existing models and database  
+- **Fully Customizable** - Actions, schemas, filters, and themes
 
 ---
 
-## 🚀 Quick Start (90 seconds)
+## Quick Start
 
 ### 1. Install Package
 ```bash
@@ -31,9 +31,9 @@ composer require relaticle/flowforge
 ### 2. Include CSS Assets
 
 > [!IMPORTANT]
-> If you have not set up a custom theme and are using Filament Panels follow the instructions in the [Filament Docs](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme) first.
+> If you have not set up a custom theme and are using Filament Panels, follow the instructions in the [Filament Docs](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme) first.
 
-After setting up a custom theme add the plugin's views to your theme css file.
+After setting up a custom theme, add the plugin's views to your theme's CSS file.
 
 ```css
 /* In your main CSS file (e.g., resources/css/app.css) */
@@ -65,7 +65,7 @@ php artisan flowforge:make-board TaskBoard --model=Task
 ])
 ```
 
-**🎉 Done!** Visit your Filament panel to see your Kanban board in action.
+**Done!** Visit your Filament panel to see your Kanban board in action.
 
 ### 5. Repair Positions (Optional)
 If you need to fix corrupted or missing position data:
@@ -75,7 +75,7 @@ php artisan flowforge:repair-positions
 
 ---
 
-## 📋 Requirements
+## Requirements
 
 - **PHP:** 8.3+
 - **Laravel:** 11+  
@@ -84,10 +84,10 @@ php artisan flowforge:repair-positions
 
 ---
 
-## 🎯 Integration Patterns
+## Integration Patterns
 
 <details>
-<summary><strong>🔹 Pattern 1: Filament Page</strong></summary>
+<summary><strong>Pattern 1: Filament Page</strong></summary>
 
 Perfect for dedicated board pages in your admin panel.
 
@@ -120,12 +120,12 @@ class TaskBoard extends BoardPage
 }
 ```
 
-**✅ Use when:** You want a standalone Kanban page in your admin panel  
-**✅ Benefits:** Full Filament integration, automatic registration, built-in actions
+**Use when:** You want a standalone Kanban page in your admin panel  
+**Benefits:** Full Filament integration, automatic registration, built-in actions
 </details>
 
 <details>
-<summary><strong>🔹 Pattern 2: Resource Integration</strong></summary>
+<summary><strong>Pattern 2: Resource Integration</strong></summary>
 
 Integrate with your existing Filament resources. Perfect for campaign management where teams track tasks within campaigns.
 
@@ -177,12 +177,12 @@ public static function getPages(): array
 }
 ```
 
-**✅ Use when:** You want to add Kanban to existing Filament resources  
-**✅ Benefits:** Inherits resource permissions, policies, and global scopes
+**Use when:** You want to add Kanban to existing Filament resources  
+**Benefits:** Inherits resource permissions, policies, and global scopes
 </details>
 
 <details>
-<summary><strong>🔹 Pattern 3: Standalone Livewire</strong></summary>
+<summary><strong>Pattern 3: Standalone Livewire</strong></summary>
 
 Use outside of Filament or in custom applications.
 
@@ -236,13 +236,13 @@ class TaskBoard extends Component implements HasBoard, HasActions, HasForms
 </div>
 ```
 
-**✅ Use when:** Building custom interfaces or non-Filament applications  
-**✅ Benefits:** Maximum flexibility, custom styling, independent routing
+**Use when:** Building custom interfaces or non-Filament applications  
+**Benefits:** Maximum flexibility, custom styling, independent routing
 </details>
 
 ---
 
-## 🎨 Customization
+## Customization
 
 ### Rich Card Content
 
@@ -352,7 +352,7 @@ public function board(Board $board): Board
 
 ---
 
-## 🏗️ Database Schema
+## Database Schema
 
 ### Required Fields
 ```php
@@ -383,7 +383,7 @@ These collations ensure consistent fractional ranking behavior across all databa
 
 ---
 
-## 🧪 Testing
+## Testing
 
 <details>
 <summary><strong>Testing Your Boards</strong></summary>
@@ -415,7 +415,7 @@ test('can move tasks between columns', function () {
 
 ---
 
-## 🚀 Performance Features
+## Performance Features
 
 - **Intelligent Pagination**: Efficiently handles 100+ cards per column
 - **Infinite Scroll**: Smooth loading with 80% scroll threshold
@@ -425,7 +425,7 @@ test('can move tasks between columns', function () {
 
 ---
 
-## 🎛️ API Reference
+## API Reference
 
 <details>
 <summary><strong>Board Configuration</strong></summary>
@@ -457,7 +457,7 @@ Column::make('todo')
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 <details>
 <summary><strong>Common Issues & Solutions</strong></summary>
@@ -485,7 +485,7 @@ Column::make('todo')
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -495,12 +495,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 📄 License
+## License
 
 MIT License. See [LICENSE.md](LICENSE.md) for details.
-
----
-
-<div align="center">
-<p><strong>Built with ❤️ for the Laravel community</strong></p>
-</div>
