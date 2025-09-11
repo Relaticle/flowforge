@@ -21,13 +21,13 @@
 
 ## Documentation
 
-**[View Complete Documentation →](https://flowforge-docs.vercel.app)**
+**[View Complete Documentation →](https://relaticle.github.io/flowforge/)**
 
-- [Quick Installation Guide](https://flowforge-docs.vercel.app/getting-started/installation)
-- [Integration Patterns](https://flowforge-docs.vercel.app/essentials/integration-patterns)
-- [Customization Examples](https://flowforge-docs.vercel.app/essentials/customization)
-- [API Reference](https://flowforge-docs.vercel.app/essentials/api-reference)
-- [Troubleshooting](https://flowforge-docs.vercel.app/essentials/troubleshooting)
+- [Quick Installation Guide](https://relaticle.github.io/flowforge/getting-started/installation)
+- [Integration Patterns](https://relaticle.github.io/flowforge/essentials/integration-patterns)
+- [Customization Examples](https://relaticle.github.io/flowforge/essentials/customization)
+- [API Reference](https://relaticle.github.io/flowforge/essentials/api-reference)
+- [Troubleshooting](https://relaticle.github.io/flowforge/essentials/troubleshooting)
 
 ---
 
@@ -39,7 +39,7 @@ composer require relaticle/flowforge
 
 Add CSS assets to your theme, create a position column, generate your board, and register it in your panel.
 
-**[→ Complete Setup Guide](https://flowforge-docs.vercel.app/getting-started/installation)**
+**[→ Complete Setup Guide](https://relaticle.github.io/flowforge/getting-started/installation)**
 
 ---
 
@@ -56,8 +56,9 @@ Add CSS assets to your theme, create a position column, generate your board, and
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-- [Implementation Guide](docs/IMPLEMENTATION_GUIDE.md) - Complete developer guide  
-- [Testing Examples](tests/Feature/) - Production-ready test patterns
+- [Contributing Guidelines](.github/CONTRIBUTING.md) - How to contribute
+- [Developer Guide](CLAUDE.md) - Complete implementation guide and architecture overview
+- [Testing Examples](tests/Feature/) - Production-ready test patterns  
 - [Report Issues](https://github.com/relaticle/flowforge/issues)
 
 ---
