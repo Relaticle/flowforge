@@ -1,4 +1,4 @@
-const baseURL = process.env.NODE_ENV === 'production' ? '/flowforge/' : '/'
+const baseURL = process.env.NUXT_APP_BASE_URL || '/'
 
 export default defineAppConfig({
     docus: {
