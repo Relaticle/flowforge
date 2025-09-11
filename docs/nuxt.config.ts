@@ -3,6 +3,9 @@ export default defineNuxtConfig({
     extends: 'docus',
     modules: ["@nuxt/image", "@nuxt/scripts"],
     devtools: {enabled: true},
+    app: {
+        baseURL: process.env.NODE_ENV === 'production' ? '/flowforge/' : '/'
+    },
     content: {
         build: {
             markdown: {
@@ -13,5 +16,8 @@ export default defineNuxtConfig({
                 }
             }
         }
+    },
+    nitro: {
+        preset: 'github_pages'
     }
 })

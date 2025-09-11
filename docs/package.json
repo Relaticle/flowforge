@@ -1,17 +1,19 @@
 {
-  "name": "flowforge-docs",
-  "scripts": {
-    "dev": "nuxt dev --extends docus",
-    "build": "nuxt build --extends docus"
-  },
-  "dependencies": {
-    "@nuxt/image": "^1.11.0",
-    "@nuxt/scripts": "^0.11.13",
-    "@nuxt/ui": "^3.3.3",
-    "@unhead/vue": "^2.0.14",
-    "better-sqlite3": "^12.2.0",
-    "docus": "latest",
-    "nuxt": "^4.1.0",
-    "typescript": "^5.9.2"
-  }
+    "name": "flowforge-docs",
+    "scripts": {
+        "dev": "nuxt dev --extends docus",
+        "build": "nuxt build --extends docus",
+        "generate": "nuxt build --preset github_pages",
+        "preview": "nuxt preview"
+    },
+    "dependencies": {
+        "@nuxt/image": "^1.11.0",
+        "@nuxt/scripts": "^0.11.13",
+        "@nuxt/ui": "^3.3.3",
+        "@unhead/vue": "^2.0.14",
+        "better-sqlite3": "^12.2.0",
+        "docus": "latest",
+        "nuxt": "^4.1.0",
+        "typescript": "^5.9.2"
+    }
 }
