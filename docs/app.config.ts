@@ -1,21 +1,23 @@
+const baseURL = process.env.NODE_ENV === 'production' ? '/flowforge/' : '/'
+
 export default defineAppConfig({
     docus: {
         title: 'Flowforge',
         description: 'Transform any Laravel model into production-ready drag-and-drop Kanban boards.',
         url: 'https://relaticle.github.io/flowforge/',
-        image: '/preview.png',
+        image: `${baseURL}preview.png`,
         github: {
-            dir: 'docs/content',
             branch: '2.x',
             repo: 'flowforge',
             owner: 'Relaticle',
-            edit: true
+            edit: true,
+            rootDir: 'docs'
         },
         header: {
             logo: {
                 alt: 'Flowforge Logo',
-                light: (process.env.NODE_ENV === 'production' ? '/flowforge/' : '/') + 'logo-light.svg',
-                dark: (process.env.NODE_ENV === 'production' ? '/flowforge/' : '/') + 'logo-dark.svg'
+                light: `${baseURL}logo-light.svg`,
+                dark: `${baseURL}logo-dark.svg`
             },
             showLinkIcon: false,
             fluid: false,
