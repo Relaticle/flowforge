@@ -3,7 +3,7 @@ export default defineAppConfig({
         title: 'Flowforge',
         description: 'Transform any Laravel model into production-ready drag-and-drop Kanban boards.',
         url: 'https://flowforge.dev',
-        image: '/social-card.png',
+        image: process.env.NODE_ENV === 'production' ? '/flowforge/preview.png' : '/preview.png',
         github: {
             dir: 'docs/content',
             branch: '2.x',
@@ -14,8 +14,8 @@ export default defineAppConfig({
         header: {
             logo: {
                 alt: 'Flowforge Logo',
-                light: '/logo-light.svg',
-                dark: '/logo-dark.svg'
+                light: '/flowforge/logo-light.svg',
+                dark: '/flowforge/logo-dark.svg'
             },
             showLinkIcon: false,
             fluid: false,
