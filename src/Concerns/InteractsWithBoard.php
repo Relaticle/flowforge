@@ -16,7 +16,7 @@ use Throwable;
 
 trait InteractsWithBoard
 {
-    use InteractsWithBoardTable;
+    use InteractsWithIsolatedBoardTable;
 
     protected Board $board;
 

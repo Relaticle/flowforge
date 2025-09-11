@@ -75,10 +75,10 @@ trait HasBoardRecords
 
         $queryClone = (clone $query)->where($statusField, $columnId);
 
-        // Apply table filters using Filament's native system
-        if ($livewire->getTable()->isFilterable()) {
-            $baseQuery = $livewire->getFilteredTableQuery();
-            $queryClone = (clone $baseQuery)->where($statusField, $columnId);
+        // Apply board filters and search using isolated table system
+        $filteredQuery = $livewire->getFilteredBoardQuery();
+        if ($filteredQuery) {
+            $queryClone = (clone $filteredQuery)->where($statusField, $columnId);
         }
 
         $positionField = $this->getPositionIdentifierAttribute();
@@ -104,11 +104,11 @@ trait HasBoardRecords
         $statusField = $this->getColumnIdentifierAttribute();
         $queryClone = (clone $query)->where($statusField, $columnId);
 
-        // Apply table filters using Filament's native system
+        // Apply board filters and search using isolated table system
         $livewire = $this->getLivewire();
-        if ($livewire->getTable()->isFilterable()) {
-            $baseQuery = $livewire->getFilteredTableQuery();
-            $queryClone = (clone $baseQuery)->where($statusField, $columnId);
+        $filteredQuery = $livewire->getFilteredBoardQuery();
+        if ($filteredQuery) {
+            $queryClone = (clone $filteredQuery)->where($statusField, $columnId);
         }
 
         return $queryClone->count();
