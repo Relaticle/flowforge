@@ -11,7 +11,7 @@ Flowforge
 #description
 Transform any Laravel model into a production-ready drag-and-drop Kanban board.
 
-Built specifically for Filament 4 admin panels.
+Built specifically for FilamentPHP.
 
 #links
   :::u-button
