@@ -1,7 +1,7 @@
 ---
 seo:
-  title: Flowforge - Kanban Boards for Filament
-  description: Transform any Laravel model into production-ready drag-and-drop Kanban boards. Built specifically for Filament 4.x admin panels with intelligent pagination and quick setup.
+  title: Flowforge - Laravel Kanban Boards
+  description: Transform any Laravel model into production-ready drag-and-drop Kanban boards. Works with Filament admin panels and standalone Livewire applications.
 ---
 
 ::u-page-hero
@@ -11,7 +11,7 @@ Flowforge
 #description
 Transform any Laravel model into a production-ready drag-and-drop Kanban board.
 
-Built specifically for FilamentPHP.
+Perfect for Filament admin panels and standalone Livewire applications.
 
 #links
   :::u-button
