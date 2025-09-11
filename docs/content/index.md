@@ -36,7 +36,9 @@ Built specifically for FilamentPHP.
   :::
 ::
 
-![Flowforge Kanban Board Preview](/preview.png)
+<div class="text-center">
+  <img src="/preview.png" alt="Flowforge Kanban Board Preview" class="mx-auto max-w-full h-auto rounded-lg shadow-lg" />
+</div>
 
 ::u-page-section
 #title

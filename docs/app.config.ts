@@ -36,5 +36,12 @@ export default defineAppConfig({
             primary: 'violet',
             neutral: 'zinc'
         }
+    },
+    uiPro: {
+        pageHero: {
+            slots: {
+                container: 'flex flex-col lg:grid py-16 sm:py-20 lg:py-24 gap-16 sm:gap-y-2'
+            }
+        }
     }
 })
