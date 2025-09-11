@@ -50,21 +50,10 @@ Why choose Flowforge?
   icon: i-lucide-zap
   ---
   #title
-  Production-Ready Performance
+  Enterprise-Scale Performance
   
   #description
-  Handles 100+ cards per column with intelligent pagination, infinite scroll, and optimistic UI updates.
-  :::
-
-  :::u-page-feature
-  ---
-  icon: i-lucide-clock
-  ---
-  #title
-  Quick Setup
-  
-  #description
-  Get running in 90 seconds. Add a position column, generate your board, and you're ready to go.
+  Cursor-based pagination handles unlimited cards per column with intelligent loading and position-based ordering optimization.
   :::
 
   :::u-page-feature
@@ -75,7 +64,7 @@ Why choose Flowforge?
   3 Integration Patterns
   
   #description
-  Use as Filament Pages, Resource integration, or standalone Livewire components - whatever fits your needs.
+  Use as Filament Pages, Resource integration, or standalone Livewire components - whatever fits your architecture.
   :::
 
   :::u-page-feature
@@ -83,9 +72,42 @@ Why choose Flowforge?
   icon: i-lucide-palette
   ---
   #title
-  Fully Customizable
+  Rich Card Schemas
   
   #description
-  Rich card schemas, custom actions, search & filtering, themes, and complete UI control.
+  Filament Schema builder creates complex card layouts with forms, components, and dynamic content rendering.
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-move
+  ---
+  #title
+  Smart Position Management
+  
+  #description
+  Advanced ranking algorithm handles unlimited drag-and-drop ordering with automatic conflict resolution and repair commands.
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-activity
+  ---
+  #title
+  Optimistic UI Experience
+  
+  #description
+  Instant visual feedback with loading states, smooth scrolling, and responsive drag interactions for seamless UX.
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-filter
+  ---
+  #title
+  Native Filament Integration
+  
+  #description
+  Deep integration with Filament's table system for filters, search, actions, and consistent admin panel experience.
   :::
 ::
