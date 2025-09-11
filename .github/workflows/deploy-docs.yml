@@ -50,6 +50,7 @@ jobs:
         run: npm run generate
         env:
           NUXT_APP_BASE_URL: /flowforge/
+          NUXT_SITE_URL: https://relaticle.github.io/flowforge/
       
       - name: Add .nojekyll file
         working-directory: ./docs
