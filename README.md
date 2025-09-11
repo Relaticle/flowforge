@@ -19,7 +19,6 @@ Transform any Laravel model into a production-ready drag-and-drop Kanban board.
 - **Quick Setup** - Get running in 90 seconds with minimal configuration
 - **Fully Customizable** - Actions, schemas, filters, and themes
 
----
 
 ## Requirements
 
@@ -28,7 +27,6 @@ Transform any Laravel model into a production-ready drag-and-drop Kanban board.
 - **Filament:** 4.x
 - **Database:** MySQL, PostgreSQL, SQLite, SQL Server, MariaDB
 
----
 
 ## Quick Start
 
@@ -40,7 +38,6 @@ Add CSS assets to your theme, create a position column, generate your board, and
 
 **[→ View Complete Documentation](https://relaticle.github.io/flowforge/)**
 
----
 
 ## Contributing
 
@@ -48,8 +45,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 - [Contributing Guidelines](.github/CONTRIBUTING.md) - How to contribute
 - [Testing Examples](tests/Feature/) - Production-ready test patterns
-
----
 
 ## License
 
