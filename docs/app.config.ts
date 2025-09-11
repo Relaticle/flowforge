@@ -14,8 +14,8 @@ export default defineAppConfig({
         header: {
             logo: {
                 alt: 'Flowforge Logo',
-                light: '/flowforge/logo-light.svg',
-                dark: '/flowforge/logo-dark.svg'
+                light: process.env.NODE_ENV === 'production' ? '/flowforge/logo-light.svg' : '/logo-light.svg',
+                dark: process.env.NODE_ENV === 'production' ? '/flowforge/logo-dark.svg' : '/logo-dark.svg'
             },
             showLinkIcon: false,
             fluid: false,
