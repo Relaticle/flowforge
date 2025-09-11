@@ -26,7 +26,8 @@ export default defineNuxtConfig({
             markdown: {
                 highlight: {
                     langs: [
-                        'php'
+                        'php',
+                        'blade'
                     ]
                 }
             }
