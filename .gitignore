@@ -13,3 +13,4 @@ phpunit.xml
 phpstan.neon
 testbench.yaml
 vendor
+test_isolation.php
