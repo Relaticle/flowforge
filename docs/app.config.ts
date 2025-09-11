@@ -6,31 +6,22 @@ export default defineAppConfig({
         description: 'Transform any Laravel model into production-ready drag-and-drop Kanban boards.',
         url: 'https://relaticle.github.io/flowforge/',
         image: `${baseURL}preview.png`,
-        github: {
-            branch: '2.x',
-            repo: 'flowforge',
-            owner: 'Relaticle',
-            edit: true,
-            rootDir: 'docs'
-        },
         header: {
             logo: {
                 alt: 'Flowforge Logo',
                 light: `${baseURL}logo-light.svg`,
                 dark: `${baseURL}logo-dark.svg`
-            },
-            showLinkIcon: false,
-            fluid: false,
-            iconLinks: [
-                {
-                    href: 'https://github.com/relaticle/flowforge',
-                    icon: 'simple-icons:github'
-                }
-            ]
+            }
         }
     },
+    github: {
+        branch: '2.x',
+        repo: 'flowforge',
+        owner: 'Relaticle',
+        edit: true,
+        rootDir: 'docs'
+    },
     socials: {
-        github: 'https://github.com/Relaticle/flowforge',
         discord: 'https://discord.gg/b9WxzUce4Q'
     },
     ui: {
