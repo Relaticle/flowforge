@@ -5,10 +5,21 @@ export default defineNuxtConfig({
     devtools: {enabled: true},
     app: {
         baseURL: process.env.NODE_ENV === 'production' ? '/flowforge/' : '/',
-        buildAssetsDir: 'assets' // avoid underscore prefix for GitHub Pages
+        buildAssetsDir: 'assets', // avoid underscore prefix for GitHub Pages
+        head: {
+            link: [
+                {
+                    rel: 'icon',
+                    type: 'image/x-icon',
+                    href: (process.env.NODE_ENV === 'production' ? '/flowforge/' : '/') + 'favicon.ico'
+                }
+            ]
+        }
     },
     image: {
-        baseURL: process.env.NODE_ENV === 'production' ? '/flowforge/' : '/'
+        // Don't set baseURL for image module - let app.baseURL handle it
+        // This prevents double baseURL application
+        provider: 'none'
     },
     content: {
         build: {
