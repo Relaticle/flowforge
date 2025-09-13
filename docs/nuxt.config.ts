@@ -33,6 +33,9 @@ export default defineNuxtConfig({
             }
         }
     },
+    seo: {
+        ogImage: (process.env.NODE_ENV === 'production' ? '/flowforge/' : '/') + 'preview.png'
+    },
     nitro: {
         preset: 'github_pages'
     }
