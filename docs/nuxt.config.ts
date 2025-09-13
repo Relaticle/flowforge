@@ -1,8 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     extends: 'docus',
-    modules: ["@nuxt/image", "@nuxt/scripts"],
-    devtools: {enabled: true},
+    modules: ['@nuxt/image', '@nuxt/scripts'],
+    devtools: { enabled: true },
+    site: {
+        name: 'Flowforge',
+    },
     app: {
         baseURL: process.env.NODE_ENV === 'production' ? '/flowforge/' : '/',
         buildAssetsDir: 'assets', // avoid underscore prefix for GitHub Pages
@@ -11,32 +14,34 @@ export default defineNuxtConfig({
                 {
                     rel: 'icon',
                     type: 'image/x-icon',
-                    href: (process.env.NODE_ENV === 'production' ? '/flowforge/' : '/') + 'favicon.ico'
-                }
-            ]
-        }
+                    href:
+                        (process.env.NODE_ENV === 'production'
+                            ? '/flowforge/'
+                            : '/') + 'favicon.ico',
+                },
+            ],
+        },
     },
     image: {
         // Don't set baseURL for image module - let app.baseURL handle it
         // This prevents double baseURL application
-        provider: 'none'
+        provider: 'none',
     },
     content: {
         build: {
             markdown: {
                 highlight: {
-                    langs: [
-                        'php',
-                        'blade'
-                    ]
-                }
-            }
-        }
+                    langs: ['php', 'blade'],
+                },
+            },
+        },
     },
     seo: {
-        ogImage: (process.env.NODE_ENV === 'production' ? '/flowforge/' : '/') + 'preview.png'
+        ogImage:
+            (process.env.NODE_ENV === 'production' ? '/flowforge/' : '/') +
+            'preview.png',
     },
     nitro: {
-        preset: 'github_pages'
-    }
+        preset: 'github_pages',
+    },
 })
