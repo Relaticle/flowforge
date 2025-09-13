@@ -14,6 +14,11 @@ export default defineAppConfig({
             }
         }
     },
+    seo: {
+        title: 'Flowforge',
+        description: 'Transform any Laravel model into production-ready drag-and-drop Kanban boards.',
+        ogImage: `${baseURL}preview.png`
+    },
     github: {
         branch: '2.x',
         repo: 'flowforge',
