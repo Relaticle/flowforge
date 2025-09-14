@@ -13,10 +13,7 @@ export default defineNuxtConfig({
                 {
                     rel: 'icon',
                     type: 'image/x-icon',
-                    href:
-                        (process.env.NODE_ENV === 'production'
-                            ? '/flowforge/'
-                            : '/') + 'favicon.ico',
+                    href: '/favicon.ico',
                 },
             ],
         },
