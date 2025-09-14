@@ -7,7 +7,6 @@ export default defineNuxtConfig({
         name: 'Flowforge',
     },
     app: {
-        baseURL: process.env.NODE_ENV === 'production' ? '/flowforge/' : '/',
         buildAssetsDir: 'assets', // avoid underscore prefix for GitHub Pages
         head: {
             link: [
