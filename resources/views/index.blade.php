@@ -16,7 +16,7 @@
     })"
 >
 
-    @include('flowforge::components.filters')
+    @include('flowforge::components.board-filters')
 
     <!-- Board Content -->
     <div class="flex-1 overflow-hidden h-full">
