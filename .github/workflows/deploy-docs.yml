@@ -29,33 +29,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      
+        uses: actions/checkout@v5
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      
+
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: 'docs/package.json'
-      
+
       - name: Install dependencies
         working-directory: ./docs
         run: npm ci
-      
+
       - name: Build documentation
         working-directory: ./docs
         run: npm run generate
         env:
-          NUXT_APP_BASE_URL: /flowforge/
           NUXT_SITE_URL: https://relaticle.github.io/flowforge/
-      
+
       - name: Add .nojekyll file
         working-directory: ./docs
         run: touch .output/public/.nojekyll
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
