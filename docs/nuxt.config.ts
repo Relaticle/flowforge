@@ -8,15 +8,6 @@ export default defineNuxtConfig({
     },
     app: {
         buildAssetsDir: 'assets', // avoid underscore prefix for GitHub Pages
-        head: {
-            link: [
-                {
-                    rel: 'icon',
-                    type: 'image/x-icon',
-                    href: '/favicon.ico',
-                },
-            ],
-        },
     },
     image: {
         // Don't set baseURL for image module - let app.baseURL handle it
