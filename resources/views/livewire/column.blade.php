@@ -1,18 +1,14 @@
 @props(['columnId', 'column', 'config'])
 
 @php
-    use Filament\Support\Colors\Color;use Filament\Support\Facades\FilamentColor;
+    use Relaticle\Flowforge\Support\ColorResolver;
 
-    $filamentColors = FilamentColor::getColors();
-    $nativeColor = null;
+    // Resolve the color once using our centralized resolver
+    $resolvedColor = ColorResolver::resolve($column['color']);
+    $isSemantic = ColorResolver::isSemantic($resolvedColor);
 
-    if(filled($column['color']) && isset($filamentColors[$column['color']])) {
-        $nativeColor = $column['color'];
-    }elseif(filled($column['color'])){
-        $color = Color::hex($column['color']);
-    }else{
-        $color = $filamentColors['primary'];
-    }
+    // For non-semantic colors, get the color array
+    $colorShades = $isSemantic ? null : $resolvedColor;
 @endphp
 
 <div
@@ -23,28 +19,34 @@
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-200">
                 {{ $column['label'] }}
             </h3>
-            @if($nativeColor)
+
+            {{-- Count Badge --}}
+            @if($isSemantic)
+                {{-- Use native Filament badge for semantic colors --}}
                 <x-filament::badge
                     tag="div"
-                    :color="$nativeColor"
+                    :color="$resolvedColor"
                     class="ms-2"
                 >
                     {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
                 </x-filament::badge>
-            @else
+            @elseif($colorShades)
+                {{-- Custom badge for Color arrays --}}
                 <div
                     @style([
-                        "--light-bg-color: $color[50]",
-                        "--light-text-color: $color[700]",
-                        "--dark-bg-color: $color[600]",
-                        "--dark-text-color: $color[300]",
+                        Filament\Support\get_color_css_variables($resolvedColor, shades: [50, 300, 600, 700])
                     ])
                     @class([
-                    'ms-2 items-center border px-2 py-0.5 rounded-md text-xs font-semibold',
-                    "bg-[var(--light-bg-color)] dark:bg-[var(--dark-bg-color)]/20",
-                    "text-[var(--light-text-color)] dark:text-[var(--dark-text-color)]",
-                    'border-[var(--light-text-color)]/30 dark:border-[var(--dark-text-color)]/30',
-                ])>
+                        'ms-2 items-center border px-2 py-0.5 rounded-md text-xs font-semibold',
+                        'bg-custom-50 dark:bg-custom-600/20',
+                        'text-custom-700 dark:text-custom-300',
+                        'border-custom-700/30 dark:border-custom-300/30',
+                    ])>
+                    {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
+                </div>
+            @else
+                {{-- Fallback: simple gray badge if no color --}}
+                <div class="ms-2 items-center border px-2 py-0.5 rounded-md text-xs font-semibold bg-gray-50 dark:bg-gray-600/20 text-gray-700 dark:text-gray-300 border-gray-700/30 dark:border-gray-300/30">
                     {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
                 </div>
             @endif
