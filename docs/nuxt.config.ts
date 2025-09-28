@@ -35,6 +35,9 @@ export default defineNuxtConfig({
             },
         },
     },
+    llms: {
+        domain: 'https://relaticle.github.io/flowforge',
+    },
     nitro: {
         preset: 'github_pages',
     },
