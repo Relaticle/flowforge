@@ -41,5 +41,26 @@ export default defineAppConfig({
                 container: 'flex flex-col lg:grid py-16 sm:py-20 lg:py-24 gap-16 sm:gap-y-2'
             }
         }
+    },
+    toc: {
+        title: 'On this page',
+        bottom: {
+            title: 'Ecosystem',
+            edit: 'https://github.com/Relaticle/flowforge',
+            links: [
+                {
+                    icon: 'i-simple-icons-laravel',
+                    label: 'FilaForms',
+                    to: 'https://filaforms.app',
+                    target: '_blank'
+                },
+                {
+                    icon: 'i-lucide-sliders',
+                    label: 'Custom Fields',
+                    to: 'https://custom-fields.relaticle.com',
+                    target: '_blank'
+                }
+            ]
+        }
     }
 })
