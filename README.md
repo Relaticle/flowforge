@@ -76,7 +76,7 @@ php artisan flowforge:make-board TaskBoard --model=Task
 ### FilaForms
 [<img src="https://filaforms.app/img/og-image.png" width="419px" />](https://filaforms.app/)
 
-Visual form builder for all your public-facing forms. Stop rebuilding contact forms for every project.
+Visual form builder for all your public-facing forms.
 [Learn more →](https://filaforms.app)
 
 ### Custom Fields
