@@ -37,7 +37,7 @@ Perfect for Filament admin panels and standalone Livewire applications.
   :::
 ::
 
-<div class="text-center">
+<div class="text-center max-w-4xl mx-auto">
   <img src="/preview.png" alt="Flowforge Kanban Board Preview" class="mx-auto max-w-full h-auto rounded-lg shadow-lg" />
 </div>
 
@@ -111,4 +111,39 @@ Why choose Flowforge?
   #description
   Deep integration with Filament's table system for filters, search, actions, and consistent admin panel experience.
   :::
+::
+
+::u-page-section
+#title
+Our Ecosystem
+
+#description
+Extend your Laravel applications with our ecosystem of complementary tools
+
+#default
+  ::card-group
+    :::card
+    ---
+    title: FilaForms
+    icon: i-simple-icons-laravel
+    to: https://filaforms.app
+    target: _blank
+    ---
+    :img{src="https://filaforms.app/img/og-image.png" alt="FilaForms" class="mb-4 rounded-lg w-full pointer-events-none"}
+
+    Visual form builder for all your public-facing forms.
+    :::
+
+    :::card
+    ---
+    title: Custom Fields
+    icon: i-lucide-sliders
+    to: https://custom-fields.relaticle.com
+    target: _blank
+    ---
+    :img{src="https://github.com/Relaticle/custom-fields/raw/2.x/art/preview.png" alt="Custom Fields" class="mb-4 rounded-lg w-full pointer-events-none"}
+
+    Let users add custom fields to any model without code changes.
+    :::
+  ::
 ::
