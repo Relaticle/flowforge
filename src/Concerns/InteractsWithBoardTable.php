@@ -27,11 +27,20 @@ trait InteractsWithBoardTable
             ->map(fn ($field) => Column::make($field)->searchable())->toArray();
 
         return $table
+            ->queryStringIdentifier('board')
             ->query($board->getQuery())
             ->filters($board->getBoardFilters())
             ->filtersFormWidth($board->getFiltersFormWidth())
             ->filtersFormColumns($board->getFiltersFormColumns())
             ->filtersLayout($board->getFiltersLayout())
             ->columns($searchableColumns);
+    }
+
+    /**
+     * Override to use board-specific query string identifier.
+     */
+    protected function getTableQueryStringIdentifier(): ?string
+    {
+        return 'board';
     }
 }
