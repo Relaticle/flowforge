@@ -20,27 +20,37 @@
         x-sortable-handle
     x-sortable-item="{{ $record['id'] }}"
     @endif
-    @if($hasCardAction && $cardAction)
-        wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
-    style="cursor: pointer;"
-    @endif
     data-card-id="{{ $record['id'] }}"
     data-position="{{ $record['position'] ?? '' }}"
 >
-    <div class="flowforge-card-content p-3">
+    <div class="flowforge-card-content">
         <div class="flex items-start justify-between mb-2">
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record['title'] }}</h4>
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-white p-3"
+                @if($hasCardAction && $cardAction)
+                    wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
+                style="cursor: pointer;"
+                @endif
+            >
+                {{ $record['title'] }}
+            </h4>
 
             @if($hasActions)
-                <div class="relative" @if($hasCardAction) @click.stop @endif>
+                <div class="m-3">
                     <x-filament-actions::group :actions="$processedRecordActions"/>
                 </div>
             @endif
         </div>
 
-        {{-- Render card schema with compact spacing --}}
-        @if(filled($record['schema']))
-            {{ $record['schema'] }}
-        @endif
+        <div class="p-3"
+             @if($hasCardAction && $cardAction)
+                 wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
+             style="cursor: pointer;"
+            @endif
+        >
+            {{-- Render card schema with compact spacing --}}
+            @if(filled($record['schema']))
+                {{ $record['schema'] }}
+            @endif
+        </div>
     </div>
 </div>
