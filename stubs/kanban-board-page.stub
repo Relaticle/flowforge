@@ -10,7 +10,7 @@ use Relaticle\Flowforge\Column;
 
 class {{ class }} extends BoardPage
 {
-    protected static ?string $navigationIcon = 'heroicon-o-view-columns';
+    protected static string|null|\BackedEnum $navigationIcon = 'heroicon-o-view-columns';
     protected static ?string $navigationLabel = '{{ navigationLabel }}';
     protected static ?string $title = '{{ title }}';
 
