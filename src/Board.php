@@ -71,6 +71,7 @@ class Board extends ViewComponent
                 'id' => $columnId,
                 'label' => $column->getLabel(),
                 'color' => $column->getColor(),
+                'icon' => $column->getIcon(),
                 'items' => $formattedRecords,
                 'total' => $this->getBoardRecordCount($columnId),
             ];
