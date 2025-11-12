@@ -16,6 +16,9 @@
     <!-- Column Header -->
     <div class="flowforge-column-header flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center">
+            @if ($column['icon'] ?? null)
+                <x-filament::icon :icon="$column['icon']" class="h-4 w-4 text-gray-500 dark:text-gray-400 me-2" />
+            @endif
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-200">
                 {{ $column['label'] }}
             </h3>
