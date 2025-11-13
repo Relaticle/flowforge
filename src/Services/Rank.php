@@ -6,7 +6,6 @@ use Relaticle\Flowforge\Exceptions\InvalidChars;
 use Relaticle\Flowforge\Exceptions\LastCharCantBeEqualToMinChar;
 use Relaticle\Flowforge\Exceptions\MaxRankLength;
 use Relaticle\Flowforge\Exceptions\PrevGreaterThanOrEquals;
-use Webmozart\Assert\Assert;
 
 use function array_filter;
 use function array_values;
@@ -104,7 +103,7 @@ final class Rank
 
         $return = substr($prevRank->get(), 0, -1) . chr(ord($char) + 1);
 
-        Assert::stringNotEmpty($return);
+        self::ensureNonEmpty($return, 'after(): computed $return');
 
         return self::fromString($return);
     }
@@ -116,14 +115,14 @@ final class Rank
         if (ord($char) - 1 <= ord(self::MIN_CHAR)) {
             $return = substr($nextRank->get(), 0, -1) . chr(ord($char) - 1) . chr(ord(self::MAX_CHAR) - 1);
 
-            Assert::stringNotEmpty($return);
+            self::ensureNonEmpty($return, 'before(): computed $return (edge case)');
 
             return self::fromString($return);
         }
 
         $return = substr($nextRank->get(), 0, -1) . chr(ord($char) - 1);
 
-        Assert::stringNotEmpty($return);
+        self::ensureNonEmpty($return, 'before(): computed $return');
 
         return self::fromString($return);
     }
@@ -153,7 +152,7 @@ final class Rank
             break;
         }
 
-        Assert::stringNotEmpty($rank);
+        self::ensureNonEmpty($rank, 'betweenRanks(): computed $rank');
 
         return self::fromString($rank);
     }
@@ -167,7 +166,7 @@ final class Rank
     {
         $return = $this->rank[$i] ?? $defaultChar;
 
-        Assert::stringNotEmpty($return);
+        self::ensureNonEmpty($return, 'getChar(): selected $return');
 
         return $return;
     }
@@ -187,8 +186,20 @@ final class Rank
 
         $return = chr((int) ((ord($prev) + ord($next)) / 2));
 
-        Assert::stringNotEmpty($return);
+        self::ensureNonEmpty($return, 'mid(): computed $return');
 
         return $return;
+    }
+
+    /**
+     * Ensure a string is non-empty at runtime; avoids relying on Webmozart Assert in production.
+     *
+     * @psalm-assert non-empty-string $value
+     */
+    private static function ensureNonEmpty(string $value, string $context): void
+    {
+        if ($value === '') {
+            throw new \LogicException('Rank invariant violated: ' . $context . ' must be a non-empty string.');
+        }
     }
 }
