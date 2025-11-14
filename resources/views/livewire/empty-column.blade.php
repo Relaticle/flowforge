@@ -6,6 +6,6 @@
         class="w-10 h-10 text-gray-400 dark:text-gray-600 mb-2" 
     />
     <p class="text-sm text-gray-500 dark:text-gray-400">
-        {{ __('flowforge::flowforge.no_cards_in_column', ['cardLabel' => strtolower($pluralCardLabel)]) }}
+        {{ __('flowforge::flowforge.no_cards_in_column', ['cardLabel' => $pluralCardLabel]) }}
     </p>
 </div>
