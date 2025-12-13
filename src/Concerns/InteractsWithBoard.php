@@ -287,6 +287,39 @@ trait InteractsWithBoard
     }
 
     /**
+     * Resolve a board action (similar to resolveTableAction).
+     */
+    protected function resolveBoardAction(array $action, array $parentActions): ?Action
+    {
+        $resolvedAction = null;
+
+        if (count($parentActions)) {
+            $parentAction = end($parentActions);
+            $resolvedAction = $parentAction->getModalAction($action['name']);
+        } else {
+            $resolvedAction = $this->cachedActions[$action['name']] ?? null;
+        }
+
+        if (! $resolvedAction) {
+            return null;
+        }
+
+        $recordKey = $action['context']['recordKey'] ?? $action['arguments']['recordKey'] ?? null;
+
+        if (filled($recordKey)) {
+            $board = $this->getBoard();
+            $query = $board->getQuery();
+
+            if ($query) {
+                $record = (clone $query)->find($recordKey);
+                $resolvedAction->record($record);
+            }
+        }
+
+        return $resolvedAction;
+    }
+
+    /**
      * Get board record actions with proper context.
      */
     public function getBoardRecordActions(array $record): array
