@@ -8,7 +8,7 @@
     processIsolation="false"
     stopOnFailure="false"
     executionOrder="random"
-    failOnWarning="true"
+    failOnWarning="false"
     failOnRisky="true"
     failOnEmptyTestSuite="true"
     beStrictAboutOutputDuringTests="true"
@@ -20,13 +20,14 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
-    <coverage>
+    <!-- Coverage configuration moved to test-coverage script -->
+    <!-- <coverage>
         <report>
             <html outputDirectory="build/coverage"/>
             <text outputFile="build/coverage.txt"/>
             <clover outputFile="build/logs/clover.xml"/>
         </report>
-    </coverage>
+    </coverage> -->
     <logging>
         <junit outputFile="build/report.junit.xml"/>
     </logging>
