@@ -379,7 +379,8 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
             0,
             'Moved card should be after Card d in new column'
         );
-        expect(strcmp($cardToMove->order_position, $beforeCard->order_position))->toBeLessThan(0,
+        expect(strcmp($cardToMove->order_position, $beforeCard->order_position))->toBeLessThan(
+            0,
             'Moved card should be before Card e in new column'
         );
     });
