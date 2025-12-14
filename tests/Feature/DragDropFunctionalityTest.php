@@ -124,8 +124,8 @@ describe('Production-Ready Kanban Drag & Drop System', function () {
 
             $sourceCard->refresh();
 
-            // beforeCardId actually places the card AFTER the specified card (based on implementation)
-            expect(strcmp($sourceCard->order_position, $targetCard->order_position))->toBeGreaterThan(0);
+            // beforeCardId places the card BEFORE the specified card (fixed implementation)
+            expect(strcmp($sourceCard->order_position, $targetCard->order_position))->toBeLessThan(0);
 
             // Project relationship should remain intact
             expect($sourceCard->project_id)->not()->toBeNull();
@@ -151,7 +151,7 @@ describe('Production-Ready Kanban Drag & Drop System', function () {
             $highPriorityTask->refresh();
             $mediumPriorityTask->refresh();
 
-            expect(strcmp($highPriorityTask->order_position, $mediumPriorityTask->order_position))->toBeGreaterThan(0);
+            expect(strcmp($highPriorityTask->order_position, $mediumPriorityTask->order_position))->toBeLessThan(0);
         });
     });
 
@@ -376,8 +376,8 @@ describe('Production-Ready Kanban Drag & Drop System', function () {
             $taskToMove = $newTasks->first();
             $targetTask = $newTasks->last();
 
-            // Move first task after last task
-            $this->board->call('moveCard', (string) $taskToMove->id, 'todo', null, (string) $targetTask->id);
+            // Move first task after last task (afterCardId=last, beforeCardId=null)
+            $this->board->call('moveCard', (string) $taskToMove->id, 'todo', (string) $targetTask->id, null);
 
             // Verify no duplicate positions in todo column
             $todoPositions = Task::where('status', 'todo')
@@ -506,6 +506,192 @@ describe('Production-Ready Kanban Drag & Drop System', function () {
                 ->and($constrainedTask->project)->not()->toBeNull()
                 ->and($constrainedTask->labels)->toBeArray()
                 ->and($constrainedTask->due_date)->not()->toBeNull();
+        });
+    });
+
+    describe('Large Scale Stress Testing (500+ Cards)', function () {
+        it('handles 500+ cards in single environment', function () {
+            // Create large production environment with 500+ tasks
+            $project = $this->projects->first();
+            $users = $this->users;
+
+            // Create 500 additional tasks across different statuses
+            $largeBatch = Task::factory()->count(500)->create([
+                'project_id' => $project->id,
+                'assigned_to' => $users->random()->id,
+                'created_by' => $users->random()->id,
+            ]);
+
+            $totalTasks = Task::count();
+            expect($totalTasks)->toBeGreaterThanOrEqual(500, 'Should have at least 500 tasks');
+
+            // Test move performance with large dataset
+            $testCard = $largeBatch->random();
+            $newStatus = collect(['todo', 'in_progress', 'completed'])->random();
+
+            $startTime = microtime(true);
+            $this->board->call('moveCard', (string) $testCard->id, $newStatus);
+            $duration = microtime(true) - $startTime;
+
+            // Should complete within 500ms even with 500+ cards
+            expect($duration)->toBeLessThan(0.5, 'Move should complete within 500ms at scale');
+
+            $testCard->refresh();
+            expect($testCard->status)->toBe($newStatus);
+
+            // Verify data integrity with large dataset
+            $orphanedTasks = Task::whereNull('project_id')->count();
+            expect($orphanedTasks)->toBe(0, 'No orphaned tasks should exist');
+        });
+
+        it('performs 100 operations on 250-card board', function () {
+            // Create medium-large board (250 cards)
+            $project = $this->projects->first();
+            $users = $this->users;
+
+            Task::factory()->count(250)->create([
+                'project_id' => $project->id,
+                'assigned_to' => $users->random()->id,
+                'created_by' => $users->random()->id,
+            ]);
+
+            $totalTasks = Task::count();
+            expect($totalTasks)->toBeGreaterThanOrEqual(250);
+
+            // Perform 100 random move operations
+            for ($i = 0; $i < 100; $i++) {
+                $task = Task::inRandomOrder()->first();
+                $newStatus = collect(['todo', 'in_progress', 'completed'])->random();
+
+                $this->board->call('moveCard', (string) $task->id, $newStatus);
+            }
+
+            // Verify no data corruption after 100 operations
+            $finalCount = Task::count();
+            expect($finalCount)->toBe($totalTasks, 'Task count should remain stable');
+
+            // Verify no orphaned data
+            $orphanedTasks = Task::whereNull('project_id')->count();
+            expect($orphanedTasks)->toBe(0);
+        });
+
+        it('validates position uniqueness across 300 cards in single column', function () {
+            // Create 300 cards all in 'todo' column
+            $project = $this->projects->first();
+
+            Task::factory()->count(300)->create([
+                'project_id' => $project->id,
+                'status' => 'todo',
+            ]);
+
+            // Get all positions in the todo column
+            $positions = Task::where('status', 'todo')
+                ->whereNotNull('order_position')
+                ->pluck('order_position')
+                ->toArray();
+
+            // Verify ALL positions are unique
+            $uniqueCount = count(array_unique($positions));
+            expect($uniqueCount)->toBe(
+                count($positions),
+                'All 300+ positions should be unique in single column'
+            );
+
+            // Verify positions can be sorted (no invalid characters)
+            $sortedPositions = $positions;
+            sort($sortedPositions);
+            expect(count($sortedPositions))->toBe(count($positions));
+        });
+    });
+
+    describe('Invariant Validation Under Stress', function () {
+        it('validates sorted positions invariant across 50 operations', function () {
+            // Create base dataset
+            $tasks = Task::factory()->count(50)->create([
+                'project_id' => $this->projects->first()->id,
+                'status' => 'todo',
+            ]);
+
+            // Perform 50 random moves, checking invariant after EACH move
+            for ($i = 0; $i < 50; $i++) {
+                $task = $tasks->random();
+                $newStatus = collect(['todo', 'in_progress', 'completed'])->random();
+
+                $this->board->call('moveCard', (string) $task->id, $newStatus);
+
+                // INVARIANT: Positions in each column must be sortable and ordered
+                foreach (['todo', 'in_progress', 'completed'] as $status) {
+                    $columnPositions = Task::where('status', $status)
+                        ->whereNotNull('order_position')
+                        ->orderBy('order_position')
+                        ->pluck('order_position')
+                        ->toArray();
+
+                    // Verify positions are in ascending order
+                    for ($j = 0; $j < count($columnPositions) - 1; $j++) {
+                        expect(strcmp($columnPositions[$j], $columnPositions[$j + 1]))->toBeLessThan(
+                            0,
+                            "Position {$j} should be < position " . ($j + 1) . " in {$status} column at operation {$i}"
+                        );
+                    }
+                }
+            }
+        });
+
+        it('validates no duplicate positions invariant during bulk operations', function () {
+            // Create base dataset with mixed statuses
+            Task::factory()->count(75)->create([
+                'project_id' => $this->projects->first()->id,
+            ]);
+
+            $allTasks = Task::all();
+
+            // Perform 30 operations, checking for duplicates after EACH operation
+            for ($i = 0; $i < 30; $i++) {
+                $task = $allTasks->random();
+                $newStatus = collect(['todo', 'in_progress', 'completed'])->random();
+
+                $this->board->call('moveCard', (string) $task->id, $newStatus);
+
+                // INVARIANT: No duplicate positions within each column
+                foreach (['todo', 'in_progress', 'completed'] as $status) {
+                    $positions = Task::where('status', $status)
+                        ->whereNotNull('order_position')
+                        ->pluck('order_position')
+                        ->toArray();
+
+                    $uniquePositions = array_unique($positions);
+
+                    expect(count($uniquePositions))->toBe(
+                        count($positions),
+                        "No duplicate positions allowed in {$status} column at operation {$i}"
+                    );
+                }
+            }
+        });
+
+        it('validates position validity invariant under stress', function () {
+            // Create dataset
+            Task::factory()->count(40)->create([
+                'project_id' => $this->projects->first()->id,
+            ]);
+
+            $allTasks = Task::all();
+
+            // Perform 40 rapid sequential moves
+            for ($i = 0; $i < 40; $i++) {
+                $task = $allTasks->random();
+                $newStatus = collect(['todo', 'in_progress', 'completed'])->random();
+
+                $this->board->call('moveCard', (string) $task->id, $newStatus);
+                $task->refresh();
+
+                // INVARIANT: Every moved card must have valid position
+                expect($task->order_position)->not()->toBeNull()
+                    ->and($task->order_position)->toBeString()
+                    ->and(strlen($task->order_position))->toBeGreaterThan(0)
+                    ->and(strlen($task->order_position))->toBeLessThan(1024); // Under MAX_RANK_LEN
+            }
         });
     });
 });

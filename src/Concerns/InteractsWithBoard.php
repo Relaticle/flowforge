@@ -215,15 +215,15 @@ trait InteractsWithBoard
         $afterPos = $afterCard?->getAttribute($positionField);
 
         if ($beforePos && $afterPos && is_string($beforePos) && is_string($afterPos)) {
-            return Rank::betweenRanks(Rank::fromString($beforePos), Rank::fromString($afterPos))->get();
+            return Rank::betweenRanks(Rank::fromString($afterPos), Rank::fromString($beforePos))->get();
         }
 
         if ($beforePos && is_string($beforePos)) {
-            return Rank::after(Rank::fromString($beforePos))->get();
+            return Rank::before(Rank::fromString($beforePos))->get();
         }
 
         if ($afterPos && is_string($afterPos)) {
-            return Rank::before(Rank::fromString($afterPos))->get();
+            return Rank::after(Rank::fromString($afterPos))->get();
         }
 
         return Rank::forEmptySequence()->get();

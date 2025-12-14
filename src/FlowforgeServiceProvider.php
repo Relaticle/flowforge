@@ -9,6 +9,7 @@ use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Relaticle\Flowforge\Commands\DiagnosePositionsCommand;
 use Relaticle\Flowforge\Commands\MakeKanbanBoardCommand;
 use Relaticle\Flowforge\Commands\RepairPositionsCommand;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
@@ -114,6 +115,7 @@ class FlowforgeServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
+            DiagnosePositionsCommand::class,
             MakeKanbanBoardCommand::class,
             RepairPositionsCommand::class,
         ];

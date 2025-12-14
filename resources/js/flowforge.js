@@ -25,7 +25,7 @@ export default function flowforge({state}) {
             const afterCardId = cardIndex > 0 ? newOrder[cardIndex - 1] : null;
             const beforeCardId = cardIndex < newOrder.length - 1 ? newOrder[cardIndex + 1] : null;
 
-            this.$wire.moveCard(cardId, targetColumn, beforeCardId, afterCardId)
+            this.$wire.moveCard(cardId, targetColumn, afterCardId, beforeCardId)
                 .then(() => this.setCardState(cardElement, false))
                 .catch(() => this.setCardState(cardElement, false));
         },
