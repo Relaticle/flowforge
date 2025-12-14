@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * IMPORTANT: Before running this migration, ensure you have no duplicate
+     * positions in your table by running:
+     *
+     *   php artisan flowforge:repair-positions YourModel --column=status
+     */
+    public function up(): void
+    {
+        Schema::table('your_table_name', function (Blueprint $table) {
+            // Add unique constraint on (status_column, position_column) combination
+            // This prevents duplicate positions within the same column/status
+            $table->unique(['status_column', 'position_column'], 'unique_position_per_column');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('your_table_name', function (Blueprint $table) {
+            $table->dropUnique('unique_position_per_column');
+        });
+    }
+};

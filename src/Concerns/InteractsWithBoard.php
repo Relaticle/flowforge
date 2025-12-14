@@ -8,9 +8,12 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\Exceptions\MaxRetriesExceededException;
 use Relaticle\Flowforge\Services\Rank;
 use Throwable;
 
@@ -95,20 +98,8 @@ trait InteractsWithBoard
             throw new InvalidArgumentException("Card not found: {$cardId}");
         }
 
-        // Calculate new position using Rank service
-        $newPosition = $this->calculatePositionBetweenCards($afterCardId, $beforeCardId, $targetColumnId);
-
-        // Use transaction for data consistency
-        DB::transaction(function () use ($card, $board, $targetColumnId, $newPosition) {
-            $columnIdentifier = $board->getColumnIdentifierAttribute();
-            $columnValue = $this->resolveStatusValue($card, $columnIdentifier, $targetColumnId);
-            $positionIdentifier = $board->getPositionIdentifierAttribute();
-
-            $card->update([
-                $columnIdentifier => $columnValue,
-                $positionIdentifier => $newPosition,
-            ]);
-        });
+        // Calculate and update position with automatic retry on conflicts
+        $newPosition = $this->calculateAndUpdatePositionWithRetry($card, $targetColumnId, $afterCardId, $beforeCardId);
 
         // Emit success event after successful transaction
         $this->dispatch('kanban-card-moved', [
@@ -116,6 +107,159 @@ trait InteractsWithBoard
             'columnId' => $targetColumnId,
             'position' => $newPosition,
         ]);
+    }
+
+    /**
+     * Calculate position and update card within transaction with pessimistic locking.
+     * This prevents race conditions when multiple users drag cards simultaneously.
+     */
+    protected function calculateAndUpdatePosition(
+        Model $card,
+        string $targetColumnId,
+        ?string $afterCardId,
+        ?string $beforeCardId
+    ): string {
+        $newPosition = null;
+
+        DB::transaction(function () use ($card, $targetColumnId, $afterCardId, $beforeCardId, &$newPosition) {
+            $board = $this->getBoard();
+            $query = $board->getQuery();
+            $positionField = $board->getPositionIdentifierAttribute();
+
+            // LOCK reference cards for reading to prevent stale data
+            $afterCard = $afterCardId
+                ? (clone $query)->where('id', $afterCardId)->lockForUpdate()->first()
+                : null;
+
+            $beforeCard = $beforeCardId
+                ? (clone $query)->where('id', $beforeCardId)->lockForUpdate()->first()
+                : null;
+
+            // Calculate position INSIDE transaction with locked data
+            $newPosition = $this->calculatePositionBetweenLockedCards(
+                $afterCard,
+                $beforeCard,
+                $targetColumnId
+            );
+
+            // Update card position
+            $columnIdentifier = $board->getColumnIdentifierAttribute();
+            $columnValue = $this->resolveStatusValue($card, $columnIdentifier, $targetColumnId);
+
+            $card->update([
+                $columnIdentifier => $columnValue,
+                $positionField => $newPosition,
+            ]);
+        });
+
+        return $newPosition;
+    }
+
+    /**
+     * Calculate position between locked cards (used within transaction).
+     */
+    protected function calculatePositionBetweenLockedCards(
+        ?Model $afterCard,
+        ?Model $beforeCard,
+        string $columnId
+    ): string {
+        if (! $afterCard && ! $beforeCard) {
+            return $this->getBoardPositionInColumn($columnId, 'bottom');
+        }
+
+        $positionField = $this->getBoard()->getPositionIdentifierAttribute();
+
+        $beforePos = $beforeCard?->getAttribute($positionField);
+        $afterPos = $afterCard?->getAttribute($positionField);
+
+        if ($beforePos && $afterPos && is_string($beforePos) && is_string($afterPos)) {
+            return Rank::betweenRanks(Rank::fromString($afterPos), Rank::fromString($beforePos))->get();
+        }
+
+        if ($beforePos && is_string($beforePos)) {
+            return Rank::before(Rank::fromString($beforePos))->get();
+        }
+
+        if ($afterPos && is_string($afterPos)) {
+            return Rank::after(Rank::fromString($afterPos))->get();
+        }
+
+        return Rank::forEmptySequence()->get();
+    }
+
+    /**
+     * Calculate and update position with automatic retry on conflicts.
+     * Wraps calculateAndUpdatePosition() with retry logic to handle rare duplicate position conflicts.
+     */
+    protected function calculateAndUpdatePositionWithRetry(
+        Model $card,
+        string $targetColumnId,
+        ?string $afterCardId,
+        ?string $beforeCardId,
+        int $maxAttempts = 3
+    ): string {
+        $baseDelay = 50; // milliseconds
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                return $this->calculateAndUpdatePosition(
+                    $card,
+                    $targetColumnId,
+                    $afterCardId,
+                    $beforeCardId
+                );
+            } catch (QueryException $e) {
+                // Check if this is a unique constraint violation
+                if (! $this->isDuplicatePositionError($e)) {
+                    throw $e; // Not a duplicate, rethrow
+                }
+
+                $lastException = $e;
+
+                // Log the conflict for monitoring
+                Log::info('Position conflict detected, retrying', [
+                    'card_id' => $card->id,
+                    'target_column' => $targetColumnId,
+                    'attempt' => $attempt,
+                    'max_attempts' => $maxAttempts,
+                ]);
+
+                // Max retries reached?
+                if ($attempt >= $maxAttempts) {
+                    throw new MaxRetriesExceededException(
+                        "Failed to move card after {$maxAttempts} attempts due to position conflicts",
+                        previous: $e
+                    );
+                }
+
+                // Exponential backoff: 50ms, 100ms, 200ms
+                $delay = $baseDelay * pow(2, $attempt - 1);
+                usleep($delay * 1000);
+
+                // Refresh reference cards before retry (they may have moved)
+                continue;
+            }
+        }
+
+        // Should never reach here
+        throw $lastException ?? new \RuntimeException('Unexpected retry loop exit');
+    }
+
+    /**
+     * Check if a QueryException is due to unique constraint violation on positions.
+     */
+    protected function isDuplicatePositionError(QueryException $e): bool
+    {
+        $errorCode = $e->errorInfo[1] ?? null;
+
+        // SQLite: SQLITE_CONSTRAINT (19)
+        // MySQL: ER_DUP_ENTRY (1062)
+        // PostgreSQL: unique_violation (23505)
+
+        return in_array($errorCode, [19, 1062, 23505]) ||
+               str_contains($e->getMessage(), 'unique_position_per_column') ||
+               str_contains($e->getMessage(), 'UNIQUE constraint failed');
     }
 
     public function loadMoreItems(string $columnId, ?int $count = null): void

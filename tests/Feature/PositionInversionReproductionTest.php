@@ -9,37 +9,7 @@ beforeEach(function () {
     $this->board = Livewire::test(TestBoard::class);
 });
 
-/**
- * Helper to detect position inversions in a column
- */
-function detectInversions(string $modelClass, string $columnValue, string $positionField = 'order_position'): array
-{
-    $records = $modelClass::query()
-        ->where('status', $columnValue)
-        ->whereNotNull($positionField)
-        ->orderBy('id')
-        ->get();
-
-    $inversions = [];
-    for ($i = 0; $i < $records->count() - 1; $i++) {
-        $current = $records[$i];
-        $next = $records[$i + 1];
-
-        $currentPos = $current->getAttribute($positionField);
-        $nextPos = $next->getAttribute($positionField);
-
-        if (strcmp($currentPos, $nextPos) >= 0) {
-            $inversions[] = [
-                'current_id' => $current->id,
-                'current_pos' => $currentPos,
-                'next_id' => $next->id,
-                'next_pos' => $nextPos,
-            ];
-        }
-    }
-
-    return $inversions;
-}
+// Note: detectInversions() helper function is defined in ParameterOrderMutationTest.php
 
 describe('Real-World Position Inversion Scenarios', function () {
     it('reproduces inversions from rapid sequential moves between same positions', function () {
