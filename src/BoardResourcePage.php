@@ -9,6 +9,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
+use Livewire\Attributes\Url;
 use Relaticle\Flowforge\Concerns\BaseBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
@@ -24,6 +25,9 @@ use Relaticle\Flowforge\Contracts\HasBoard;
 abstract class BoardResourcePage extends Page implements HasActions, HasBoard, HasForms
 {
     use BaseBoard;
+
+    #[Url(as: 'search')]
+    public $tableSearch = '';
 
     protected string $view = 'flowforge::filament.pages.board-page';
 
