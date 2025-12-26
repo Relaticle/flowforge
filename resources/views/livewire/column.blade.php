@@ -83,7 +83,7 @@
         @if(isset($column['total']) && $column['total'] > count($column['items']))
             @scroll.throttle.100ms="handleColumnScroll($event, '{{ $columnId }}')"
         @endif
-        class="flowforge-column-content p-3 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain kanban-cards"
+        class="flowforge-column-content p-3 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain kanban-cards"
         style="max-height: calc(100vh - 13rem);"
     >
         @if (isset($column['items']) && count($column['items']) > 0)
