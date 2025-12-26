@@ -22,7 +22,8 @@
     "require": {
         "php": "^8.3",
         "filament/filament": "^4.0",
-        "spatie/laravel-package-tools": "^1.15.0"
+        "spatie/laravel-package-tools": "^1.15.0",
+        "ext-bcmath": "*"
     },
     "require-dev": {
         "larastan/larastan": "^3.0",
