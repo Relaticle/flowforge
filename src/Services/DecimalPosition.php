@@ -80,11 +80,21 @@ final readonly class DecimalPosition
      * @param  string  $before  Upper bound position (card below)
      * @return string Position between bounds with jitter applied
      *
-     * @throws InvalidArgumentException When after >= before (invalid bounds)
+     * @throws InvalidArgumentException When after > before (invalid bounds)
+     *
+     * @note When after == before (equal positions), returns after() to append
      */
     public static function between(string $after, string $before): string
     {
-        if (bccomp($after, $before, self::SCALE) >= 0) {
+        $comparison = bccomp($after, $before, self::SCALE);
+
+        // Handle equal positions: treat as "insert after first card"
+        // This follows Trello's approach - duplicates naturally spread out over time
+        if ($comparison === 0) {
+            return self::after($after);
+        }
+
+        if ($comparison > 0) {
             throw new InvalidArgumentException(
                 "Invalid bounds: after ({$after}) must be less than before ({$before})"
             );

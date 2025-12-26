@@ -38,11 +38,15 @@ describe('between() with jitter', function () {
         DecimalPosition::between($after, $before);
     })->throws(InvalidArgumentException::class, 'Invalid bounds: after (2000.0000000000) must be less than before (1000.0000000000)');
 
-    test('throws InvalidArgumentException when after equals before', function () {
+    test('handles equal positions by inserting after (Trello approach)', function () {
         $position = '1500.0000000000';
 
-        DecimalPosition::between($position, $position);
-    })->throws(InvalidArgumentException::class);
+        $result = DecimalPosition::between($position, $position);
+
+        // When positions are equal, we append after the first card
+        // This follows Trello's approach - duplicates spread out over time
+        expect($result)->toBe('67035.0000000000'); // 1500 + 65535
+    });
 });
 
 describe('betweenExact() deterministic', function () {
