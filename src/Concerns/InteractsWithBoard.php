@@ -130,11 +130,11 @@ trait InteractsWithBoard
 
             // LOCK reference cards for reading to prevent stale data
             $afterCard = $afterCardId
-                ? (clone $query)->where('id', $afterCardId)->lockForUpdate()->first()
+                ? (clone $query)->whereKey($afterCardId)->lockForUpdate()->first()
                 : null;
 
             $beforeCard = $beforeCardId
-                ? (clone $query)->where('id', $beforeCardId)->lockForUpdate()->first()
+                ? (clone $query)->whereKey($beforeCardId)->lockForUpdate()->first()
                 : null;
 
             // Get positions from locked cards
@@ -155,10 +155,10 @@ trait InteractsWithBoard
 
                     // Recalculate position after rebalancing
                     $afterCard = $afterCardId
-                        ? (clone $query)->where('id', $afterCardId)->lockForUpdate()->first()
+                        ? (clone $query)->whereKey($afterCardId)->lockForUpdate()->first()
                         : null;
                     $beforeCard = $beforeCardId
-                        ? (clone $query)->where('id', $beforeCardId)->lockForUpdate()->first()
+                        ? (clone $query)->whereKey($beforeCardId)->lockForUpdate()->first()
                         : null;
 
                     $afterPos = $afterCard?->getAttribute($positionField);
@@ -512,6 +512,7 @@ trait InteractsWithBoard
         $board = $this->getBoard();
         $statusField = $board->getColumnIdentifierAttribute();
         $positionField = $board->getPositionIdentifierAttribute();
+        $keyName = $query->getModel()->getKeyName();
         $queryClone = (clone $query)->where($statusField, $columnId);
 
         if ($position === 'top') {
@@ -519,7 +520,7 @@ trait InteractsWithBoard
             $firstRecord = $queryClone
                 ->whereNotNull($positionField)
                 ->orderBy($positionField, 'asc')
-                ->orderBy('id', 'asc') // Tie-breaker for deterministic order
+                ->orderBy($keyName, 'asc') // Tie-breaker for deterministic order
                 ->first();
 
             if ($firstRecord) {
@@ -536,7 +537,7 @@ trait InteractsWithBoard
         $lastRecord = $queryClone
             ->whereNotNull($positionField)
             ->orderBy($positionField, 'desc')
-            ->orderBy('id', 'desc') // Tie-breaker for deterministic order
+            ->orderBy($keyName, 'desc') // Tie-breaker for deterministic order
             ->first();
 
         if ($lastRecord) {

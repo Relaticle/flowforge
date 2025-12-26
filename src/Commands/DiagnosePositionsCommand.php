@@ -138,6 +138,7 @@ class DiagnosePositionsCommand extends Command
     private function checkGaps(Model $model, string $columnField, string $positionField): array
     {
         $issues = [];
+        $keyName = $model->getKeyName();
         $columns = $model->query()->distinct()->pluck($columnField)->map(fn ($value) => $value instanceof \BackedEnum ? $value->value : $value);
 
         foreach ($columns as $column) {
@@ -145,7 +146,7 @@ class DiagnosePositionsCommand extends Command
                 ->where($columnField, $column)
                 ->whereNotNull($positionField)
                 ->orderBy($positionField)
-                ->orderBy('id')
+                ->orderBy($keyName)
                 ->pluck($positionField);
 
             if ($positions->count() < 2) {
@@ -190,13 +191,14 @@ class DiagnosePositionsCommand extends Command
     private function checkInversions(Model $model, string $columnField, string $positionField): array
     {
         $issues = [];
+        $keyName = $model->getKeyName();
         $columns = $model->query()->distinct()->pluck($columnField)->map(fn ($value) => $value instanceof \BackedEnum ? $value->value : $value);
 
         foreach ($columns as $column) {
             $records = $model->query()
                 ->where($columnField, $column)
                 ->whereNotNull($positionField)
-                ->orderBy('id')
+                ->orderBy($keyName)
                 ->get();
 
             if ($records->count() < 2) {

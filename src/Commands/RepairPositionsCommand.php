@@ -278,15 +278,16 @@ class RepairPositionsCommand extends Command
     private function getRecordsForStrategy(string $model, string $columnField, string $positionField, mixed $group, string $strategy, $baseQuery = null): Collection
     {
         $query = $baseQuery ? (clone $baseQuery)->where($columnField, $group) : $model::where($columnField, $group);
+        $keyName = $query->getModel()->getKeyName();
 
         return match ($strategy) {
-            'regenerate' => $query->orderBy('id')->get(),
-            'fix_missing' => $query->whereNull($positionField)->orderBy('id')->get(),
+            'regenerate' => $query->orderBy($keyName)->get(),
+            'fix_missing' => $query->whereNull($positionField)->orderBy($keyName)->get(),
             'fix_duplicates' => $this->getDuplicateRecords($query, $positionField),
             'fix_all' => $query->where(function ($q) use ($positionField) {
                 $q->whereNull($positionField)
                     ->orWhereIn($positionField, $this->getDuplicatePositions($q, $positionField));
-            })->orderBy('id')->get(),
+            })->orderBy($keyName)->get(),
             default => new Collection,
         };
     }
@@ -302,7 +303,9 @@ class RepairPositionsCommand extends Command
             return new Collection;
         }
 
-        return $query->whereIn($positionField, $duplicatePositions)->orderBy('id')->get();
+        $keyName = $query->getModel()->getKeyName();
+
+        return $query->whereIn($positionField, $duplicatePositions)->orderBy($keyName)->get();
     }
 
     /**

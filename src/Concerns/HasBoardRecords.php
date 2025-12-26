@@ -82,10 +82,11 @@ trait HasBoardRecords
         }
 
         $positionField = $this->getPositionIdentifierAttribute();
+        $keyName = $queryClone->getModel()->getKeyName();
 
         if ($positionField && $this->modelHasColumn($queryClone->getModel(), $positionField)) {
             $queryClone->orderBy($positionField, 'asc')
-                ->orderBy('id', 'asc'); // Tie-breaker for deterministic order
+                ->orderBy($keyName, 'asc'); // Tie-breaker for deterministic order
         }
 
         return $queryClone->limit($limit)->get();
@@ -171,12 +172,13 @@ trait HasBoardRecords
 
         $statusField = $this->getColumnIdentifierAttribute();
         $positionField = $this->getPositionIdentifierAttribute();
+        $keyName = $query->getModel()->getKeyName();
 
         return (clone $query)
             ->where($statusField, $columnId)
             ->where($positionField, '<', $position)
             ->orderBy($positionField, 'desc')
-            ->orderBy('id', 'desc') // Tie-breaker for deterministic order
+            ->orderBy($keyName, 'desc') // Tie-breaker for deterministic order
             ->limit($limit)
             ->get();
     }
@@ -194,12 +196,13 @@ trait HasBoardRecords
 
         $statusField = $this->getColumnIdentifierAttribute();
         $positionField = $this->getPositionIdentifierAttribute();
+        $keyName = $query->getModel()->getKeyName();
 
         return (clone $query)
             ->where($statusField, $columnId)
             ->where($positionField, '>', $position)
             ->orderBy($positionField, 'asc')
-            ->orderBy('id', 'asc') // Tie-breaker for deterministic order
+            ->orderBy($keyName, 'asc') // Tie-breaker for deterministic order
             ->limit($limit)
             ->get();
     }
@@ -217,11 +220,12 @@ trait HasBoardRecords
 
         $statusField = $this->getColumnIdentifierAttribute();
         $positionField = $this->getPositionIdentifierAttribute();
+        $keyName = $query->getModel()->getKeyName();
 
         $record = (clone $query)
             ->where($statusField, $columnId)
             ->orderBy($positionField, 'desc')
-            ->orderBy('id', 'desc') // Tie-breaker for deterministic order
+            ->orderBy($keyName, 'desc') // Tie-breaker for deterministic order
             ->first();
 
         return $record?->getAttribute($positionField);

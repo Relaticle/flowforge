@@ -33,11 +33,12 @@ final readonly class PositionRebalancer
         string $columnId,
         string $positionField
     ): int {
+        $keyName = $query->getModel()->getKeyName();
         $records = (clone $query)
             ->where($columnField, $columnId)
             ->whereNotNull($positionField)
             ->orderBy($positionField)
-            ->orderBy('id') // Tie-breaker for deterministic order
+            ->orderBy($keyName) // Tie-breaker for deterministic order
             ->get();
 
         if ($records->isEmpty()) {
