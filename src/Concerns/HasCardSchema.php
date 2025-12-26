@@ -32,6 +32,7 @@ trait HasCardSchema
         }
 
         $livewire = $this->getLivewire();
+        /** @phpstan-ignore argument.type (Filament Schema expects HasSchemas&Livewire\Component but getLivewire returns HasBoard) */
         $schema = Schema::make($livewire)->record($record);
 
         return $this->evaluate($this->cardSchemaBuilder, ['schema' => $schema]);
@@ -42,6 +43,7 @@ trait HasCardSchema
      */
     protected function resolveDefaultClosureDependencyForEvaluationByName(string $parameterName): array
     {
+        /** @phpstan-ignore argument.type (Filament Schema expects HasSchemas&Livewire\Component but getLivewire returns HasBoard) */
         return match ($parameterName) {
             'schema' => [Schema::make($this->getLivewire())],
             default => parent::resolveDefaultClosureDependencyForEvaluationByName($parameterName),

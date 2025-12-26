@@ -259,7 +259,7 @@ trait InteractsWithBoard
 
                 // Log the conflict for monitoring
                 Log::info('Position conflict detected, retrying', [
-                    'card_id' => $card->id,
+                    'card_id' => $card->getKey(),
                     'target_column' => $targetColumnId,
                     'attempt' => $attempt,
                     'max_attempts' => $maxAttempts,
@@ -300,54 +300,6 @@ trait InteractsWithBoard
         return in_array($errorCode, [19, 1062, 23505]) ||
                str_contains($e->getMessage(), 'unique_position_per_column') ||
                str_contains($e->getMessage(), 'UNIQUE constraint failed');
-    }
-
-    /**
-     * Execute position update with retry mechanism for race conditions.
-     * Handles cases where rapid card movements cause stale data issues.
-     *
-     * @template T
-     *
-     * @param  callable(): T  $callback
-     * @return T
-     */
-    protected function withPositionRetry(callable $callback, string $cardId, string $targetColumnId, int $maxAttempts = 3): mixed
-    {
-        $baseDelay = 50; // milliseconds
-        $lastException = null;
-
-        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
-            try {
-                return $callback();
-            } catch (QueryException $e) {
-                if (! $this->isDuplicatePositionError($e)) {
-                    throw $e;
-                }
-
-                $lastException = $e;
-
-                Log::info('Position conflict detected, retrying', [
-                    'card_id' => $cardId,
-                    'target_column' => $targetColumnId,
-                    'attempt' => $attempt,
-                    'max_attempts' => $maxAttempts,
-                ]);
-
-                if ($attempt >= $maxAttempts) {
-                    throw new MaxRetriesExceededException(
-                        "Failed to move card after {$maxAttempts} attempts due to position conflicts",
-                        previous: $e
-                    );
-                }
-
-                $delay = $baseDelay * pow(2, $attempt - 1);
-                usleep($delay * 1000);
-
-                continue;
-            }
-        }
-
-        throw $lastException ?? new \RuntimeException('Unexpected retry loop exit');
     }
 
     public function loadMoreItems(string $columnId, ?int $count = null): void

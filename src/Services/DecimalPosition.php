@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Services;
 
+use InvalidArgumentException;
+
 /**
  * Decimal-based position calculation using BCMath for precision.
  * Uses DECIMAL(20,10) storage - 10 integer digits + 10 decimal places.
@@ -15,7 +17,7 @@ namespace Relaticle\Flowforge\Services;
  * a unique position to prevent collisions when multiple users move cards
  * to the same position simultaneously.
  */
-final class DecimalPosition
+final readonly class DecimalPosition
 {
     /**
      * Default gap between positions (65,535).
@@ -76,10 +78,18 @@ final class DecimalPosition
      *
      * @param  string  $after  Lower bound position (card above)
      * @param  string  $before  Upper bound position (card below)
-     * @return string  Position between bounds with jitter applied
+     * @return string Position between bounds with jitter applied
+     *
+     * @throws InvalidArgumentException When after >= before (invalid bounds)
      */
     public static function between(string $after, string $before): string
     {
+        if (bccomp($after, $before, self::SCALE) >= 0) {
+            throw new InvalidArgumentException(
+                "Invalid bounds: after ({$after}) must be less than before ({$before})"
+            );
+        }
+
         // Calculate the exact midpoint
         $sum = bcadd($after, $before, self::SCALE);
         $midpoint = bcdiv($sum, '2', self::SCALE);
@@ -106,10 +116,18 @@ final class DecimalPosition
      *
      * @param  string  $after  Lower bound position
      * @param  string  $before  Upper bound position
-     * @return string  Exact midpoint between bounds
+     * @return string Exact midpoint between bounds
+     *
+     * @throws InvalidArgumentException When after >= before (invalid bounds)
      */
     public static function betweenExact(string $after, string $before): string
     {
+        if (bccomp($after, $before, self::SCALE) >= 0) {
+            throw new InvalidArgumentException(
+                "Invalid bounds: after ({$after}) must be less than before ({$before})"
+            );
+        }
+
         $sum = bcadd($after, $before, self::SCALE);
 
         return bcdiv($sum, '2', self::SCALE);
@@ -172,7 +190,7 @@ final class DecimalPosition
      * Normalize a position string to ensure consistent format.
      * Converts numeric values to properly scaled decimal strings.
      */
-    public static function normalize(string|int|float $position): string
+    public static function normalize(string | int | float $position): string
     {
         return bcadd((string) $position, '0', self::SCALE);
     }
@@ -220,7 +238,7 @@ final class DecimalPosition
      * @param  string  $after  Lower bound position
      * @param  string  $before  Upper bound position
      * @param  int  $count  Number of positions to generate
-     * @return array<int, string>  Array of unique positions
+     * @return array<int, string> Array of unique positions
      */
     public static function generateBetween(string $after, string $before, int $count): array
     {
@@ -252,7 +270,7 @@ final class DecimalPosition
      * desired range using BCMath for precision.
      *
      * @param  string  $maxOffset  Maximum absolute offset (positive number)
-     * @return string  Random value in [-maxOffset, +maxOffset]
+     * @return string Random value in [-maxOffset, +maxOffset]
      */
     private static function generateJitter(string $maxOffset): string
     {
@@ -261,14 +279,19 @@ final class DecimalPosition
             return '0.0000000000';
         }
 
-        // Get 8 random bytes and convert to unsigned 64-bit integer
+        // Get 8 random bytes and convert to unsigned 64-bit string
+        // PHP's unpack('P') returns signed int for values >= 2^63,
+        // so we manually convert bytes to an unsigned decimal string
         $bytes = random_bytes(8);
-        $randomInt = unpack('P', $bytes)[1]; // Unsigned 64-bit little-endian
+        $randomUnsigned = '0';
+        for ($i = 7; $i >= 0; $i--) {
+            $randomUnsigned = bcmul($randomUnsigned, '256', 0);
+            $randomUnsigned = bcadd($randomUnsigned, (string) ord($bytes[$i]), 0);
+        }
 
-        // Normalize to [0, 1] range
-        // PHP_INT_MAX is the max for signed, but we have unsigned so use 2^64
+        // Normalize to [0, 1] range using 2^64 - 1 as max
         $maxUint64 = '18446744073709551615'; // 2^64 - 1
-        $normalized = bcdiv((string) $randomInt, $maxUint64, self::SCALE);
+        $normalized = bcdiv($randomUnsigned, $maxUint64, self::SCALE);
 
         // Scale to [-1, 1] range
         $scaled = bcsub(bcmul($normalized, '2', self::SCALE), '1', self::SCALE);

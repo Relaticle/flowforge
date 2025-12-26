@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
  * This service redistributes positions evenly using the default gap, ensuring
  * consistent spacing and preventing precision exhaustion after many insertions.
  */
-final class PositionRebalancer
+final readonly class PositionRebalancer
 {
     /**
      * Rebalance all positions in a column.
