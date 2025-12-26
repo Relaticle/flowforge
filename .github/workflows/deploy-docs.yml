@@ -3,7 +3,7 @@ name: Deploy Docs to GitHub Pages
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["2.x"]
+    branches: ["3.x"]
     paths:
       - 'docs/**'
       - '.github/workflows/deploy-docs.yml'
