@@ -1,6 +1,6 @@
 <?php
 
-use Relaticle\Flowforge\Services\Rank;
+use Relaticle\Flowforge\Services\DecimalPosition;
 
 dataset('workflow_progressions', [
     'todo_to_in_progress' => ['todo', 'in_progress'],
@@ -88,10 +88,10 @@ dataset('position_corruption_types', [
 // Production board state factory
 function createProductionBoardState(): array
 {
-    $rank = Rank::forEmptySequence();
+    $position = DecimalPosition::forEmptyColumn();
     $tasks = [];
 
-    // Generate tasks with proper Rank positions
+    // Generate tasks with proper decimal positions
     $taskData = [
         ['Fix critical security vulnerability', 'todo', 'high'],
         ['Implement user authentication', 'todo', 'high'],
@@ -109,17 +109,15 @@ function createProductionBoardState(): array
         ['Create deployment scripts', 'completed', 'medium'],
     ];
 
-    foreach ($taskData as $index => [$title, $status, $priority]) {
-        if ($index > 0) {
-            $rank = Rank::after($rank);
-        }
-
+    foreach ($taskData as [$title, $status, $priority]) {
         $tasks[] = [
             'title' => $title,
             'status' => $status,
-            'order_position' => $rank->get(),
+            'order_position' => $position,
             'priority' => $priority,
         ];
+
+        $position = DecimalPosition::after($position);
     }
 
     return $tasks;

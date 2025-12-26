@@ -1,7 +1,7 @@
 <?php
 
 use Livewire\Livewire;
-use Relaticle\Flowforge\Services\Rank;
+use Relaticle\Flowforge\Services\DecimalPosition;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 use Relaticle\Flowforge\Tests\Fixtures\TestBoard;
 
@@ -31,22 +31,22 @@ describe('Concurrent Operation Stress Tests - Simulating Real-World Concurrency'
 
             // Verify card has valid position after each move
             expect($targetCard->order_position)->not()->toBeNull()
-                ->and($targetCard->order_position)->toBeString()
-                ->and(strlen($targetCard->order_position))->toBeGreaterThan(0)
                 ->and($targetCard->status)->toBe($randomStatus);
         }
 
-        // Verify positions are properly sorted in each column
+        // Verify positions are properly sorted in each column (using decimal comparison)
         foreach ($statuses as $status) {
             $positions = Task::where('status', $status)
                 ->orderBy('order_position')
+                ->orderBy('id')
                 ->pluck('order_position')
                 ->toArray();
 
             // Check positions are in ascending order
             for ($i = 0; $i < count($positions) - 1; $i++) {
-                expect(strcmp($positions[$i], $positions[$i + 1]))->toBeLessThan(
-                    0,
+                $current = DecimalPosition::normalize($positions[$i]);
+                $next = DecimalPosition::normalize($positions[$i + 1]);
+                expect(DecimalPosition::lessThan($current, $next))->toBeTrue(
                     "Positions should be sorted in {$status} column after 20 rapid moves"
                 );
             }
@@ -84,13 +84,15 @@ describe('Concurrent Operation Stress Tests - Simulating Real-World Concurrency'
         foreach (['todo', 'in_progress', 'completed'] as $status) {
             $positions = Task::where('status', $status)
                 ->orderBy('order_position')
+                ->orderBy('id')
                 ->pluck('order_position')
                 ->toArray();
 
             // Check positions are in ascending order
             for ($i = 0; $i < count($positions) - 1; $i++) {
-                expect(strcmp($positions[$i], $positions[$i + 1]))->toBeLessThan(
-                    0,
+                $current = DecimalPosition::normalize($positions[$i]);
+                $next = DecimalPosition::normalize($positions[$i + 1]);
+                expect(DecimalPosition::lessThan($current, $next))->toBeTrue(
                     "Positions should be sorted in {$status} column after concurrent operations"
                 );
             }
@@ -116,18 +118,16 @@ describe('Concurrent Operation Stress Tests - Simulating Real-World Concurrency'
 
         // Create 20 cards in sequential order
         $cards = collect();
+        $position = DecimalPosition::forEmptyColumn();
         for ($i = 1; $i <= 20; $i++) {
-            $rank = $i === 1
-                ? Rank::forEmptySequence()
-                : Rank::after(Rank::fromString($cards->last()->order_position));
-
             $card = Task::factory()->create([
                 'title' => "Card {$i}",
                 'status' => 'todo',
-                'order_position' => $rank->get(),
+                'order_position' => $position,
             ]);
 
             $cards->push($card);
+            $position = DecimalPosition::after($position);
         }
 
         // Reverse the order by moving each card to the top
@@ -136,6 +136,7 @@ describe('Concurrent Operation Stress Tests - Simulating Real-World Concurrency'
             // Move to top (afterCardId=null, beforeCardId=first card)
             $firstCard = Task::where('status', 'todo')
                 ->orderBy('order_position')
+                ->orderBy('id')
                 ->first();
 
             $this->board->call(
@@ -160,12 +161,14 @@ describe('Concurrent Operation Stress Tests - Simulating Real-World Concurrency'
         // Verify no inversions
         $sortedPositions = Task::where('status', 'todo')
             ->orderBy('order_position')
+            ->orderBy('id')
             ->pluck('order_position')
             ->toArray();
 
         for ($i = 0; $i < count($sortedPositions) - 1; $i++) {
-            expect(strcmp($sortedPositions[$i], $sortedPositions[$i + 1]))->toBeLessThan(
-                0,
+            $current = DecimalPosition::normalize($sortedPositions[$i]);
+            $next = DecimalPosition::normalize($sortedPositions[$i + 1]);
+            expect(DecimalPosition::lessThan($current, $next))->toBeTrue(
                 "Position {$i} should be < position " . ($i + 1) . ' after mass reorder'
             );
         }
@@ -186,12 +189,14 @@ describe('Concurrent Operation Stress Tests - Simulating Real-World Concurrency'
         // Verify positions are properly sorted in target column
         $positions = Task::where('status', 'in_progress')
             ->orderBy('order_position')
+            ->orderBy('id')
             ->pluck('order_position')
             ->toArray();
 
         for ($i = 0; $i < count($positions) - 1; $i++) {
-            expect(strcmp($positions[$i], $positions[$i + 1]))->toBeLessThan(
-                0,
+            $current = DecimalPosition::normalize($positions[$i]);
+            $next = DecimalPosition::normalize($positions[$i + 1]);
+            expect(DecimalPosition::lessThan($current, $next))->toBeTrue(
                 'Positions should be sorted in in_progress column'
             );
         }
@@ -242,20 +247,21 @@ describe('Concurrent Operation Stress Tests - Simulating Real-World Concurrency'
         // Verify all cards have valid positions
         foreach ([$card1, $card2, $card3] as $card) {
             $card->refresh();
-            expect($card->order_position)->not()->toBeNull()
-                ->and(strlen($card->order_position))->toBeGreaterThan(0);
+            expect($card->order_position)->not()->toBeNull();
         }
 
         // Verify positions are properly sorted in each column
         foreach (['todo', 'in_progress', 'completed'] as $status) {
             $positions = Task::where('status', $status)
                 ->orderBy('order_position')
+                ->orderBy('id')
                 ->pluck('order_position')
                 ->toArray();
 
             for ($i = 0; $i < count($positions) - 1; $i++) {
-                expect(strcmp($positions[$i], $positions[$i + 1]))->toBeLessThan(
-                    0,
+                $current = DecimalPosition::normalize($positions[$i]);
+                $next = DecimalPosition::normalize($positions[$i + 1]);
+                expect(DecimalPosition::lessThan($current, $next))->toBeTrue(
                     "Positions should be sorted in {$status} after ping-pong movements"
                 );
             }

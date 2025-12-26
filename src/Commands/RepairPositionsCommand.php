@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Relaticle\Flowforge\Services\Rank;
+use Relaticle\Flowforge\Services\DecimalPosition;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
@@ -325,15 +325,17 @@ class RepairPositionsCommand extends Command
     private function generatePositions(iterable $records, string $strategy): array
     {
         $positions = [];
-        $lastRank = null;
+        $lastPosition = null;
 
         foreach ($records as $record) {
             $positionValue = $record instanceof Model ? $record->getAttribute('position') : $record->position ?? null;
             if ($strategy === 'regenerate' || is_null($positionValue)) {
-                $rank = $lastRank ? Rank::after($lastRank) : Rank::forEmptySequence();
+                $newPosition = $lastPosition !== null
+                    ? DecimalPosition::after($lastPosition)
+                    : DecimalPosition::forEmptyColumn();
                 $recordId = $record instanceof Model ? $record->getKey() : $record->id;
-                $positions[$recordId] = $rank->get();
-                $lastRank = $rank;
+                $positions[$recordId] = $newPosition;
+                $lastPosition = $newPosition;
             }
         }
 

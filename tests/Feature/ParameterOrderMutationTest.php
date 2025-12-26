@@ -1,8 +1,7 @@
 <?php
 
 use Livewire\Livewire;
-use Relaticle\Flowforge\Exceptions\PrevGreaterThanOrEquals;
-use Relaticle\Flowforge\Services\Rank;
+use Relaticle\Flowforge\Services\DecimalPosition;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 use Relaticle\Flowforge\Tests\Fixtures\TestBoard;
 
@@ -26,10 +25,11 @@ function detectInversions(string $modelClass, string $columnValue, string $posit
         $current = $records[$i];
         $next = $records[$i + 1];
 
-        $currentPos = $current->getAttribute($positionField);
-        $nextPos = $next->getAttribute($positionField);
+        $currentPos = DecimalPosition::normalize($current->getAttribute($positionField));
+        $nextPos = DecimalPosition::normalize($next->getAttribute($positionField));
 
-        if (strcmp($currentPos, $nextPos) >= 0) {
+        // Check if positions are inverted (should be current < next)
+        if (DecimalPosition::compare($currentPos, $nextPos) >= 0) {
             $inversions[] = [
                 'current_id' => $current->id,
                 'current_pos' => $currentPos,
@@ -42,36 +42,36 @@ function detectInversions(string $modelClass, string $columnValue, string $posit
     return $inversions;
 }
 
-describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
-    it('documents correct parameter order after fix', function () {
-        // DOCUMENTATION TEST: Shows how parameters work AFTER the fix
+describe('Parameter Order Mutation Tests - Decimal Positioning', function () {
+    it('documents correct parameter order with decimal positions', function () {
+        // DOCUMENTATION TEST: Shows how parameters work with decimal positions
         // This test verifies the fix is working correctly
 
         $cardA = Task::factory()->create([
             'title' => 'Card A',
             'status' => 'todo',
-            'order_position' => 'a',
+            'order_position' => '65535.0000000000',
         ]);
 
         $cardB = Task::factory()->create([
             'title' => 'Card B',
             'status' => 'todo',
-            'order_position' => 'b',
+            'order_position' => '131070.0000000000',
         ]);
 
         $cardC = Task::factory()->create([
             'title' => 'Card C',
             'status' => 'todo',
-            'order_position' => 'c',
+            'order_position' => '196605.0000000000',
         ]);
 
         $newCard = Task::factory()->create([
             'title' => 'New Card',
             'status' => 'todo',
-            'order_position' => 'm',
+            'order_position' => DecimalPosition::forEmptyColumn(),
         ]);
 
-        // CORRECT PARAMETER ORDER (after fix):
+        // CORRECT PARAMETER ORDER:
         // moveCard(cardId, column, afterCardId, beforeCardId)
         // afterCardId = card BEFORE the new position (visually above)
         // beforeCardId = card AFTER the new position (visually below)
@@ -87,54 +87,55 @@ describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
 
         $newCard->refresh();
 
-        // Verify correct placement
-        $isCorrect = strcmp($cardA->order_position, $newCard->order_position) < 0
-                  && strcmp($newCard->order_position, $cardB->order_position) < 0;
+        // Verify correct placement using decimal comparison
+        $cardAPos = DecimalPosition::normalize($cardA->order_position);
+        $newCardPos = DecimalPosition::normalize($newCard->order_position);
+        $cardBPos = DecimalPosition::normalize($cardB->order_position);
+
+        $isCorrect = DecimalPosition::lessThan($cardAPos, $newCardPos)
+                  && DecimalPosition::lessThan($newCardPos, $cardBPos);
 
         expect($isCorrect)->toBeTrue(
-            'With current fix, card should be between A and B'
+            'Card should be between A and B'
         );
     });
 
-    it('proves PHP logic with swapped parameters creates exception', function () {
-        // MUTATION TEST: Simulates OLD BROKEN PHP logic
-        // This shows what happens when betweenRanks parameters are swapped
+    it('proves midpoint calculation never fails (unlike old Rank service)', function () {
+        // IMPROVEMENT TEST: With decimal positions, midpoint always works
+        // No more PrevGreaterThanOrEquals exception!
 
         $cardA = Task::factory()->create([
             'status' => 'todo',
-            'order_position' => 'a',
+            'order_position' => '65535.0000000000',
         ]);
 
         $cardB = Task::factory()->create([
             'status' => 'todo',
-            'order_position' => 'b',
+            'order_position' => '131070.0000000000',
         ]);
 
-        // SIMULATE OLD BROKEN PHP LOGIC:
-        // Used to be: betweenRanks($beforePos, $afterPos) - WRONG ORDER
-        // This throws exception because 'b' > 'a'
+        // Decimal midpoint calculation always succeeds
+        $midpoint = DecimalPosition::between(
+            DecimalPosition::normalize($cardA->order_position),
+            DecimalPosition::normalize($cardB->order_position)
+        );
 
-        expect(function () use ($cardA, $cardB) {
-            Rank::betweenRanks(
-                Rank::fromString($cardB->order_position),  // 'b' as prev (WRONG)
-                Rank::fromString($cardA->order_position)   // 'a' as next (WRONG)
-            );
-        })->toThrow(PrevGreaterThanOrEquals::class);
+        // The midpoint should be between the two positions
+        expect(DecimalPosition::lessThan(DecimalPosition::normalize($cardA->order_position), $midpoint))->toBeTrue();
+        expect(DecimalPosition::lessThan($midpoint, DecimalPosition::normalize($cardB->order_position)))->toBeTrue();
     });
 
     it('validates parameter semantic meanings under stress', function () {
         // Create 10 cards in sequence
         $cards = collect();
+        $position = DecimalPosition::forEmptyColumn();
         for ($i = 0; $i < 10; $i++) {
-            $rank = $i === 0
-                ? Rank::forEmptySequence()
-                : Rank::after(Rank::fromString($cards->last()->order_position));
-
             $cards->push(Task::factory()->create([
                 'title' => "Card {$i}",
                 'status' => 'todo',
-                'order_position' => $rank->get(),
+                'order_position' => $position,
             ]));
+            $position = DecimalPosition::after($position);
         }
 
         // Test EVERY adjacent pair with correct parameter semantics
@@ -142,7 +143,7 @@ describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
             $newCard = Task::factory()->create([
                 'title' => "New Card {$i}",
                 'status' => 'todo',
-                'order_position' => 'm',
+                'order_position' => DecimalPosition::forEmptyColumn(),
             ]);
 
             $afterCard = $cards->get($i);
@@ -164,14 +165,16 @@ describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
             $beforeCard = $beforeCard->fresh();
 
             // Invariant: afterCard < newCard < beforeCard
-            expect(strcmp($afterCard->order_position, $newCard->order_position))->toBeLessThan(
-                0,
+            $afterCardPos = DecimalPosition::normalize($afterCard->order_position);
+            $newCardPos = DecimalPosition::normalize($newCard->order_position);
+            $beforeCardPos = DecimalPosition::normalize($beforeCard->order_position);
+
+            expect(DecimalPosition::lessThan($afterCardPos, $newCardPos))->toBeTrue(
                 "After inserting between {$afterCard->title} and {$beforeCard->title}, " .
                 'new card position should be > afterCard'
             );
 
-            expect(strcmp($newCard->order_position, $beforeCard->order_position))->toBeLessThan(
-                0,
+            expect(DecimalPosition::lessThan($newCardPos, $beforeCardPos))->toBeTrue(
                 "After inserting between {$afterCard->title} and {$beforeCard->title}, " .
                 'new card position should be < beforeCard'
             );
@@ -179,15 +182,21 @@ describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
     });
 
     it('verifies correct behavior for all edge cases', function () {
+        $position = DecimalPosition::forEmptyColumn();
         $cards = collect(['a', 'b', 'c'])->map(
-            fn ($pos) => Task::factory()->create([
-                'status' => 'todo',
-                'order_position' => $pos,
-            ])
+            function ($label) use (&$position) {
+                $card = Task::factory()->create([
+                    'status' => 'todo',
+                    'order_position' => $position,
+                ]);
+                $position = DecimalPosition::after($position);
+
+                return $card;
+            }
         );
 
         // Edge Case 1: Move to TOP (afterCardId=null, beforeCardId=firstCard)
-        $newCard1 = Task::factory()->create(['status' => 'todo', 'order_position' => 'm']);
+        $newCard1 = Task::factory()->create(['status' => 'todo', 'order_position' => DecimalPosition::forEmptyColumn()]);
         $this->board->call(
             'moveCard',
             (string) $newCard1->id,
@@ -196,13 +205,13 @@ describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
             (string) $cards->get(0)->id     // beforeCardId=first card
         );
         $newCard1->refresh();
-        expect(strcmp($newCard1->order_position, $cards->get(0)->order_position))->toBeLessThan(
-            0,
-            'Card moved to top should have position < first card'
-        );
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($newCard1->order_position),
+            DecimalPosition::normalize($cards->get(0)->order_position)
+        ))->toBeTrue('Card moved to top should have position < first card');
 
         // Edge Case 2: Move to BOTTOM (afterCardId=lastCard, beforeCardId=null)
-        $newCard2 = Task::factory()->create(['status' => 'todo', 'order_position' => 'm']);
+        $newCard2 = Task::factory()->create(['status' => 'todo', 'order_position' => DecimalPosition::forEmptyColumn()]);
         $this->board->call(
             'moveCard',
             (string) $newCard2->id,
@@ -211,13 +220,13 @@ describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
             null                            // beforeCardId=null (no card after)
         );
         $newCard2->refresh();
-        expect(strcmp($cards->last()->order_position, $newCard2->order_position))->toBeLessThan(
-            0,
-            'Card moved to bottom should have position > last card'
-        );
+        expect(DecimalPosition::greaterThan(
+            DecimalPosition::normalize($newCard2->order_position),
+            DecimalPosition::normalize($cards->last()->order_position)
+        ))->toBeTrue('Card moved to bottom should have position > last card');
 
         // Edge Case 3: Move BETWEEN (both non-null)
-        $newCard3 = Task::factory()->create(['status' => 'todo', 'order_position' => 'm']);
+        $newCard3 = Task::factory()->create(['status' => 'todo', 'order_position' => DecimalPosition::forEmptyColumn()]);
         $this->board->call(
             'moveCard',
             (string) $newCard3->id,
@@ -226,28 +235,26 @@ describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
             (string) $cards->get(1)->id     // beforeCardId=second card
         );
         $newCard3->refresh();
-        expect(strcmp($cards->get(0)->order_position, $newCard3->order_position))->toBeLessThan(
-            0,
-            'Card moved between should have position > first card'
-        );
-        expect(strcmp($newCard3->order_position, $cards->get(1)->order_position))->toBeLessThan(
-            0,
-            'Card moved between should have position < second card'
-        );
+        expect(DecimalPosition::greaterThan(
+            DecimalPosition::normalize($newCard3->order_position),
+            DecimalPosition::normalize($cards->get(0)->order_position)
+        ))->toBeTrue('Card moved between should have position > first card');
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($newCard3->order_position),
+            DecimalPosition::normalize($cards->get(1)->order_position)
+        ))->toBeTrue('Card moved between should have position < second card');
     });
 
     it('stresses parameter order with rapid alternating insertions', function () {
         $cards = collect();
+        $position = DecimalPosition::forEmptyColumn();
         for ($i = 0; $i < 5; $i++) {
-            $rank = $i === 0
-                ? Rank::forEmptySequence()
-                : Rank::after(Rank::fromString($cards->last()->order_position));
-
             $cards->push(Task::factory()->create([
                 'title' => "Card {$i}",
                 'status' => 'todo',
-                'order_position' => $rank->get(),
+                'order_position' => $position,
             ]));
+            $position = DecimalPosition::after($position);
         }
 
         // Rapidly insert 20 cards, alternating between positions
@@ -255,7 +262,7 @@ describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
             $newCard = Task::factory()->create([
                 'title' => "Rapid Card {$round}",
                 'status' => 'todo',
-                'order_position' => 'm',
+                'order_position' => DecimalPosition::forEmptyColumn(),
             ]);
 
             // Alternate between inserting at different positions
@@ -274,12 +281,14 @@ describe('Parameter Order Mutation Tests - Prove the Fix Matters', function () {
             $newCard->refresh();
 
             // Verify correct placement EVERY time
-            expect(strcmp($afterCard->fresh()->order_position, $newCard->order_position))->toBeLessThan(
-                0,
+            $afterCardPos = DecimalPosition::normalize($afterCard->fresh()->order_position);
+            $newCardPos = DecimalPosition::normalize($newCard->order_position);
+            $beforeCardPos = DecimalPosition::normalize($beforeCard->fresh()->order_position);
+
+            expect(DecimalPosition::lessThan($afterCardPos, $newCardPos))->toBeTrue(
                 "Round {$round}: Card should be after {$afterCard->title}"
             );
-            expect(strcmp($newCard->order_position, $beforeCard->fresh()->order_position))->toBeLessThan(
-                0,
+            expect(DecimalPosition::lessThan($newCardPos, $beforeCardPos))->toBeTrue(
                 "Round {$round}: Card should be before {$beforeCard->title}"
             );
         }

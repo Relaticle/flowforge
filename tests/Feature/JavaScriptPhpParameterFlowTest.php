@@ -1,7 +1,7 @@
 <?php
 
 use Livewire\Livewire;
-use Relaticle\Flowforge\Services\Rank;
+use Relaticle\Flowforge\Services\DecimalPosition;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 use Relaticle\Flowforge\Tests\Fixtures\TestBoard;
 
@@ -18,12 +18,18 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
         // const beforeCardId = cardIndex < newOrder.length - 1 ? newOrder[cardIndex + 1] : null;
         // this.$wire.moveCard(cardId, targetColumn, afterCardId, beforeCardId)
 
+        $position = DecimalPosition::forEmptyColumn();
         $cards = collect(['a', 'b', 'c', 'd', 'e'])->map(
-            fn ($pos) => Task::factory()->create([
-                'title' => "Card {$pos}",
-                'status' => 'todo',
-                'order_position' => $pos,
-            ])
+            function ($label) use (&$position) {
+                $card = Task::factory()->create([
+                    'title' => "Card {$label}",
+                    'status' => 'todo',
+                    'order_position' => $position,
+                ]);
+                $position = DecimalPosition::after($position);
+
+                return $card;
+            }
         );
 
         $cardToMove = $cards->get(0);  // Moving card 'a'
@@ -56,29 +62,36 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
         $beforeCard = $cards->get(2);  // Card 'c'
 
         // Verify: 'b' < movedCard < 'c'
-        expect(strcmp($afterCard->fresh()->order_position, $cardToMove->order_position))->toBeLessThan(
-            0,
-            "Moved card should be after '{$afterCard->title}'"
-        );
-        expect(strcmp($cardToMove->order_position, $beforeCard->fresh()->order_position))->toBeLessThan(
-            0,
-            "Moved card should be before '{$beforeCard->title}'"
-        );
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($afterCard->fresh()->order_position),
+            DecimalPosition::normalize($cardToMove->order_position)
+        ))->toBeTrue("Moved card should be after '{$afterCard->title}'");
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($cardToMove->order_position),
+            DecimalPosition::normalize($beforeCard->fresh()->order_position)
+        ))->toBeTrue("Moved card should be before '{$beforeCard->title}'");
     });
 
     it('tests JavaScript edge case: moving to TOP (index 0)', function () {
+        $position = DecimalPosition::forEmptyColumn();
         $cards = collect(['a', 'b', 'c'])->map(
-            fn ($pos) => Task::factory()->create([
-                'title' => "Card {$pos}",
-                'status' => 'todo',
-                'order_position' => $pos,
-            ])
+            function ($label) use (&$position) {
+                $card = Task::factory()->create([
+                    'title' => "Card {$label}",
+                    'status' => 'todo',
+                    'order_position' => $position,
+                ]);
+                $position = DecimalPosition::after($position);
+
+                return $card;
+            }
         );
 
+        // Use a position after the existing cards to avoid unique constraint collision
         $newCard = Task::factory()->create([
             'title' => 'NewTop',
             'status' => 'todo',
-            'order_position' => 'm',
+            'order_position' => $position, // $position is already past card 'c'
         ]);
 
         // SIMULATE JAVASCRIPT: Moving to index 0 (top)
@@ -105,25 +118,32 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
         $newCard->refresh();
 
         // Verify: newCard < 'a'
-        expect(strcmp($newCard->order_position, $cards->get(0)->fresh()->order_position))->toBeLessThan(
-            0,
-            'Card moved to top should be before first card'
-        );
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($newCard->order_position),
+            DecimalPosition::normalize($cards->get(0)->fresh()->order_position)
+        ))->toBeTrue('Card moved to top should be before first card');
     });
 
     it('tests JavaScript edge case: moving to BOTTOM (last index)', function () {
+        $position = DecimalPosition::forEmptyColumn();
         $cards = collect(['a', 'b', 'c'])->map(
-            fn ($pos) => Task::factory()->create([
-                'title' => "Card {$pos}",
-                'status' => 'todo',
-                'order_position' => $pos,
-            ])
+            function ($label) use (&$position) {
+                $card = Task::factory()->create([
+                    'title' => "Card {$label}",
+                    'status' => 'todo',
+                    'order_position' => $position,
+                ]);
+                $position = DecimalPosition::after($position);
+
+                return $card;
+            }
         );
 
+        // Use a position after the existing cards to avoid unique constraint collision
         $newCard = Task::factory()->create([
             'title' => 'NewBottom',
             'status' => 'todo',
-            'order_position' => 'm',
+            'order_position' => $position, // $position is already past card 'c'
         ]);
 
         // SIMULATE JAVASCRIPT: Moving to last index (bottom)
@@ -150,25 +170,32 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
         $newCard->refresh();
 
         // Verify: 'c' < newCard
-        expect(strcmp($cards->last()->fresh()->order_position, $newCard->order_position))->toBeLessThan(
-            0,
-            'Card moved to bottom should be after last card'
-        );
+        expect(DecimalPosition::greaterThan(
+            DecimalPosition::normalize($newCard->order_position),
+            DecimalPosition::normalize($cards->last()->fresh()->order_position)
+        ))->toBeTrue('Card moved to bottom should be after last card');
     });
 
     it('tests JavaScript edge case: moving BETWEEN cards (middle index)', function () {
+        $position = DecimalPosition::forEmptyColumn();
         $cards = collect(['a', 'b', 'c', 'd'])->map(
-            fn ($pos) => Task::factory()->create([
-                'title' => "Card {$pos}",
-                'status' => 'todo',
-                'order_position' => $pos,
-            ])
+            function ($label) use (&$position) {
+                $card = Task::factory()->create([
+                    'title' => "Card {$label}",
+                    'status' => 'todo',
+                    'order_position' => $position,
+                ]);
+                $position = DecimalPosition::after($position);
+
+                return $card;
+            }
         );
 
+        // Use a position after the existing cards to avoid unique constraint collision
         $newCard = Task::factory()->create([
             'title' => 'NewMiddle',
             'status' => 'todo',
-            'order_position' => 'm',
+            'order_position' => $position, // $position is already past card 'd'
         ]);
 
         // SIMULATE JAVASCRIPT: Moving to index 2 (between 'b' and 'c')
@@ -197,29 +224,27 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
         $beforeCard = $cards->get(2);  // Card 'c'
 
         // Verify: 'b' < newCard < 'c'
-        expect(strcmp($afterCard->fresh()->order_position, $newCard->order_position))->toBeLessThan(
-            0,
-            'Card should be after Card b'
-        );
-        expect(strcmp($newCard->order_position, $beforeCard->fresh()->order_position))->toBeLessThan(
-            0,
-            'Card should be before Card c'
-        );
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($afterCard->fresh()->order_position),
+            DecimalPosition::normalize($newCard->order_position)
+        ))->toBeTrue('Card should be after Card b');
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($newCard->order_position),
+            DecimalPosition::normalize($beforeCard->fresh()->order_position)
+        ))->toBeTrue('Card should be before Card c');
     });
 
     it('simulates browser drag-drop with exact index calculations', function () {
         // Create ordered list like browser shows
         $cards = collect();
+        $position = DecimalPosition::forEmptyColumn();
         for ($i = 1; $i <= 5; $i++) {
-            $lastRank = $i === 1
-                ? Rank::forEmptySequence()
-                : Rank::after(Rank::fromString($cards->last()->order_position));
-
             $cards->push(Task::factory()->create([
                 'title' => "Card {$i}",
                 'status' => 'todo',
-                'order_position' => $lastRank->get(),
+                'order_position' => $position,
             ]));
+            $position = DecimalPosition::after($position);
         }
 
         // Simulate dragging Card 1 to position between Card 3 and Card 4
@@ -252,38 +277,38 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
         $card4 = $cards->get(3)->fresh();
 
         // Verify: Card3 < MovedCard < Card4
-        expect(strcmp($card3->order_position, $cardToMove->order_position))->toBeLessThan(
-            0,
-            'Moved card should be after Card 3'
-        );
-        expect(strcmp($cardToMove->order_position, $card4->order_position))->toBeLessThan(
-            0,
-            'Moved card should be before Card 4'
-        );
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($card3->order_position),
+            DecimalPosition::normalize($cardToMove->order_position)
+        ))->toBeTrue('Moved card should be after Card 3');
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($cardToMove->order_position),
+            DecimalPosition::normalize($card4->order_position)
+        ))->toBeTrue('Moved card should be before Card 4');
     });
 
     it('tests all possible index positions in a 10-card column', function () {
         // Create 10 cards
         $cards = collect();
+        $position = DecimalPosition::forEmptyColumn();
         for ($i = 0; $i < 10; $i++) {
-            $rank = $i === 0
-                ? Rank::forEmptySequence()
-                : Rank::after(Rank::fromString($cards->last()->order_position));
-
             $cards->push(Task::factory()->create([
                 'title' => "Card {$i}",
                 'status' => 'todo',
-                'order_position' => $rank->get(),
+                'order_position' => $position,
             ]));
+            $position = DecimalPosition::after($position);
         }
 
         // Test moving a new card to EVERY possible index (0 through 10)
         for ($targetIndex = 0; $targetIndex <= 10; $targetIndex++) {
+            // Use unique position for each new card to avoid unique constraint collision
             $newCard = Task::factory()->create([
                 'title' => "New at index {$targetIndex}",
                 'status' => 'todo',
-                'order_position' => 'm',
+                'order_position' => $position, // $position starts past card 9
             ]);
+            $position = DecimalPosition::after($position); // Increment for next iteration
 
             // SIMULATE JAVASCRIPT INDEX CALCULATION
             $afterCardId = $targetIndex > 0
@@ -307,18 +332,18 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
             // Verify correct placement based on index
             if ($targetIndex > 0) {
                 $afterCard = $cards->get($targetIndex - 1)->fresh();
-                expect(strcmp($afterCard->order_position, $newCard->order_position))->toBeLessThan(
-                    0,
-                    "At index {$targetIndex}, card should be after card at index " . ($targetIndex - 1)
-                );
+                expect(DecimalPosition::lessThan(
+                    DecimalPosition::normalize($afterCard->order_position),
+                    DecimalPosition::normalize($newCard->order_position)
+                ))->toBeTrue("At index {$targetIndex}, card should be after card at index " . ($targetIndex - 1));
             }
 
             if ($targetIndex < $cards->count()) {
                 $beforeCard = $cards->get($targetIndex)->fresh();
-                expect(strcmp($newCard->order_position, $beforeCard->order_position))->toBeLessThan(
-                    0,
-                    "At index {$targetIndex}, card should be before card at index {$targetIndex}"
-                );
+                expect(DecimalPosition::lessThan(
+                    DecimalPosition::normalize($newCard->order_position),
+                    DecimalPosition::normalize($beforeCard->order_position)
+                ))->toBeTrue("At index {$targetIndex}, card should be before card at index {$targetIndex}");
             }
 
             // Clean up for next iteration
@@ -328,20 +353,32 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
 
     it('validates cross-column moves with JavaScript parameter logic', function () {
         // Create cards in different columns
+        $todoPosition = DecimalPosition::forEmptyColumn();
         $todoCards = collect(['a', 'b', 'c'])->map(
-            fn ($pos) => Task::factory()->create([
-                'title' => "Todo {$pos}",
-                'status' => 'todo',
-                'order_position' => $pos,
-            ])
+            function ($label) use (&$todoPosition) {
+                $card = Task::factory()->create([
+                    'title' => "Todo {$label}",
+                    'status' => 'todo',
+                    'order_position' => $todoPosition,
+                ]);
+                $todoPosition = DecimalPosition::after($todoPosition);
+
+                return $card;
+            }
         );
 
+        $inProgressPosition = DecimalPosition::forEmptyColumn();
         $inProgressCards = collect(['d', 'e', 'f'])->map(
-            fn ($pos) => Task::factory()->create([
-                'title' => "InProgress {$pos}",
-                'status' => 'in_progress',
-                'order_position' => $pos,
-            ])
+            function ($label) use (&$inProgressPosition) {
+                $card = Task::factory()->create([
+                    'title' => "InProgress {$label}",
+                    'status' => 'in_progress',
+                    'order_position' => $inProgressPosition,
+                ]);
+                $inProgressPosition = DecimalPosition::after($inProgressPosition);
+
+                return $card;
+            }
         );
 
         // Move a todo card to in_progress column at index 1
@@ -375,13 +412,13 @@ describe('JavaScript → PHP Parameter Flow Validation', function () {
         $afterCard = $inProgressCards->get(0)->fresh();
         $beforeCard = $inProgressCards->get(1)->fresh();
 
-        expect(strcmp($afterCard->order_position, $cardToMove->order_position))->toBeLessThan(
-            0,
-            'Moved card should be after Card d in new column'
-        );
-        expect(strcmp($cardToMove->order_position, $beforeCard->order_position))->toBeLessThan(
-            0,
-            'Moved card should be before Card e in new column'
-        );
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($afterCard->order_position),
+            DecimalPosition::normalize($cardToMove->order_position)
+        ))->toBeTrue('Moved card should be after Card d in new column');
+        expect(DecimalPosition::lessThan(
+            DecimalPosition::normalize($cardToMove->order_position),
+            DecimalPosition::normalize($beforeCard->order_position)
+        ))->toBeTrue('Moved card should be before Card e in new column');
     });
 });

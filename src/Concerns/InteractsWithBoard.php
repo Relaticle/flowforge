@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Relaticle\Flowforge\Board;
 use Relaticle\Flowforge\Exceptions\MaxRetriesExceededException;
-use Relaticle\Flowforge\Services\Rank;
+use Relaticle\Flowforge\Services\DecimalPosition;
+use Relaticle\Flowforge\Services\PositionRebalancer;
 use Throwable;
 
 trait InteractsWithBoard
@@ -76,7 +77,7 @@ trait InteractsWithBoard
     }
 
     /**
-     * Move card to new position using Rank-based positioning.
+     * Move card to new position using decimal-based positioning.
      *
      * @throws Throwable
      */
@@ -119,12 +120,13 @@ trait InteractsWithBoard
         ?string $afterCardId,
         ?string $beforeCardId
     ): string {
-        $newPosition = null;
+        $newPosition = '';
 
         DB::transaction(function () use ($card, $targetColumnId, $afterCardId, $beforeCardId, &$newPosition) {
             $board = $this->getBoard();
             $query = $board->getQuery();
             $positionField = $board->getPositionIdentifierAttribute();
+            $columnField = $board->getColumnIdentifierAttribute();
 
             // LOCK reference cards for reading to prevent stale data
             $afterCard = $afterCardId
@@ -135,19 +137,41 @@ trait InteractsWithBoard
                 ? (clone $query)->where('id', $beforeCardId)->lockForUpdate()->first()
                 : null;
 
+            // Get positions from locked cards
+            $afterPos = $afterCard?->getAttribute($positionField);
+            $beforePos = $beforeCard?->getAttribute($positionField);
+
             // Calculate position INSIDE transaction with locked data
-            $newPosition = $this->calculatePositionBetweenLockedCards(
-                $afterCard,
-                $beforeCard,
-                $targetColumnId
-            );
+            $newPosition = $this->calculateDecimalPosition($afterPos, $beforePos, $targetColumnId);
+
+            // Check if rebalancing is needed after this insert
+            if ($afterPos !== null && $beforePos !== null) {
+                $afterPosStr = DecimalPosition::normalize($afterPos);
+                $beforePosStr = DecimalPosition::normalize($beforePos);
+
+                if (DecimalPosition::needsRebalancing($afterPosStr, $beforePosStr)) {
+                    // Rebalance the column - this redistributes positions evenly
+                    $this->rebalanceColumn($targetColumnId);
+
+                    // Recalculate position after rebalancing
+                    $afterCard = $afterCardId
+                        ? (clone $query)->where('id', $afterCardId)->lockForUpdate()->first()
+                        : null;
+                    $beforeCard = $beforeCardId
+                        ? (clone $query)->where('id', $beforeCardId)->lockForUpdate()->first()
+                        : null;
+
+                    $afterPos = $afterCard?->getAttribute($positionField);
+                    $beforePos = $beforeCard?->getAttribute($positionField);
+                    $newPosition = $this->calculateDecimalPosition($afterPos, $beforePos, $targetColumnId);
+                }
+            }
 
             // Update card position
-            $columnIdentifier = $board->getColumnIdentifierAttribute();
-            $columnValue = $this->resolveStatusValue($card, $columnIdentifier, $targetColumnId);
+            $columnValue = $this->resolveStatusValue($card, $columnField, $targetColumnId);
 
             $card->update([
-                $columnIdentifier => $columnValue,
+                $columnField => $columnValue,
                 $positionField => $newPosition,
             ]);
         });
@@ -156,35 +180,51 @@ trait InteractsWithBoard
     }
 
     /**
-     * Calculate position between locked cards (used within transaction).
+     * Calculate position using DecimalPosition service.
+     *
+     * @param  mixed  $afterPos  Position of card above (null for top)
+     * @param  mixed  $beforePos  Position of card below (null for bottom)
+     * @param  string  $columnId  Target column ID
      */
-    protected function calculatePositionBetweenLockedCards(
-        ?Model $afterCard,
-        ?Model $beforeCard,
-        string $columnId
-    ): string {
-        if (! $afterCard && ! $beforeCard) {
+    protected function calculateDecimalPosition(mixed $afterPos, mixed $beforePos, string $columnId): string
+    {
+        // Handle empty column case
+        if ($afterPos === null && $beforePos === null) {
             return $this->getBoardPositionInColumn($columnId, 'bottom');
         }
 
-        $positionField = $this->getBoard()->getPositionIdentifierAttribute();
+        // Normalize positions to strings for BCMath
+        $afterPosStr = $afterPos !== null ? DecimalPosition::normalize($afterPos) : null;
+        $beforePosStr = $beforePos !== null ? DecimalPosition::normalize($beforePos) : null;
 
-        $beforePos = $beforeCard?->getAttribute($positionField);
-        $afterPos = $afterCard?->getAttribute($positionField);
+        return DecimalPosition::calculate($afterPosStr, $beforePosStr);
+    }
 
-        if ($beforePos && $afterPos && is_string($beforePos) && is_string($afterPos)) {
-            return Rank::betweenRanks(Rank::fromString($afterPos), Rank::fromString($beforePos))->get();
+    /**
+     * Rebalance all positions in a column, redistributing them evenly.
+     * Called automatically when gap between positions falls below MIN_GAP.
+     */
+    protected function rebalanceColumn(string $columnId): void
+    {
+        $board = $this->getBoard();
+        $query = $board->getQuery();
+
+        if (! $query) {
+            return;
         }
 
-        if ($beforePos && is_string($beforePos)) {
-            return Rank::before(Rank::fromString($beforePos))->get();
-        }
+        $rebalancer = new PositionRebalancer;
+        $count = $rebalancer->rebalanceColumn(
+            $query,
+            $board->getColumnIdentifierAttribute(),
+            $columnId,
+            $board->getPositionIdentifierAttribute()
+        );
 
-        if ($afterPos && is_string($afterPos)) {
-            return Rank::after(Rank::fromString($afterPos))->get();
-        }
-
-        return Rank::forEmptySequence()->get();
+        Log::info('Flowforge: Auto-rebalanced column due to small gap', [
+            'column' => $columnId,
+            'records' => $count,
+        ]);
     }
 
     /**
@@ -260,6 +300,54 @@ trait InteractsWithBoard
         return in_array($errorCode, [19, 1062, 23505]) ||
                str_contains($e->getMessage(), 'unique_position_per_column') ||
                str_contains($e->getMessage(), 'UNIQUE constraint failed');
+    }
+
+    /**
+     * Execute position update with retry mechanism for race conditions.
+     * Handles cases where rapid card movements cause stale data issues.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $callback
+     * @return T
+     */
+    protected function withPositionRetry(callable $callback, string $cardId, string $targetColumnId, int $maxAttempts = 3): mixed
+    {
+        $baseDelay = 50; // milliseconds
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            try {
+                return $callback();
+            } catch (QueryException $e) {
+                if (! $this->isDuplicatePositionError($e)) {
+                    throw $e;
+                }
+
+                $lastException = $e;
+
+                Log::info('Position conflict detected, retrying', [
+                    'card_id' => $cardId,
+                    'target_column' => $targetColumnId,
+                    'attempt' => $attempt,
+                    'max_attempts' => $maxAttempts,
+                ]);
+
+                if ($attempt >= $maxAttempts) {
+                    throw new MaxRetriesExceededException(
+                        "Failed to move card after {$maxAttempts} attempts due to position conflicts",
+                        previous: $e
+                    );
+                }
+
+                $delay = $baseDelay * pow(2, $attempt - 1);
+                usleep($delay * 1000);
+
+                continue;
+            }
+        }
+
+        throw $lastException ?? new \RuntimeException('Unexpected retry loop exit');
     }
 
     public function loadMoreItems(string $columnId, ?int $count = null): void
@@ -347,7 +435,7 @@ trait InteractsWithBoard
 
         $query = $this->getBoard()->getQuery();
         if (! $query) {
-            return Rank::forEmptySequence()->get();
+            return DecimalPosition::forEmptyColumn();
         }
 
         $positionField = $this->getBoard()->getPositionIdentifierAttribute();
@@ -358,19 +446,11 @@ trait InteractsWithBoard
         $afterCard = $afterCardId ? (clone $query)->find($afterCardId) : null;
         $afterPos = $afterCard?->getAttribute($positionField);
 
-        if ($beforePos && $afterPos && is_string($beforePos) && is_string($afterPos)) {
-            return Rank::betweenRanks(Rank::fromString($afterPos), Rank::fromString($beforePos))->get();
-        }
+        // Normalize positions
+        $afterPosStr = $afterPos !== null ? DecimalPosition::normalize($afterPos) : null;
+        $beforePosStr = $beforePos !== null ? DecimalPosition::normalize($beforePos) : null;
 
-        if ($beforePos && is_string($beforePos)) {
-            return Rank::before(Rank::fromString($beforePos))->get();
-        }
-
-        if ($afterPos && is_string($afterPos)) {
-            return Rank::after(Rank::fromString($afterPos))->get();
-        }
-
-        return Rank::forEmptySequence()->get();
+        return DecimalPosition::calculate($afterPosStr, $beforePosStr);
     }
 
     /**
@@ -474,7 +554,7 @@ trait InteractsWithBoard
     {
         $query = $this->getBoard()->getQuery();
         if (! $query) {
-            return Rank::forEmptySequence()->get();
+            return DecimalPosition::forEmptyColumn();
         }
 
         $board = $this->getBoard();
@@ -487,31 +567,33 @@ trait InteractsWithBoard
             $firstRecord = $queryClone
                 ->whereNotNull($positionField)
                 ->orderBy($positionField, 'asc')
+                ->orderBy('id', 'asc') // Tie-breaker for deterministic order
                 ->first();
 
             if ($firstRecord) {
                 $firstPosition = $firstRecord->getAttribute($positionField);
-                if (is_string($firstPosition)) {
-                    return Rank::before(Rank::fromString($firstPosition))->get();
+                if ($firstPosition !== null) {
+                    return DecimalPosition::before(DecimalPosition::normalize($firstPosition));
                 }
             }
 
-            return Rank::forEmptySequence()->get();
+            return DecimalPosition::forEmptyColumn();
         }
 
         // Get last valid position (ignore null positions)
         $lastRecord = $queryClone
             ->whereNotNull($positionField)
             ->orderBy($positionField, 'desc')
+            ->orderBy('id', 'desc') // Tie-breaker for deterministic order
             ->first();
 
         if ($lastRecord) {
             $lastPosition = $lastRecord->getAttribute($positionField);
-            if (is_string($lastPosition)) {
-                return Rank::after(Rank::fromString($lastPosition))->get();
+            if ($lastPosition !== null) {
+                return DecimalPosition::after(DecimalPosition::normalize($lastPosition));
             }
         }
 
-        return Rank::forEmptySequence()->get();
+        return DecimalPosition::forEmptyColumn();
     }
 }

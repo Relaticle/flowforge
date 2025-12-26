@@ -5,6 +5,7 @@ namespace Relaticle\Flowforge\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Relaticle\Flowforge\Services\DecimalPosition;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;
@@ -16,17 +17,9 @@ class DiagnosePositionsCommand extends Command
     protected $signature = 'flowforge:diagnose-positions
                             {--model= : Model class to diagnose (e.g., App\\Models\\Task)}
                             {--column= : Column identifier field}
-                            {--position= : Position field name}
-                            {--fix : Automatically apply collation fixes}';
+                            {--position= : Position field name}';
 
-    protected $description = 'Diagnose position column collation and ordering issues';
-
-    private array $expectedCollations = [
-        'mysql' => 'utf8mb4_bin',
-        'pgsql' => 'C',
-        'sqlsrv' => 'Latin1_General_BIN2',
-        'sqlite' => null, // SQLite doesn't need collation
-    ];
+    protected $description = 'Diagnose position column issues including gaps, inversions, and duplicates';
 
     public function handle(): int
     {
@@ -66,37 +59,37 @@ class DiagnosePositionsCommand extends Command
         }
 
         // Display configuration
-        info("✓ Model: {$model}");
-        info("✓ Column Identifier: {$columnField}");
-        info("✓ Position Identifier: {$positionField}");
+        info("Model: {$model}");
+        info("Column Identifier: {$columnField}");
+        info("Position Identifier: {$positionField}");
         $this->newLine();
 
         // Run diagnostics
         $issues = [];
 
-        // 1. Check collation
-        $this->line('🔍 Checking database collation...');
-        $collationIssue = $this->checkCollation($modelInstance, $positionField);
-        if ($collationIssue) {
-            $issues[] = $collationIssue;
+        // 1. Check for small gaps (needs rebalancing)
+        $this->line('Checking position gaps...');
+        $gapIssues = $this->checkGaps($modelInstance, $columnField, $positionField);
+        if (count($gapIssues) > 0) {
+            $issues = array_merge($issues, $gapIssues);
         }
 
         // 2. Check for position inversions
-        $this->line('🔍 Scanning for position inversions...');
+        $this->line('Scanning for position inversions...');
         $inversionIssues = $this->checkInversions($modelInstance, $columnField, $positionField);
         if (count($inversionIssues) > 0) {
             $issues = array_merge($issues, $inversionIssues);
         }
 
         // 3. Check for duplicates
-        $this->line('🔍 Checking for duplicate positions...');
+        $this->line('Checking for duplicate positions...');
         $duplicateIssues = $this->checkDuplicates($modelInstance, $columnField, $positionField);
         if (count($duplicateIssues) > 0) {
             $issues = array_merge($issues, $duplicateIssues);
         }
 
         // 4. Check for null positions
-        $this->line('🔍 Checking for null positions...');
+        $this->line('Checking for null positions...');
         $nullIssue = $this->checkNullPositions($modelInstance, $positionField);
         if ($nullIssue) {
             $issues[] = $nullIssue;
@@ -106,21 +99,16 @@ class DiagnosePositionsCommand extends Command
 
         // Display results
         if (empty($issues)) {
-            info('✅ All checks passed! No issues detected.');
+            info('All checks passed! No issues detected.');
 
             return self::SUCCESS;
         }
 
-        warning(sprintf('⚠️  Found %d issue(s):', count($issues)));
+        warning(sprintf('Found %d issue(s):', count($issues)));
         $this->newLine();
 
         foreach ($issues as $index => $issue) {
             $this->displayIssue($index + 1, $issue);
-        }
-
-        // Offer fixes if --fix option is provided
-        if ($this->option('fix') && isset($collationIssue)) {
-            $this->applyCollationFix($modelInstance, $positionField);
         }
 
         return self::FAILURE;
@@ -129,9 +117,8 @@ class DiagnosePositionsCommand extends Command
     private function displayHeader(): void
     {
         $this->newLine();
-        $this->line('╔══════════════════════════════════════════════════════════════╗');
-        $this->line('║              Flowforge Position Diagnostics                   ║');
-        $this->line('╚══════════════════════════════════════════════════════════════╝');
+        $this->line('Flowforge Position Diagnostics');
+        $this->line('===============================');
         $this->newLine();
     }
 
@@ -148,82 +135,56 @@ class DiagnosePositionsCommand extends Command
         return null;
     }
 
-    private function checkCollation(Model $model, string $positionField): ?array
+    private function checkGaps(Model $model, string $columnField, string $positionField): array
     {
-        $connection = $model->getConnection();
-        $driver = $connection->getDriverName();
-        $table = $model->getTable();
+        $issues = [];
+        $columns = $model->query()->distinct()->pluck($columnField)->map(fn ($value) => $value instanceof \BackedEnum ? $value->value : $value);
 
-        // Skip for SQLite (no collation needed)
-        if ($driver === 'sqlite') {
-            info('  ✓ SQLite database - no collation check needed');
+        foreach ($columns as $column) {
+            $positions = $model->query()
+                ->where($columnField, $column)
+                ->whereNotNull($positionField)
+                ->orderBy($positionField)
+                ->orderBy('id')
+                ->pluck($positionField);
 
-            return null;
-        }
-
-        $expectedCollation = $this->expectedCollations[$driver] ?? null;
-
-        if (! $expectedCollation) {
-            warning("  ⚠️  Unknown database driver: {$driver}");
-
-            return null;
-        }
-
-        // Get actual collation
-        $actualCollation = $this->getColumnCollation($connection, $table, $positionField);
-
-        if ($actualCollation === $expectedCollation) {
-            info("  ✓ Collation correct: {$actualCollation}");
-
-            return null;
-        }
-
-        return [
-            'type' => 'collation',
-            'severity' => 'critical',
-            'table' => $table,
-            'column' => $positionField,
-            'expected' => $expectedCollation,
-            'actual' => $actualCollation ?? 'unknown',
-            'driver' => $driver,
-        ];
-    }
-
-    private function getColumnCollation($connection, string $table, string $column): ?string
-    {
-        $driver = $connection->getDriverName();
-
-        try {
-            if ($driver === 'mysql') {
-                $result = DB::select("SHOW FULL COLUMNS FROM `{$table}` WHERE Field = ?", [$column]);
-
-                return $result[0]->Collation ?? null;
+            if ($positions->count() < 2) {
+                continue;
             }
 
-            if ($driver === 'pgsql') {
-                $result = DB::select('
-                    SELECT collation_name
-                    FROM information_schema.columns
-                    WHERE table_name = ? AND column_name = ?
-                ', [$table, $column]);
+            $smallGaps = 0;
+            $minGap = null;
 
-                return $result[0]->collation_name ?? null;
+            for ($i = 0; $i < $positions->count() - 1; $i++) {
+                $current = DecimalPosition::normalize($positions[$i]);
+                $next = DecimalPosition::normalize($positions[$i + 1]);
+                $gap = DecimalPosition::gap($current, $next);
+
+                if ($minGap === null || DecimalPosition::lessThan($gap, $minGap)) {
+                    $minGap = $gap;
+                }
+
+                if (DecimalPosition::needsRebalancing($current, $next)) {
+                    $smallGaps++;
+                }
             }
 
-            if ($driver === 'sqlsrv') {
-                $result = DB::select('
-                    SELECT COLLATION_NAME
-                    FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = ? AND COLUMN_NAME = ?
-                ', [$table, $column]);
-
-                return $result[0]->COLLATION_NAME ?? null;
+            if ($smallGaps > 0) {
+                $issues[] = [
+                    'type' => 'small_gaps',
+                    'severity' => 'medium',
+                    'column' => $column,
+                    'count' => $smallGaps,
+                    'min_gap' => $minGap,
+                ];
             }
-        } catch (\Exception $e) {
-            warning("  Could not determine collation: {$e->getMessage()}");
         }
 
-        return null;
+        if (empty($issues)) {
+            info('  No small gaps detected (no rebalancing needed)');
+        }
+
+        return $issues;
     }
 
     private function checkInversions(Model $model, string $columnField, string $positionField): array
@@ -247,11 +208,11 @@ class DiagnosePositionsCommand extends Command
                 $current = $records[$i];
                 $next = $records[$i + 1];
 
-                $currentPos = $current->getAttribute($positionField);
-                $nextPos = $next->getAttribute($positionField);
+                $currentPos = DecimalPosition::normalize($current->getAttribute($positionField));
+                $nextPos = DecimalPosition::normalize($next->getAttribute($positionField));
 
                 // Check if positions are inverted (current >= next when they should be current < next)
-                if (strcmp($currentPos, $nextPos) >= 0) {
+                if (DecimalPosition::compare($currentPos, $nextPos) >= 0) {
                     $inversions[] = [
                         'current_id' => $current->getKey(),
                         'current_pos' => $currentPos,
@@ -273,7 +234,7 @@ class DiagnosePositionsCommand extends Command
         }
 
         if (empty($issues)) {
-            info('  ✓ No position inversions detected');
+            info('  No position inversions detected');
         }
 
         return $issues;
@@ -305,7 +266,7 @@ class DiagnosePositionsCommand extends Command
         }
 
         if (empty($issues)) {
-            info('  ✓ No duplicate positions detected');
+            info('  No duplicate positions detected');
         }
 
         return $issues;
@@ -316,7 +277,7 @@ class DiagnosePositionsCommand extends Command
         $nullCount = $model->query()->whereNull($positionField)->count();
 
         if ($nullCount === 0) {
-            info('  ✓ No null positions detected');
+            info('  No null positions detected');
 
             return null;
         }
@@ -330,80 +291,35 @@ class DiagnosePositionsCommand extends Command
 
     private function displayIssue(int $number, array $issue): void
     {
-        $severityColors = [
-            'critical' => 'error',
-            'high' => 'error',
-            'medium' => 'warning',
-            'low' => 'info',
-        ];
-
-        $color = $severityColors[$issue['severity']] ?? 'info';
-
         $this->line("Issue #{$number}: " . strtoupper($issue['type']));
 
-        if ($issue['type'] === 'collation') {
-            error('  ❌ COLLATION MISMATCH');
-            $this->line("     Expected: {$issue['expected']} (binary comparison)");
-            $this->line("     Found: {$issue['actual']} (case-insensitive comparison)");
-            $this->newLine();
-            $this->line('     This causes incorrect position ordering!');
-            $this->newLine();
-            warning('  🔧 Fix: Run this migration to correct collation:');
-            $this->newLine();
-
-            if ($issue['driver'] === 'mysql') {
-                $this->line("     ALTER TABLE {$issue['table']} MODIFY {$issue['column']} VARCHAR(255)");
-                $this->line('     CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;');
-            } elseif ($issue['driver'] === 'pgsql') {
-                $this->line("     ALTER TABLE {$issue['table']} ALTER COLUMN {$issue['column']}");
-                $this->line('     TYPE VARCHAR(255) COLLATE "C";');
-            }
+        if ($issue['type'] === 'small_gaps') {
+            warning("  Found {$issue['count']} position pair(s) with gap below " . DecimalPosition::MIN_GAP . " in column '{$issue['column']}'");
+            $this->line("     Minimum gap found: {$issue['min_gap']}");
+            $this->line('     This may cause precision issues. Consider running: php artisan flowforge:rebalance-positions');
             $this->newLine();
         }
 
         if ($issue['type'] === 'inversion') {
-            error("  ❌ Found {$issue['count']} inverted position pair(s) in column '{$issue['column']}':");
+            error("  Found {$issue['count']} inverted position pair(s) in column '{$issue['column']}':");
             foreach ($issue['examples'] as $example) {
-                $this->line("     - Card #{$example['current_id']} (pos: \"{$example['current_pos']}\") comes before Card #{$example['next_id']} (pos: \"{$example['next_pos']}\")");
+                $this->line("     - Record #{$example['current_id']} (pos: {$example['current_pos']}) >= Record #{$example['next_id']} (pos: {$example['next_pos']})");
             }
             $this->newLine();
         }
 
         if ($issue['type'] === 'duplicate') {
-            warning("  ⚠️  Found {$issue['count']} duplicate positions in column '{$issue['column']}'");
+            warning("  Found {$issue['count']} duplicate positions in column '{$issue['column']}'");
             $this->line("     ({$issue['unique_positions']} unique position values with duplicates)");
             $this->newLine();
         }
 
         if ($issue['type'] === 'null') {
-            info("  ℹ️  Found {$issue['count']} records with null positions");
+            info("  Found {$issue['count']} records with null positions");
             $this->newLine();
         }
 
-        info('  💡 After fixing issues, run: php artisan flowforge:repair-positions');
+        info('  After fixing issues, run: php artisan flowforge:repair-positions');
         $this->newLine();
-    }
-
-    private function applyCollationFix(Model $model, string $positionField): void
-    {
-        $connection = $model->getConnection();
-        $driver = $connection->getDriverName();
-        $table = $model->getTable();
-
-        $this->line('🔧 Applying collation fix...');
-
-        try {
-            if ($driver === 'mysql') {
-                DB::statement("ALTER TABLE `{$table}` MODIFY `{$positionField}` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin");
-                info('  ✓ Collation updated successfully');
-            } elseif ($driver === 'pgsql') {
-                DB::statement("ALTER TABLE \"{$table}\" ALTER COLUMN \"{$positionField}\" TYPE VARCHAR(255) COLLATE \"C\"");
-                info('  ✓ Collation updated successfully');
-            } else {
-                warning("  ⚠️  Auto-fix not supported for {$driver}. Please run the migration manually.");
-            }
-        } catch (\Exception $e) {
-            error("  ❌ Failed to apply fix: {$e->getMessage()}");
-        }
     }
 }

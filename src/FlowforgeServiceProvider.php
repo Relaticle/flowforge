@@ -8,9 +8,9 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\DB;
 use Relaticle\Flowforge\Commands\DiagnosePositionsCommand;
 use Relaticle\Flowforge\Commands\MakeKanbanBoardCommand;
+use Relaticle\Flowforge\Commands\RebalancePositionsCommand;
 use Relaticle\Flowforge\Commands\RepairPositionsCommand;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -117,6 +117,7 @@ class FlowforgeServiceProvider extends PackageServiceProvider
         return [
             DiagnosePositionsCommand::class,
             MakeKanbanBoardCommand::class,
+            RebalancePositionsCommand::class,
             RepairPositionsCommand::class,
         ];
     }
@@ -154,16 +155,10 @@ class FlowforgeServiceProvider extends PackageServiceProvider
      */
     private function registerBlueprintMacros(): void
     {
+        // DECIMAL(20,10) for position - 10 integer digits + 10 decimal places
+        // Supports ~33 bisections before precision loss, with 65535 gap
         Blueprint::macro('flowforgePositionColumn', function (string $name = 'position') {
-            $driver = DB::connection()->getDriverName();
-            $column = $this->string($name)->nullable();
-
-            return match ($driver) {
-                'pgsql' => $column->collation('C'),
-                'mysql' => $column->collation('utf8mb4_bin'),
-                'sqlsrv' => $column->collation('Latin1_General_BIN2'),
-                default => $column,  // No collation needed - BINARY by default, e.g. SQLite
-            };
+            return $this->decimal($name, 20, 10)->nullable();
         });
     }
 }

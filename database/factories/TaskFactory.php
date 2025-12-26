@@ -3,7 +3,7 @@
 namespace Relaticle\Flowforge\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Relaticle\Flowforge\Services\Rank;
+use Relaticle\Flowforge\Services\DecimalPosition;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 
 class TaskFactory extends Factory
@@ -176,15 +176,15 @@ class TaskFactory extends Factory
 
     private function generatePosition(): string
     {
-        // Generate positions in a realistic range
-        static $baseRank = null;
+        // Generate positions in a realistic range using decimal positions
+        static $position = null;
 
-        if ($baseRank === null) {
-            $baseRank = Rank::forEmptySequence();
+        if ($position === null) {
+            $position = DecimalPosition::forEmptyColumn();
         } else {
-            $baseRank = Rank::after($baseRank);
+            $position = DecimalPosition::after($position);
         }
 
-        return $baseRank->get();
+        return $position;
     }
 }

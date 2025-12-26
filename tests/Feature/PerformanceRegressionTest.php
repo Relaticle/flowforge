@@ -1,7 +1,7 @@
 <?php
 
 use Livewire\Livewire;
-use Relaticle\Flowforge\Services\Rank;
+use Relaticle\Flowforge\Services\DecimalPosition;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 use Relaticle\Flowforge\Tests\Fixtures\TestBoard;
 
@@ -37,48 +37,36 @@ describe('Performance Regression Baselines - Prevent Future Slowdowns', function
         '500 cards' => [500, 0.5],    // 500ms
     ]);
 
-    it('tracks position string length growth over time', function ($cardCount) {
+    it('tracks position value growth over time', function ($cardCount) {
         // Create cards sequentially
         $cards = collect();
-        $lengthMetrics = [];
+        $position = DecimalPosition::forEmptyColumn();
 
         for ($i = 1; $i <= $cardCount; $i++) {
-            $rank = $i === 1
-                ? Rank::forEmptySequence()
-                : Rank::after(Rank::fromString($cards->last()->order_position));
-
             $card = Task::factory()->create([
                 'status' => 'todo',
-                'order_position' => $rank->get(),
+                'order_position' => $position,
             ]);
 
             $cards->push($card);
-
-            // Track metrics at checkpoints
-            if ($i % 25 === 0) {
-                $lengths = $cards->pluck('order_position')->map(fn ($p) => strlen($p));
-                $lengthMetrics[$i] = [
-                    'avg' => round($lengths->avg(), 2),
-                    'max' => $lengths->max(),
-                ];
-            }
+            $position = DecimalPosition::after($position);
         }
 
-        // Verify growth is linear, not exponential
-        $checkpoints = array_keys($lengthMetrics);
-        for ($i = 1; $i < count($checkpoints); $i++) {
-            $prev = $lengthMetrics[$checkpoints[$i - 1]];
-            $curr = $lengthMetrics[$checkpoints[$i]];
+        // Verify growth is linear (each position increases by DEFAULT_GAP)
+        $positions = $cards->pluck('order_position');
+        $firstPos = (float) $positions->first();
+        $lastPos = (float) $positions->last();
 
-            // Growth should be gradual (max increase of 2 chars per 25 cards)
-            $avgGrowth = $curr['avg'] - $prev['avg'];
-            expect($avgGrowth)->toBeLessThan(
-                2,
-                'Average position length growth should be gradual'
-            );
-        }
+        // Expected: lastPos ≈ firstPos + (cardCount - 1) * DEFAULT_GAP
+        $expectedLast = $firstPos + ($cardCount - 1) * (float) DecimalPosition::DEFAULT_GAP;
+        expect(abs($lastPos - $expectedLast))->toBeLessThan(
+            1,
+            'Position growth should be linear (constant gap increment)'
+        );
 
-        dump("Length metrics for {$cardCount} cards:", $lengthMetrics);
+        // Verify all positions unique
+        $uniquePositions = $cards->pluck('order_position')->unique()->count();
+        expect($uniquePositions)->toBe($cardCount, 'All positions should be unique');
     })->with([
         '100 cards' => 100,
         '200 cards' => 200,
@@ -107,12 +95,6 @@ describe('Performance Regression Baselines - Prevent Future Slowdowns', function
         // Performance baselines
         expect($avgDuration)->toBeLessThan(0.1, 'Average operation should be < 100ms');
         expect($maxDuration)->toBeLessThan(0.3, 'Max operation should be < 300ms');
-
-        dump('Bulk operations performance:', [
-            'avg_duration_ms' => round($avgDuration * 1000, 2),
-            'max_duration_ms' => round($maxDuration * 1000, 2),
-            'total_operations' => 50,
-        ]);
     });
 
     it('validates database query performance under load', function () {
@@ -131,6 +113,7 @@ describe('Performance Regression Baselines - Prevent Future Slowdowns', function
         $start = microtime(true);
         $orderedTasks = Task::where('status', 'todo')
             ->orderBy('order_position')
+            ->orderBy('id')
             ->get();
         $metrics['query_ordered'] = microtime(true) - $start;
 
@@ -146,11 +129,6 @@ describe('Performance Regression Baselines - Prevent Future Slowdowns', function
                 "{$operation} should complete within 50ms (took " . round($duration * 1000, 2) . 'ms)'
             );
         }
-
-        dump('Database query performance:', array_map(
-            fn ($d) => round($d * 1000, 2) . 'ms',
-            $metrics
-        ));
     });
 
     it('establishes memory usage baselines', function () {
@@ -179,39 +157,33 @@ describe('Performance Regression Baselines - Prevent Future Slowdowns', function
             10,
             "Memory usage should be under 10MB (used {$memoryUsedMB}MB)"
         );
-
-        dump('Memory usage:', [
-            'before_mb' => round($beforeMemory / 1024 / 1024, 2),
-            'after_mb' => round($afterMemory / 1024 / 1024, 2),
-            'used_mb' => $memoryUsedMB,
-        ]);
     });
 
     it('validates position generation performance', function () {
         // Benchmark position generation algorithms
         $metrics = [];
 
-        // 1. Empty sequence position
+        // 1. Empty column position
         $start = microtime(true);
         for ($i = 0; $i < 100; $i++) {
-            $pos = Rank::forEmptySequence()->get();
+            $pos = DecimalPosition::forEmptyColumn();
         }
-        $metrics['empty_sequence'] = (microtime(true) - $start) / 100;
+        $metrics['empty_column'] = (microtime(true) - $start) / 100;
 
         // 2. After position
-        $lastPos = Rank::forEmptySequence();
+        $lastPos = DecimalPosition::forEmptyColumn();
         $start = microtime(true);
         for ($i = 0; $i < 100; $i++) {
-            $lastPos = Rank::after($lastPos);
+            $lastPos = DecimalPosition::after($lastPos);
         }
         $metrics['after_position'] = (microtime(true) - $start) / 100;
 
         // 3. Between positions
-        $pos1 = Rank::fromString('a');
-        $pos2 = Rank::fromString('b');
+        $pos1 = DecimalPosition::forEmptyColumn();
+        $pos2 = DecimalPosition::after($pos1);
         $start = microtime(true);
         for ($i = 0; $i < 100; $i++) {
-            $pos = Rank::betweenRanks($pos1, $pos2)->get();
+            $pos = DecimalPosition::between($pos1, $pos2);
         }
         $metrics['between_positions'] = (microtime(true) - $start) / 100;
 
@@ -222,10 +194,5 @@ describe('Performance Regression Baselines - Prevent Future Slowdowns', function
                 "{$operation} should be < 1ms per operation"
             );
         }
-
-        dump('Position generation performance (avg per operation):', array_map(
-            fn ($d) => round($d * 1000000, 2) . 'μs',
-            $metrics
-        ));
     });
 });

@@ -84,7 +84,8 @@ trait HasBoardRecords
         $positionField = $this->getPositionIdentifierAttribute();
 
         if ($positionField && $this->modelHasColumn($queryClone->getModel(), $positionField)) {
-            $queryClone->orderBy($positionField, 'asc');
+            $queryClone->orderBy($positionField, 'asc')
+                ->orderBy('id', 'asc'); // Tie-breaker for deterministic order
         }
 
         return $queryClone->limit($limit)->get();
@@ -175,6 +176,7 @@ trait HasBoardRecords
             ->where($statusField, $columnId)
             ->where($positionField, '<', $position)
             ->orderBy($positionField, 'desc')
+            ->orderBy('id', 'desc') // Tie-breaker for deterministic order
             ->limit($limit)
             ->get();
     }
@@ -197,6 +199,7 @@ trait HasBoardRecords
             ->where($statusField, $columnId)
             ->where($positionField, '>', $position)
             ->orderBy($positionField, 'asc')
+            ->orderBy('id', 'asc') // Tie-breaker for deterministic order
             ->limit($limit)
             ->get();
     }
@@ -218,6 +221,7 @@ trait HasBoardRecords
         $record = (clone $query)
             ->where($statusField, $columnId)
             ->orderBy($positionField, 'desc')
+            ->orderBy('id', 'desc') // Tie-breaker for deterministic order
             ->first();
 
         return $record?->getAttribute($positionField);
