@@ -15,6 +15,7 @@
             ->merge($getExtraAttributes(), escape: false)
             ->class([
                 'flex',
+                'flex-row',
                 // Gap classes optimized for cards
                 'gap-1' => $gap === 'xs',
                 'gap-2' => $gap === 'sm',

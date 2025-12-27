@@ -41,7 +41,7 @@
             @endif
         </div>
 
-        <div class="p-3"
+        <div class="px-3 pb-3"
              @if($hasCardAction && $cardAction)
                  wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
              style="cursor: pointer;"
