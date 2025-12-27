@@ -391,11 +391,24 @@ trait InteractsWithBoard
         }
 
         $positionField = $this->getBoard()->getPositionIdentifierAttribute();
+        $model = $query->getModel();
+        $keyName = $model->getKeyName();
 
-        $beforeCard = $beforeCardId ? (clone $query)->find($beforeCardId) : null;
+        // Batch fetch both cards in single query with only needed columns
+        $cardIds = array_filter([$beforeCardId, $afterCardId]);
+        $cards = $cardIds
+            ? (clone $query)
+                ->withoutEagerLoads()
+                ->select([$model->qualifyColumn($keyName), $model->qualifyColumn($positionField)])
+                ->whereIn($model->qualifyColumn($keyName), $cardIds)
+                ->get()
+                ->keyBy($keyName)
+            : collect();
+
+        $beforeCard = $beforeCardId ? $cards->get($beforeCardId) : null;
         $beforePos = $beforeCard?->getAttribute($positionField);
 
-        $afterCard = $afterCardId ? (clone $query)->find($afterCardId) : null;
+        $afterCard = $afterCardId ? $cards->get($afterCardId) : null;
         $afterPos = $afterCard?->getAttribute($positionField);
 
         // Normalize positions

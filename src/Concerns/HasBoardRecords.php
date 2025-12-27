@@ -18,6 +18,8 @@ trait HasBoardRecords
 
     protected int $cardsPerColumn = 20;
 
+    protected array $columnExistenceCache = [];
+
     /**
      * Set the record title attribute.
      */
@@ -149,14 +151,19 @@ trait HasBoardRecords
      */
     protected function modelHasColumn($model, string $columnName): bool
     {
-        try {
-            $table = $model->getTable();
-            $schema = $model->getConnection()->getSchemaBuilder();
+        $cacheKey = get_class($model).'::'.$model->getTable().'::'.$columnName;
 
-            return $schema->hasColumn($table, $columnName);
-        } catch (Exception) {
-            return false;
+        if (! isset($this->columnExistenceCache[$cacheKey])) {
+            try {
+                $table = $model->getTable();
+                $schema = $model->getConnection()->getSchemaBuilder();
+                $this->columnExistenceCache[$cacheKey] = $schema->hasColumn($table, $columnName);
+            } catch (Exception) {
+                $this->columnExistenceCache[$cacheKey] = false;
+            }
         }
+
+        return $this->columnExistenceCache[$cacheKey];
     }
 
     /**
