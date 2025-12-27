@@ -37,9 +37,9 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
      * board action detection.
      *
      * @param  array<array<string, mixed>>  $actions
-     * @return array<Action>
+     * @return array<\Filament\Actions\Action>
      *
-     * @throws ActionNotResolvableException
+     * @throws \Filament\Actions\Exceptions\ActionNotResolvableException
      */
     protected function resolveActions(array $actions): array
     {

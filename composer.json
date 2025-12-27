@@ -52,8 +52,8 @@
     },
     "scripts": {
         "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
-        "analyse": "vendor/bin/phpstan analyse",
-        "pest": "vendor/bin/pest",
+        "analyse": "php -d memory_limit=512M vendor/bin/phpstan analyse",
+        "pest": "vendor/bin/pest --no-coverage",
         "test-coverage": "vendor/bin/pest --coverage",
         "pint": "vendor/bin/pint",
         "test": [

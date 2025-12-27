@@ -181,7 +181,7 @@ trait HasBoardRecords
      */
     protected function modelHasColumn($model, string $columnName): bool
     {
-        $cacheKey = get_class($model).'::'.$model->getTable().'::'.$columnName;
+        $cacheKey = get_class($model) . '::' . $model->getTable() . '::' . $columnName;
 
         if (! isset($this->columnExistenceCache[$cacheKey])) {
             try {
