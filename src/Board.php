@@ -58,6 +58,9 @@ class Board extends ViewComponent
      */
     public function getViewData(): array
     {
+        // Batch all column counts in a single query
+        $allCounts = $this->getBatchedBoardRecordCounts();
+
         // Build columns data using new concerns
         $columns = [];
         foreach ($this->getColumns() as $column) {
@@ -73,7 +76,7 @@ class Board extends ViewComponent
                 'color' => $column->getColor(),
                 'icon' => $column->getIcon(),
                 'items' => $formattedRecords,
-                'total' => $this->getBoardRecordCount($columnId),
+                'total' => $allCounts[$columnId] ?? 0,
             ];
         }
 

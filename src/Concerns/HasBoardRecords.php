@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
+use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -116,6 +117,35 @@ trait HasBoardRecords
         }
 
         return $queryClone->count();
+    }
+
+    /**
+     * Get record counts for all columns in a single query using GROUP BY.
+     */
+    public function getBatchedBoardRecordCounts(): array
+    {
+        $query = $this->getQuery();
+
+        if (! $query) {
+            return [];
+        }
+
+        $statusField = $this->getColumnIdentifierAttribute();
+        $livewire = $this->getLivewire();
+
+        $queryClone = clone $query;
+
+        // Apply table filters using Filament's native system
+        if ($livewire->getTable()->isFilterable()) {
+            $baseQuery = $livewire->getFilteredTableQuery();
+            $queryClone = clone $baseQuery;
+        }
+
+        return $queryClone
+            ->select(DB::raw("{$statusField} as column_value, COUNT(*) as total"))
+            ->groupBy($statusField)
+            ->pluck('total', 'column_value')
+            ->toArray();
     }
 
     /**
