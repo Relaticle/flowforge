@@ -9,6 +9,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
+use Livewire\Attributes\Url;
 use Relaticle\Flowforge\Concerns\BaseBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
@@ -24,6 +25,9 @@ use Relaticle\Flowforge\Contracts\HasBoard;
 abstract class BoardResourcePage extends Page implements HasActions, HasBoard, HasForms
 {
     use BaseBoard;
+
+    #[Url(as: 'search')]
+    public $tableSearch = '';
 
     protected string $view = 'flowforge::filament.pages.board-page';
 
@@ -43,7 +47,7 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
      *
      * @throws ActionNotResolvableException
      */
-    protected function resolveActions(array $actions): array
+    protected function resolveActions(array $actions, bool $isMounting = true): array
     {
         $resolvedActions = [];
 

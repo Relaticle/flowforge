@@ -18,9 +18,12 @@ trait CanSearchBoardRecords
     /**
      * Make the board searchable.
      */
-    public function searchable(array | Closure $fields = []): static
+    public function searchable(string | array | Closure $fields = []): static
     {
-        $this->searchableFields = $this->evaluate($fields);
+        // Ensure fields is an array
+        $searchableFields = is_string($fields) ? [$fields] : $fields;
+        
+        $this->searchableFields = $this->evaluate($searchableFields);
         $this->isSearchable = true;
 
         return $this;

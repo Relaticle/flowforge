@@ -81,6 +81,13 @@ trait HasBoardRecords
             $queryClone = (clone $baseQuery)->where($statusField, $columnId);
         }
 
+        // Apply search
+        if ($livewire->hasTableSearch()) {
+            $queryClone->where(function ($q) use (&$livewire) {
+                return $q->whereAny($this->getSearchableFields(), 'LIKE', '%' . $livewire->getTableSearch() . '%');
+            });
+        }
+
         $positionField = $this->getPositionIdentifierAttribute();
 
         if ($positionField && $this->modelHasColumn($queryClone->getModel(), $positionField)) {
