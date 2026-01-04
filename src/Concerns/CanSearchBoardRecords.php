@@ -22,7 +22,7 @@ trait CanSearchBoardRecords
     {
         // Ensure fields is an array
         $searchableFields = is_string($fields) ? [$fields] : $fields;
-        
+
         $this->searchableFields = $this->evaluate($searchableFields);
         $this->isSearchable = true;
 
