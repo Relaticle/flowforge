@@ -41,7 +41,7 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
      *
      * @throws \Filament\Actions\Exceptions\ActionNotResolvableException
      */
-    protected function resolveActions(array $actions): array
+    protected function resolveActions(array $actions, bool $isMounting = true): array
     {
         $resolvedActions = [];
 
