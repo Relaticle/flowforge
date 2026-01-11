@@ -29,7 +29,7 @@ function switchVersion(version: Version): void {
 </script>
 
 <template>
-    <div v-if="versions.length > 1" class="relative">
+    <div v-if="versions.length > 1" class="relative" @click.stop>
         <UPopover>
             <UButton
                 variant="ghost"
