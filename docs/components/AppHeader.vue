@@ -22,7 +22,7 @@ const isOldVersion = computed(() => currentVersion.value !== 'v3')
 </script>
 
 <template>
-  <div>
+  <div class="sticky top-0 z-50">
     <!-- Version Warning Banner -->
     <div
       v-if="isOldVersion"
