@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const baseURL = process.env.NUXT_APP_BASE_URL || '/'
+const docsVersion = process.env.DOCS_VERSION || 'v3'
 
 export default defineNuxtConfig({
     extends: 'docus',
@@ -7,6 +8,11 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     site: {
         name: 'Flowforge',
+    },
+    appConfig: {
+        versioning: {
+            current: docsVersion,
+        },
     },
     app: {
         baseURL,
