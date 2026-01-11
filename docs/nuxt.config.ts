@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const baseURL = process.env.NUXT_APP_BASE_URL || '/'
+
 export default defineNuxtConfig({
     extends: 'docus',
     modules: ['@nuxt/image', '@nuxt/scripts'],
@@ -7,23 +9,19 @@ export default defineNuxtConfig({
         name: 'Flowforge',
     },
     app: {
-        buildAssetsDir: 'assets', // avoid underscore prefix for GitHub Pages
+        baseURL,
+        buildAssetsDir: 'assets',
         head: {
             link: [
                 {
                     rel: 'icon',
                     type: 'image/x-icon',
-                    href:
-                        (process.env.NODE_ENV === 'production'
-                            ? '/flowforge/'
-                            : '/') + 'favicon.ico',
+                    href: baseURL + 'favicon.ico',
                 },
             ],
         },
     },
     image: {
-        // Don't set baseURL for image module - let app.baseURL handle it
-        // This prevents double baseURL application
         provider: 'none',
     },
     content: {
@@ -36,7 +34,7 @@ export default defineNuxtConfig({
         },
     },
     llms: {
-        domain: 'https://relaticle.github.io/flowforge',
+        domain: `https://relaticle.github.io${baseURL.replace(/\/$/, '')}`,
     },
     nitro: {
         preset: 'github_pages',
