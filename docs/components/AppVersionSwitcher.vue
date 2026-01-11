@@ -16,10 +16,9 @@ const currentVersionConfig = computed(() =>
 )
 
 function getTargetUrl(version: Version): string {
-    const currentBasePath = currentVersionConfig.value?.path?.replace(/\/$/, '') || '/flowforge'
-    const currentPath = route.path
-    const relativePath = currentPath.replace(new RegExp(`^${currentBasePath}`), '')
-    return version.path.replace(/\/$/, '') + (relativePath || '/')
+    // route.path is relative to baseURL, so use it directly
+    const relativePath = route.path === '/' ? '' : route.path
+    return version.path.replace(/\/$/, '') + relativePath + (relativePath ? '' : '/')
 }
 
 function switchVersion(version: Version): void {
