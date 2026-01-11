@@ -10,8 +10,28 @@ export default defineNuxtConfig({
         name: 'Flowforge',
     },
     appConfig: {
+        docus: {
+            url: `https://relaticle.github.io${baseURL}`,
+            image: `${baseURL}preview.png`,
+            header: {
+                logo: {
+                    light: `${baseURL}logo-light.svg`,
+                    dark: `${baseURL}logo-dark.svg`,
+                },
+            },
+        },
+        seo: {
+            ogImage: `${baseURL}preview.png`,
+        },
+        github: {
+            branch: docsVersion === 'v3' ? '3.x' : '2.x',
+        },
         versioning: {
             current: docsVersion,
+            versions: [
+                { label: 'v3 (Latest)', value: 'v3', path: '/flowforge/' },
+                { label: 'v2', value: 'v2', path: '/flowforge/v2/' },
+            ],
         },
     },
     app: {
