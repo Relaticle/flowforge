@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const appConfig = useAppConfig()
-const route = useRoute()
 
 interface Version {
     label: string
@@ -15,15 +14,8 @@ const currentVersionConfig = computed(() =>
     versions.find((v: Version) => v.value === currentVersion)
 )
 
-function getTargetUrl(version: Version): string {
-    // route.path is relative to baseURL, so use it directly
-    const relativePath = route.path === '/' ? '' : route.path
-    return version.path.replace(/\/$/, '') + relativePath + (relativePath ? '' : '/')
-}
-
 function switchVersion(version: Version): void {
-    const url = getTargetUrl(version)
-    window.location.href = url
+    window.location.href = version.path
 }
 </script>
 
