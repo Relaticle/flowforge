@@ -45,8 +45,9 @@ const isOldVersion = computed(() => currentVersion.value !== 'v3')
     >
       <AppHeaderCenter />
 
-      <template #title>
+      <template #left>
         <AppHeaderLogo class="h-6 w-auto shrink-0" />
+        <AppVersionSwitcher />
       </template>
 
       <template #right>
