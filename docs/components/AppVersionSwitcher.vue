@@ -15,34 +15,41 @@ const currentVersionConfig = computed(() =>
     versions.find((v: Version) => v.value === currentVersion)
 )
 
-const items = computed(() => {
+function getTargetUrl(version: Version): string {
     const currentBasePath = currentVersionConfig.value?.path?.replace(/\/$/, '') || '/flowforge'
     const currentPath = route.path
+    const relativePath = currentPath.replace(new RegExp(`^${currentBasePath}`), '')
+    return version.path.replace(/\/$/, '') + (relativePath || '/')
+}
 
-    return versions.map((version: Version) => {
-        const relativePath = currentPath.replace(new RegExp(`^${currentBasePath}`), '')
-        const targetPath = version.path.replace(/\/$/, '') + relativePath
-
-        return [{
-            label: version.label,
-            click: () => {
-                window.location.href = targetPath || version.path
-            }
-        }]
-    })
-})
+function switchVersion(version: Version): void {
+    const url = getTargetUrl(version)
+    window.location.href = url
+}
 </script>
 
 <template>
-    <UDropdownMenu
-        v-if="versions.length > 1"
-        :items="items"
-    >
-        <UButton
-            variant="ghost"
-            size="sm"
-            :label="currentVersionConfig?.label || currentVersion"
-            trailing-icon="i-lucide-chevron-down"
-        />
-    </UDropdownMenu>
+    <div v-if="versions.length > 1" class="relative">
+        <UPopover>
+            <UButton
+                variant="ghost"
+                size="sm"
+                :label="currentVersionConfig?.label || currentVersion"
+                trailing-icon="i-lucide-chevron-down"
+            />
+            <template #content>
+                <div class="p-1">
+                    <button
+                        v-for="version in versions"
+                        :key="version.value"
+                        class="w-full px-3 py-2 text-left text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
+                        :class="{ 'font-medium text-primary': version.value === currentVersion }"
+                        @click="switchVersion(version)"
+                    >
+                        {{ version.label }}
+                    </button>
+                </div>
+            </template>
+        </UPopover>
+    </div>
 </template>
