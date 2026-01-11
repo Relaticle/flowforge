@@ -1,10 +1,11 @@
 const baseURL = process.env.NUXT_APP_BASE_URL || '/'
+const currentVersion = process.env.DOCS_VERSION || 'v3'
 
 export default defineAppConfig({
     docus: {
         title: 'Flowforge',
         description: 'Transform any Laravel model into production-ready drag-and-drop Kanban boards.',
-        url: 'https://relaticle.github.io/flowforge/',
+        url: `https://relaticle.github.io${baseURL}`,
         image: `${baseURL}preview.png`,
         header: {
             logo: {
@@ -20,11 +21,18 @@ export default defineAppConfig({
         ogImage: `${baseURL}preview.png`
     },
     github: {
-        branch: '2.x',
+        branch: currentVersion === 'v3' ? '3.x' : '2.x',
         repo: 'flowforge',
         owner: 'Relaticle',
         edit: true,
         rootDir: 'docs'
+    },
+    versioning: {
+        current: currentVersion,
+        versions: [
+            { label: 'v3 (Latest)', value: 'v3', path: '/flowforge/' },
+            { label: 'v2', value: 'v2', path: '/flowforge/v2/' }
+        ]
     },
     socials: {
         discord: 'https://discord.gg/b9WxzUce4Q'
