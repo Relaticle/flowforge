@@ -45,12 +45,12 @@ const isOldVersion = computed(() => currentVersion.value !== 'v3')
     >
       <AppHeaderCenter />
 
-      <template #left>
+      <template #title>
         <AppHeaderLogo class="h-6 w-auto shrink-0" />
-        <AppVersionSwitcher />
       </template>
 
       <template #right>
+        <AppVersionSwitcher />
         <AppHeaderCTA />
 
         <template v-if="isEnabled && locales.length > 1">
