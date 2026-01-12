@@ -74,17 +74,28 @@ php artisan flowforge:make-board TaskBoard --model=Task
 
 ## Our Ecosystem
 
+<table>
+<tr>
+<td width="50%" valign="top">
+
 ### FilaForms
-[<img src="https://filaforms.app/img/og-image.png" width="419px" />](https://filaforms.app/)
+[<img src="https://filaforms.app/img/og-image.png" width="100%" />](https://filaforms.app/)
 
 Visual form builder for all your public-facing forms.
 [Learn more →](https://filaforms.app)
 
+</td>
+<td width="50%" valign="top">
+
 ### Custom Fields
-[<img src="https://github.com/Relaticle/custom-fields/raw/2.x/art/preview.png" width="419px" />](https://custom-fields.relaticle.com)
+[<img src="https://github.com/Relaticle/custom-fields/raw/2.x/art/preview.png" width="100%" />](https://custom-fields.relaticle.com)
 
 Let users add custom fields to any model without code changes.
-[Learn more →](https://custom-fields.relaticle.com/v2/introduction)
+[Learn more →](https://custom-fields.relaticle.com)
+
+</td>
+</tr>
+</table>
 
 ## Contributing
 
