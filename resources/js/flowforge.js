@@ -3,6 +3,7 @@ export default function flowforge({state}) {
         state,
         isLoading: {},
         fullyLoaded: {},
+        areFiltersOpen: false,
 
         init() {
             this.$wire.$on('kanban-items-loaded', (event) => {
