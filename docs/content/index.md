@@ -141,7 +141,7 @@ Extend your Laravel applications with our ecosystem of complementary tools
     to: https://custom-fields.relaticle.com
     target: _blank
     ---
-    :img{src="https://github.com/Relaticle/custom-fields/raw/2.x/art/preview.png" alt="Custom Fields" class="mb-4 rounded-lg w-full pointer-events-none"}
+    :img{src="https://relaticle.github.io/custom-fields/og-image.png" alt="Custom Fields" class="mb-4 rounded-lg w-full pointer-events-none"}
 
     Let users add custom fields to any model without code changes.
     :::
