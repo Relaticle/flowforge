@@ -98,13 +98,13 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Download v3 artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: docs-v3
           path: ./combined
 
       - name: Download v2 artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: docs-v2
           path: ./combined/v2
