@@ -28,7 +28,7 @@ Transform any Laravel model into a production-ready drag-and-drop Kanban board.
 
 - **PHP:** 8.3+
 - **Laravel:** 12+
-- **Livewire:** 3.x+
+- **Livewire:** 4.x+
 - **Filament:** 5.x+
 - **ext-bcmath:** Required for position calculations
 - **Database:** MySQL, PostgreSQL, SQLite, SQL Server, MariaDB
