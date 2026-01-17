@@ -8,6 +8,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
+use Livewire\Attributes\Url;
 use Relaticle\Flowforge\Concerns\BaseBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
@@ -25,6 +26,12 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
     use BaseBoard;
 
     protected string $view = 'flowforge::filament.pages.board-page';
+
+    /**
+     * @var array<string, mixed>|null
+     */
+    #[Url(as: 'filters')]
+    public ?array $tableFilters = null;
 
     /**
      * Override Filament's action resolution to detect and route board actions.
