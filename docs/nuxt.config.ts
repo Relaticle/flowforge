@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const baseURL = process.env.NUXT_APP_BASE_URL || '/'
-const docsVersion = process.env.DOCS_VERSION || 'v3'
+const docsVersion = process.env.DOCS_VERSION || '2.x'
 
 export default defineNuxtConfig({
     extends: 'docus',
@@ -8,6 +8,11 @@ export default defineNuxtConfig({
     devtools: { enabled: true },
     site: {
         name: 'Flowforge',
+    },
+    runtimeConfig: {
+        public: {
+            docsVersion,
+        },
     },
     appConfig: {
         docus: {
@@ -24,14 +29,7 @@ export default defineNuxtConfig({
             ogImage: `${baseURL}preview.png`,
         },
         github: {
-            branch: docsVersion === 'v3' ? '3.x' : '2.x',
-        },
-        versioning: {
-            current: docsVersion,
-            versions: [
-                { label: 'v3 (Latest)', value: 'v3', path: '/flowforge/' },
-                { label: 'v2', value: 'v2', path: '/flowforge/v2/' },
-            ],
+            branch: docsVersion,
         },
     },
     app: {

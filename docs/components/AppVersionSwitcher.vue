@@ -1,21 +1,12 @@
 <script setup lang="ts">
-const appConfig = useAppConfig()
+const { versions, currentVersion, currentTitle, loadVersions } = useVersions()
 
-interface Version {
-    label: string
-    value: string
-    path: string
-}
+onMounted(() => loadVersions())
 
-const versions = (appConfig.versioning?.versions || []) as Version[]
-const currentVersion = appConfig.versioning?.current || 'v3'
-
-const currentVersionConfig = computed(() =>
-    versions.find((v: Version) => v.value === currentVersion)
-)
-
-function switchVersion(version: Version): void {
-    window.location.href = version.path
+function switchVersion(version: { version: string; path: string }): void {
+    if (version.version !== currentVersion) {
+        window.location.href = version.path
+    }
 }
 </script>
 
@@ -25,22 +16,23 @@ function switchVersion(version: Version): void {
             <UButton
                 variant="ghost"
                 size="sm"
-                :label="currentVersionConfig?.label || currentVersion"
+                :label="currentTitle"
                 trailing-icon="i-lucide-chevron-down"
             />
             <template #content>
                 <div class="p-1">
                     <button
                         v-for="version in versions"
-                        :key="version.value"
+                        :key="version.version"
                         class="w-full px-3 py-2 text-left text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-                        :class="{ 'font-medium text-primary': version.value === currentVersion }"
+                        :class="{ 'font-medium text-primary': version.version === currentVersion }"
                         @click="switchVersion(version)"
                     >
-                        {{ version.label }}
+                        {{ version.title }}
                     </button>
                 </div>
             </template>
         </UPopover>
     </div>
+    <UBadge v-else-if="currentVersion" variant="subtle" color="neutral">{{ currentVersion }}</UBadge>
 </template>

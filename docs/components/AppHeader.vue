@@ -5,6 +5,9 @@ const appConfig = useAppConfig()
 const site = useSiteConfig()
 
 const { localePath, isEnabled, locales } = useDocusI18n()
+const { currentVersion, isOldVersion, loadVersions } = useVersions()
+
+onMounted(() => loadVersions())
 
 const links = computed(() => appConfig.github && appConfig.github.url
   ? [
@@ -16,9 +19,6 @@ const links = computed(() => appConfig.github && appConfig.github.url
       },
     ]
   : [])
-
-const currentVersion = computed(() => appConfig.versioning?.current || 'v3')
-const isOldVersion = computed(() => currentVersion.value !== 'v3')
 </script>
 
 <template>
@@ -33,7 +33,7 @@ const isOldVersion = computed(() => currentVersion.value !== 'v3')
         href="/flowforge/"
         class="underline font-medium hover:text-amber-900 dark:hover:text-amber-100"
       >
-        View the latest version (v3) &rarr;
+        View the latest version &rarr;
       </a>
     </div>
 
