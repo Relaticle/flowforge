@@ -1,4 +1,4 @@
-name: Deploy Docs to GitHub Pages
+name: Deploy Docs
 
 on:
   push:
@@ -6,157 +6,143 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/deploy-docs.yml'
-
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version branch to deploy (e.g., 4.x, 3.x, 2.x)'
+        required: true
+        type: choice
+        options:
+          - '4.x'
+          - '3.x'
+          - '2.x'
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
+# Prevent concurrent deploys to avoid push conflicts
 concurrency:
-  group: "pages"
+  group: deploy-docs
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 jobs:
-  build-v4:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 4.x
-        uses: actions/checkout@v6
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "branch=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set version config
+        id: config
+        run: |
+          BRANCH="${{ steps.version.outputs.branch }}"
+          case $BRANCH in
+            4.x)
+              echo "dest_folder=." >> $GITHUB_OUTPUT
+              echo "base_url=/flowforge/" >> $GITHUB_OUTPUT
+              echo "is_latest=true" >> $GITHUB_OUTPUT
+              ;;
+            3.x)
+              echo "dest_folder=v3" >> $GITHUB_OUTPUT
+              echo "base_url=/flowforge/v3/" >> $GITHUB_OUTPUT
+              echo "is_latest=false" >> $GITHUB_OUTPUT
+              ;;
+            2.x)
+              echo "dest_folder=v2" >> $GITHUB_OUTPUT
+              echo "base_url=/flowforge/v2/" >> $GITHUB_OUTPUT
+              echo "is_latest=false" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "Unknown branch: $BRANCH"
+              exit 1
+              ;;
+          esac
+
+      - name: Checkout source branch
+        uses: actions/checkout@v4
         with:
-          ref: '4.x'
+          ref: ${{ steps.version.outputs.branch }}
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: 'docs/package.json'
+          cache-dependency-path: 'docs/package-lock.json'
 
       - name: Install dependencies
         working-directory: ./docs
         run: npm ci
 
-      - name: Build v4 documentation
+      - name: Build documentation
         working-directory: ./docs
         run: npm run generate
         env:
-          NUXT_APP_BASE_URL: /flowforge/
+          NUXT_APP_BASE_URL: ${{ steps.config.outputs.base_url }}
           NUXT_SITE_URL: https://relaticle.github.io
-          DOCS_VERSION: v4
+          DOCS_VERSION: ${{ steps.version.outputs.branch }}
 
-      - name: Upload v4 artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: docs-v4
-          path: ./docs/.output/public
-          retention-days: 1
+      - name: Deploy to gh-pages
+        run: |
+          DEST="${{ steps.config.outputs.dest_folder }}"
+          IS_LATEST="${{ steps.config.outputs.is_latest }}"
 
-  build-v3:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout 3.x
-        uses: actions/checkout@v6
-        with:
-          ref: '3.x'
+          if [ "$IS_LATEST" == "true" ]; then
+            echo "Deploying latest version to root..."
+            cd gh-pages
+            # List of items to preserve
+            PRESERVE="v2 v3 versions.json .nojekyll README.md .git"
+            # Remove everything except preserved items
+            for item in *; do
+              if [ -e "$item" ]; then
+                SKIP=false
+                for keep in $PRESERVE; do
+                  if [ "$item" == "$keep" ]; then
+                    SKIP=true
+                    break
+                  fi
+                done
+                if [ "$SKIP" == "false" ]; then
+                  rm -rf "$item"
+                fi
+              fi
+            done
+            # Also remove hidden files except .git, .nojekyll
+            for item in .[!.]*; do
+              if [ -e "$item" ] && [ "$item" != ".git" ] && [ "$item" != ".nojekyll" ]; then
+                rm -rf "$item"
+              fi
+            done
+            cd ..
+            # Copy new build to root
+            cp -r docs/.output/public/* gh-pages/
+          else
+            echo "Deploying to $DEST subfolder..."
+            rm -rf "gh-pages/$DEST"
+            cp -r docs/.output/public "gh-pages/$DEST"
+          fi
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'docs/package.json'
-
-      - name: Install dependencies
-        working-directory: ./docs
-        run: npm ci
-
-      - name: Build v3 documentation
-        working-directory: ./docs
-        run: npm run generate
-        env:
-          NUXT_APP_BASE_URL: /flowforge/v3/
-          NUXT_SITE_URL: https://relaticle.github.io
-          DOCS_VERSION: v3
-
-      - name: Upload v3 artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: docs-v3
-          path: ./docs/.output/public
-          retention-days: 1
-
-  build-v2:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout 2.x
-        uses: actions/checkout@v6
-        with:
-          ref: '2.x'
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'docs/package.json'
-
-      - name: Install dependencies
-        working-directory: ./docs
-        run: npm ci
-
-      - name: Build v2 documentation
-        working-directory: ./docs
-        run: npm run generate
-        env:
-          NUXT_APP_BASE_URL: /flowforge/v2/
-          NUXT_SITE_URL: https://relaticle.github.io
-          DOCS_VERSION: v2
-
-      - name: Upload v2 artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: docs-v2
-          path: ./docs/.output/public
-          retention-days: 1
-
-  merge-and-deploy:
-    runs-on: ubuntu-latest
-    needs: [build-v4, build-v3, build-v2]
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Download v4 artifact
-        uses: actions/download-artifact@v7
-        with:
-          name: docs-v4
-          path: ./combined
-
-      - name: Download v3 artifact
-        uses: actions/download-artifact@v7
-        with:
-          name: docs-v3
-          path: ./combined/v3
-
-      - name: Download v2 artifact
-        uses: actions/download-artifact@v7
-        with:
-          name: docs-v2
-          path: ./combined/v2
-
-      - name: Add .nojekyll file
-        run: touch ./combined/.nojekyll
-
-      - name: Upload combined artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: ./combined
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Commit and push
+        working-directory: ./gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to deploy"
+          else
+            git commit -m "Deploy ${{ steps.version.outputs.branch }} docs"
+            git push
+          fi
