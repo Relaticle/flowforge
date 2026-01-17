@@ -2,7 +2,7 @@ name: Deploy Docs to GitHub Pages
 
 on:
   push:
-    branches: ["3.x", "2.x"]
+    branches: ["4.x", "3.x", "2.x"]
     paths:
       - 'docs/**'
       - '.github/workflows/deploy-docs.yml'
@@ -19,6 +19,40 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build-v4:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 4.x
+        uses: actions/checkout@v6
+        with:
+          ref: '4.x'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'docs/package.json'
+
+      - name: Install dependencies
+        working-directory: ./docs
+        run: npm ci
+
+      - name: Build v4 documentation
+        working-directory: ./docs
+        run: npm run generate
+        env:
+          NUXT_APP_BASE_URL: /flowforge/
+          NUXT_SITE_URL: https://relaticle.github.io
+          DOCS_VERSION: v4
+
+      - name: Upload v4 artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: docs-v4
+          path: ./docs/.output/public
+          retention-days: 1
+
   build-v3:
     runs-on: ubuntu-latest
     steps:
@@ -42,7 +76,7 @@ jobs:
         working-directory: ./docs
         run: npm run generate
         env:
-          NUXT_APP_BASE_URL: /flowforge/
+          NUXT_APP_BASE_URL: /flowforge/v3/
           NUXT_SITE_URL: https://relaticle.github.io
           DOCS_VERSION: v3
 
@@ -89,7 +123,7 @@ jobs:
 
   merge-and-deploy:
     runs-on: ubuntu-latest
-    needs: [build-v3, build-v2]
+    needs: [build-v4, build-v3, build-v2]
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -97,11 +131,17 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Download v4 artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: docs-v4
+          path: ./combined
+
       - name: Download v3 artifact
         uses: actions/download-artifact@v7
         with:
           name: docs-v3
-          path: ./combined
+          path: ./combined/v3
 
       - name: Download v2 artifact
         uses: actions/download-artifact@v7
