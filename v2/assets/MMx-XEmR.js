@@ -1,0 +1,1 @@
+import{Q as n,c,e as r,o as p,x as u,X as i,U as s}from"#entry";const m={base:"my-1.5 ps-1.5 leading-7 [&>ul]:my-0"},_={__name:"ProseLi",props:{class:{type:null,required:!1}},setup(e){const a=e,o=n(),l=c(()=>s({extend:s(m),...o.ui?.prose?.li||{}}));return(t,d)=>(p(),r("li",{class:i(l.value({class:a.class}))},[u(t.$slots,"default")],2))}};export{_ as default};

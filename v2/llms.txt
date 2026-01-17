@@ -1,0 +1,21 @@
+# Flowforge
+
+## Documentation Sets
+
+- [Flowforge](https://relaticle.github.io/flowforge/v2/llms-full.txt)
+
+## Landing
+
+- [Filament/Livewire Kanban Boards](https://relaticle.github.io/flowforge/v2): Transform any Laravel model into production-ready drag-and-drop Kanban boards. Works with Filament admin panels and standalone Livewire applications.
+
+## Docs
+
+- [Introduction](https://relaticle.github.io/flowforge/v2/getting-started/introduction): Transform any Laravel model into production-ready drag-and-drop Kanban boards.
+- [Installation](https://relaticle.github.io/flowforge/v2/getting-started/installation): Get started with Flowforge in 90 seconds.
+- [Integration Patterns](https://relaticle.github.io/flowforge/v2/essentials/integration-patterns): Three ways to integrate Flowforge into your application.
+- [Customization](https://relaticle.github.io/flowforge/v2/essentials/customization): Customize your Kanban boards with rich content, actions, and filtering.
+- [Database Schema](https://relaticle.github.io/flowforge/v2/essentials/database-schema): Set up your database for drag-and-drop Kanban functionality.
+- [API Reference](https://relaticle.github.io/flowforge/v2/essentials/api-reference): Complete reference for Flowforge configuration methods.
+- [Troubleshooting](https://relaticle.github.io/flowforge/v2/essentials/troubleshooting): Common issues and solutions for Flowforge implementation.
+- [Contributing](https://relaticle.github.io/flowforge/v2/community/contributing): How to contribute to Flowforge
+- [License](https://relaticle.github.io/flowforge/v2/community/license): MIT License terms and what it means for you

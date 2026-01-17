@@ -1,0 +1,245 @@
+# Database Schema
+
+> Set up your database for drag-and-drop Kanban functionality.
+
+## Required Fields
+
+Your model needs these essential fields for Kanban functionality:
+
+```php
+Schema::create('tasks', function (Blueprint $table) {
+    $table->id();
+    $table->string('title');                         // Card title
+    $table->string('status');                        // Column identifier
+    $table->flowforgePositionColumn();               // Drag-and-drop ordering
+    $table->timestamps();
+});
+```
+
+## Enum Support
+
+Flowforge automatically handles PHP `BackedEnum` for status fields. No manual conversion needed:
+
+```php
+// Define your enum
+enum TaskStatus: string
+{
+    case Todo = 'todo';
+    case InProgress = 'in_progress';
+    case Done = 'done';
+}
+
+// Cast in your model
+class Task extends Model
+{
+    protected $casts = [
+        'status' => TaskStatus::class,
+    ];
+}
+
+// Flowforge automatically converts column IDs to enum values
+Column::make('todo')      // → TaskStatus::Todo
+Column::make('in_progress') // → TaskStatus::InProgress
+Column::make('done')      // → TaskStatus::Done
+```
+
+<callout type="info">
+
+When a card moves between columns, Flowforge detects the `BackedEnum` cast and converts the column identifier to the appropriate enum value automatically.
+
+</callout>
+
+## Position Column
+
+The `flowforgePositionColumn()` method is crucial for drag-and-drop functionality. It handles database-specific collations automatically:
+
+```php
+// Default column name 'position'
+$table->flowforgePositionColumn();
+
+// Custom column name
+$table->flowforgePositionColumn('sort_order');
+```
+
+## Database-Specific Collations
+
+Flowforge automatically applies the correct binary collation for consistent fractional ranking across all database systems:
+
+<table>
+<thead>
+  <tr>
+    <th>
+      Database
+    </th>
+    
+    <th>
+      Collation
+    </th>
+    
+    <th>
+      Purpose
+    </th>
+  </tr>
+</thead>
+
+<tbody>
+  <tr>
+    <td>
+      <strong>
+        MySQL/MariaDB
+      </strong>
+    </td>
+    
+    <td>
+      <code>
+        utf8mb4_bin
+      </code>
+    </td>
+    
+    <td>
+      Binary comparison by character code values
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <strong>
+        PostgreSQL
+      </strong>
+    </td>
+    
+    <td>
+      <code>
+        C
+      </code>
+    </td>
+    
+    <td>
+      Binary byte comparison (POSIX locale)
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <strong>
+        SQL Server
+      </strong>
+    </td>
+    
+    <td>
+      <code>
+        Latin1_General_BIN2
+      </code>
+    </td>
+    
+    <td>
+      Unicode code-point comparison
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <strong>
+        SQLite
+      </strong>
+    </td>
+    
+    <td>
+      None
+    </td>
+    
+    <td>
+      Uses <code>
+        BINARY
+      </code>
+      
+       collation by default
+    </td>
+  </tr>
+</tbody>
+</table>
+
+## Example Migration
+
+Here's a complete example for adding Flowforge support to an existing table:
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->flowforgePositionColumn('position');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn('position');
+        });
+    }
+};
+```
+
+## Factory Integration
+
+When using factories, ensure position values are generated correctly:
+
+```php
+use Relaticle\Flowforge\Services\Rank;
+
+class TaskFactory extends Factory
+{
+    private static array $statusCounters = ['todo' => 0, 'in_progress' => 0, 'done' => 0];
+    private static array $lastRanks = [];
+
+    public function definition(): array
+    {
+        $status = $this->faker->randomElement(['todo', 'in_progress', 'done']);
+        
+        return [
+            'title' => $this->faker->sentence(3),
+            'status' => $status,
+            'position' => $this->generatePositionForStatus($status),
+        ];
+    }
+
+    private function generatePositionForStatus(string $status): string
+    {
+        if (self::$statusCounters[$status] === 0) {
+            $rank = Rank::forEmptySequence();
+        } else {
+            $rank = isset(self::$lastRanks[$status]) 
+                ? Rank::after(self::$lastRanks[$status])
+                : Rank::forEmptySequence();
+        }
+
+        self::$statusCounters[$status]++;
+        self::$lastRanks[$status] = $rank;
+        
+        return $rank->get();
+    }
+}
+```
+
+## Repair Command
+
+If position data becomes corrupted, use the repair command:
+
+```bash
+php artisan flowforge:repair-positions
+```
+
+This command will:
+
+- Identify records with missing or corrupted position values
+- Regenerate proper fractional ranking positions
+- Maintain existing order where possible
+- Work across all supported database systems

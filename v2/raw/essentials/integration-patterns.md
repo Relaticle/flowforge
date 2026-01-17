@@ -1,0 +1,200 @@
+# Integration Patterns
+
+> Three ways to integrate Flowforge into your application.
+
+Flowforge provides three flexible integration patterns to fit different use cases and application architectures.
+
+## Standalone Livewire
+
+Use in any Laravel application - complete flexibility for custom interfaces.
+
+```php
+<?php
+
+namespace App\Livewire;
+
+use App\Models\Task;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Livewire\Component;
+use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\Column;
+use Relaticle\Flowforge\Concerns\InteractsWithBoard;
+use Relaticle\Flowforge\Contracts\HasBoard;
+
+class TaskBoard extends Component implements HasBoard, HasActions, HasForms
+{
+    use InteractsWithActions;
+    use InteractsWithBoard {
+        InteractsWithBoard::getDefaultActionRecord insteadof InteractsWithActions;
+    }
+    use InteractsWithForms;
+
+    public function board(Board $board): Board
+    {
+        return $board
+            ->query(Task::query())
+            ->columnIdentifier('status')
+            ->positionIdentifier('position')
+            ->columns([
+                Column::make('todo')->label('To Do')->color('gray'),
+                Column::make('in_progress')->label('In Progress')->color('blue'),
+                Column::make('completed')->label('Completed')->color('green'),
+            ]);
+    }
+
+    public function render()
+    {
+        return view('livewire.task-board');
+    }
+}
+```
+
+```blade
+{{-- resources/views/livewire/task-board.blade.php --}}
+<div>
+    <h1 class="text-2xl font-bold mb-6">Task Board</h1>
+    {{ $this->board }}
+</div>
+```
+
+**Use when:** Building customer-facing apps, custom dashboards, or non-Filament applications<br />
+
+**Benefits:** Maximum flexibility, custom styling, independent routing, works anywhere
+
+## Filament Page
+
+Perfect for dedicated Kanban pages in your Filament admin panel.
+
+```php
+<?php
+
+namespace App\Filament\Pages;
+
+use App\Models\Task;
+use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\BoardPage;
+use Relaticle\Flowforge\Column;
+
+class TaskBoard extends BoardPage
+{
+    protected static ?string $navigationIcon = 'heroicon-o-view-columns';
+    
+    public function board(Board $board): Board
+    {
+        return $board
+            ->query(Task::query())
+            ->columnIdentifier('status')
+            ->positionIdentifier('position')
+            ->columns([
+                Column::make('todo')->label('To Do')->color('gray'),
+                Column::make('in_progress')->label('In Progress')->color('blue'),
+                Column::make('completed')->label('Completed')->color('green'),
+            ]);
+    }
+}
+```
+
+**Use when:** You want a standalone Kanban page in your admin panel<br />
+
+**Benefits:** Full Filament integration, automatic registration, built-in actions
+
+## Resource Integration
+
+Integrate with your existing Filament resources. Perfect for campaign management where teams track tasks within campaigns.
+
+```php
+<?php
+
+namespace App\Filament\Resources\CampaignResource\Pages;
+
+use App\Filament\Resources\CampaignResource;
+use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\BoardResourcePage;
+use Relaticle\Flowforge\Column;
+
+class CampaignTaskBoard extends BoardResourcePage
+{
+    protected static string $resource = CampaignResource::class;
+    
+    public function board(Board $board): Board
+    {
+        return $board
+            ->query(
+                // Get tasks for this specific campaign and current user's team
+                $this->getRecord()
+                    ->tasks()
+                    ->whereHas('team', fn($q) => $q->where('id', auth()->user()->current_team_id))
+                    ->getQuery()
+            )
+            ->columnIdentifier('status')
+            ->positionIdentifier('position')
+            ->columns([
+                Column::make('backlog')->label('Backlog')->color('gray'),
+                Column::make('in_progress')->label('In Progress')->color('blue'),
+                Column::make('review')->label('Review')->color('amber'),
+                Column::make('completed')->label('Completed')->color('green'),
+            ]);
+    }
+}
+
+// Register in your CampaignResource
+public static function getPages(): array
+{
+    return [
+        'index' => Pages\ListCampaigns::route('/'),
+        'create' => Pages\CreateCampaign::route('/create'),
+        'edit' => Pages\EditCampaign::route('/{record}/edit'),
+        'tasks' => Pages\CampaignTaskBoard::route('/{record}/tasks'), // Add this line
+    ];
+}
+```
+
+**Use when:** Adding Kanban views to existing Filament resources
+**Benefits:** Inherits resource permissions, policies, and global scopes automatically
+
+## Extending Board Behavior
+
+Override these methods to customize board behavior for your specific needs.
+
+### Custom Card Movement Logic
+
+Override `moveCard()` to add custom logic when cards are moved:
+
+```php
+public function moveCard(
+    string $cardId,
+    string $targetColumnId,
+    ?string $afterCardId = null,
+    ?string $beforeCardId = null
+): void {
+    // Call parent to handle the actual move
+    parent::moveCard($cardId, $targetColumnId, $afterCardId, $beforeCardId);
+
+    // Add custom logic
+    $task = Task::find($cardId);
+
+    if ($targetColumnId === 'completed') {
+        $task->update(['completed_at' => now()]);
+        $task->assignee->notify(new TaskCompletedNotification($task));
+    }
+}
+```
+
+### Custom Record Fetching
+
+Override `getBoardRecords()` for complex filtering logic:
+
+```php
+public function getBoardRecords(string $columnId): \Illuminate\Support\Collection
+{
+    return $this->getEloquentQuery()
+        ->where($this->getBoard()->getColumnIdentifier(), $columnId)
+        ->where('team_id', auth()->user()->current_team_id)  // Custom filter
+        ->with(['assignee', 'priority', 'labels'])           // Eager loading
+        ->orderBy($this->getBoard()->getPositionIdentifier())
+        ->get();
+}
+```
