@@ -1,0 +1,23 @@
+[
+  {
+    "version": "4.x",
+    "title": "v4 (Latest)",
+    "path": "/flowforge/",
+    "branch": "4.x",
+    "isLatest": true
+  },
+  {
+    "version": "3.x",
+    "title": "v3",
+    "path": "/flowforge/v3/",
+    "branch": "3.x",
+    "isLatest": false
+  },
+  {
+    "version": "2.x",
+    "title": "v2",
+    "path": "/flowforge/v2/",
+    "branch": "2.x",
+    "isLatest": false
+  }
+]
