@@ -9,36 +9,48 @@ use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
 
 /**
- * Provides table functionality to any Livewire component that has a Board.
- * This allows pure Livewire components to use Board filters without extending BoardPage.
+ * Bridges Board filter configuration to Filament's Table.
+ *
+ * The Board stores filter configuration via HasBoardFilters (which uses Filament's HasFilters trait).
+ * This trait passes all that configuration to the actual Table component.
  */
 trait InteractsWithBoardTable
 {
     use InteractsWithTable;
 
-    /**
-     * Get table from board configuration.
-     */
     public function table(Table $table): Table
     {
         $board = $this->getBoard();
 
         $searchableColumns = collect($board->getSearchableFields())
-            ->map(fn ($field) => Column::make($field)->searchable())->toArray();
+            ->map(fn ($field) => Column::make($field)->searchable())
+            ->toArray();
 
-        return $table
+        $table = $table
             ->queryStringIdentifier('board')
             ->query($board->getQuery())
+            ->columns($searchableColumns)
             ->filters($board->getBoardFilters())
             ->filtersFormWidth($board->getFiltersFormWidth())
             ->filtersFormColumns($board->getFiltersFormColumns())
+            ->filtersFormMaxHeight($board->getFiltersFormMaxHeight())
             ->filtersLayout($board->getFiltersLayout())
-            ->columns($searchableColumns);
+            ->filtersResetActionPosition($board->getFiltersResetActionPosition())
+            ->deferFilters($board->hasDeferredFilters())
+            ->persistFiltersInSession($board->persistsFiltersInSession())
+            ->deselectAllRecordsWhenFiltered($board->shouldDeselectAllRecordsWhenFiltered());
+
+        if ($triggerModifier = $board->getFiltersTriggerActionModifier()) {
+            $table->filtersTriggerAction($triggerModifier);
+        }
+
+        if ($applyModifier = $board->getFiltersApplyActionModifier()) {
+            $table->filtersApplyAction($applyModifier);
+        }
+
+        return $table;
     }
 
-    /**
-     * Override to use board-specific query string identifier.
-     */
     protected function getTableQueryStringIdentifier(): ?string
     {
         return 'board';

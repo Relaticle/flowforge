@@ -47,7 +47,7 @@ jobs:
           DOCS_VERSION: v3
 
       - name: Upload v3 artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: docs-v3
           path: ./docs/.output/public
@@ -81,7 +81,7 @@ jobs:
           DOCS_VERSION: v2
 
       - name: Upload v2 artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: docs-v2
           path: ./docs/.output/public
@@ -98,13 +98,13 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Download v3 artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: docs-v3
           path: ./combined
 
       - name: Download v2 artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: docs-v2
           path: ./combined/v2
