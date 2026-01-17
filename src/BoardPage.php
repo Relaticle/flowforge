@@ -7,6 +7,7 @@ namespace Relaticle\Flowforge;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
+use Livewire\Attributes\Url;
 use Relaticle\Flowforge\Concerns\BaseBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
@@ -19,4 +20,10 @@ abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
     use BaseBoard;
 
     protected string $view = 'flowforge::filament.pages.board-page';
+
+    /**
+     * @var array<string, mixed>|null
+     */
+    #[Url(as: 'filters')]
+    public ?array $tableFilters = null;
 }
