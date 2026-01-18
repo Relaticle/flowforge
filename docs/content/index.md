@@ -138,7 +138,7 @@ Extend your Laravel applications with our ecosystem of complementary tools
     ---
     title: Custom Fields
     icon: i-lucide-sliders
-    to: https://custom-fields.relaticle.com
+    to: https://relaticle.github.io/custom-fields
     target: _blank
     ---
     :img{src="https://relaticle.github.io/custom-fields/og-image.png" alt="Custom Fields" class="mb-4 rounded-lg w-full pointer-events-none"}

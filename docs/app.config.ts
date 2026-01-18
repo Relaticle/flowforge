@@ -49,7 +49,7 @@ export default defineAppConfig({
                 {
                     icon: 'i-lucide-sliders',
                     label: 'Custom Fields',
-                    to: 'https://custom-fields.relaticle.com',
+                    to: 'https://relaticle.github.io/custom-fields',
                     target: '_blank'
                 }
             ]
