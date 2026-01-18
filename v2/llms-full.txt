@@ -127,7 +127,7 @@ Why choose Flowforge?
     icon: i-lucide-sliders
     target: _blank
     title: Custom Fields
-    to: https://custom-fields.relaticle.com
+    to: https://relaticle.github.io/custom-fields
     ---
     ![Custom Fields](https://github.com/Relaticle/custom-fields/raw/2.x/art/preview.png){.mb-4.rounded-lg.w-full.pointer-events-none}
     
