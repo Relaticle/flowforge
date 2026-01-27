@@ -12,10 +12,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Determine target branch
+        id: branch
+        run: |
+          # Extract major version from tag (v4.0.1 -> 4.x)
+          TAG="${{ github.event.release.tag_name }}"
+          MAJOR=$(echo "$TAG" | sed -E 's/^v([0-9]+)\..*/\1/')
+          echo "name=${MAJOR}.x" >> $GITHUB_OUTPUT
+
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ steps.branch.outputs.name }}
 
       - name: Update Changelog
         uses: stefanzweifel/changelog-updater-action@v1
@@ -26,6 +34,6 @@ jobs:
       - name: Commit updated CHANGELOG
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          branch: main
+          branch: ${{ steps.branch.outputs.name }}
           commit_message: Update CHANGELOG
           file_pattern: CHANGELOG.md
