@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Concerns;
 
-use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Enterprise-grade record management for Board with cursor-based pagination.
