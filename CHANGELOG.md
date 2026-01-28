@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v4.0.1 - 2026-01-28
+
+### Bug Fixes
+
+- Import DB facade for database operations in HasBoardRecords (#80)
+
 ## [4.0.0] - 2026-01-17
 
 ### Breaking Changes
@@ -18,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Migration
 
 See [Upgrading Guide](docs/content/1.getting-started/4.upgrading.md) for migration instructions from v3.x.
+
 
 ---
 
@@ -60,11 +67,13 @@ See [Upgrading Guide](docs/content/1.getting-started/4.upgrading.md) for migrati
 
 See [UPGRADE.md](UPGRADE.md) for detailed migration instructions from v2.x.
 
+
 ---
 
 ## [2.1.0] - Previous stable release
 
 See [v2.x branch](https://github.com/Relaticle/flowforge/tree/2.x) for v2.x changelog.
+
 
 ---
 
