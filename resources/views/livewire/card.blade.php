@@ -16,11 +16,11 @@
         'cursor-grab hover:cursor-grabbing' => $hasPositionIdentifier,
         'cursor-default' => !$hasActions && !$hasCardAction && !$hasPositionIdentifier,
     ])
+    x-sortable-item="{{ $record['id'] }}"
+    data-card-id="{{ $record['id'] }}"
     @if($hasPositionIdentifier)
         x-sortable-handle
-    x-sortable-item="{{ $record['id'] }}"
     @endif
-    data-card-id="{{ $record['id'] }}"
     data-position="{{ $record['position'] ?? '' }}"
 >
     <div class="flowforge-card-content">
