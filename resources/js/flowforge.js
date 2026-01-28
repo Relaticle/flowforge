@@ -15,8 +15,23 @@ export default function flowforge({state}) {
 
         handleSortableEnd(event) {
             const newOrder = event.to.sortable.toArray();
-            const cardId = event.item.getAttribute('x-sortable-item');
+            let cardId = event.item.getAttribute('x-sortable-item');
+
+            // Fallback to data-card-id if x-sortable-item is missing (edge case safety)
+            if (!cardId) {
+                cardId = event.item.getAttribute('data-card-id');
+                if (!cardId) {
+                    console.error('Flowforge: Could not determine card ID for move operation');
+                    return;
+                }
+            }
+
             const targetColumn = event.to.getAttribute('data-column-id');
+            if (!targetColumn) {
+                console.error('Flowforge: Target column ID is missing');
+                return;
+            }
+
             const cardElement = event.item;
 
             this.setCardState(cardElement, true);
