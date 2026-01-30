@@ -15,5 +15,8 @@
         "docus": "latest",
         "nuxt": "^4.1.2",
         "typescript": "^5.9.2"
+    },
+    "devDependencies": {
+        "nuxt-fathom": "^0.0.3"
     }
 }
