@@ -93,6 +93,7 @@ jobs:
           NUXT_APP_BASE_URL: ${{ steps.config.outputs.base_url }}
           NUXT_SITE_URL: https://relaticle.github.io
           DOCS_VERSION: ${{ steps.version.outputs.branch }}
+          NUXT_PUBLIC_FATHOM_SITE_ID: ${{ secrets.FATHOM_SITE_ID }}
 
       - name: Deploy to gh-pages
         run: |

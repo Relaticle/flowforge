@@ -4,7 +4,10 @@ const docsVersion = process.env.DOCS_VERSION || '4.x'
 
 export default defineNuxtConfig({
     extends: 'docus',
-    modules: ['@nuxt/image', '@nuxt/scripts'],
+    modules: ['@nuxt/image', '@nuxt/scripts', 'nuxt-fathom'],
+    fathom: {
+        siteId: process.env.NUXT_PUBLIC_FATHOM_SITE_ID || '',
+    },
     devtools: { enabled: true },
     site: {
         name: 'Flowforge',
