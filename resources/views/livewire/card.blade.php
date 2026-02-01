@@ -10,7 +10,7 @@
 
 <div
     @class([
-        'flowforge-card mb-3 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md',
+        'flowforge-card mb-2 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-md',
         'cursor-pointer' => $hasActions || $hasCardAction,
         'cursor-pointer transition-all duration-100 ease-in-out hover:shadow-lg hover:border-gray-400 active:shadow-md' => $hasCardAction,
         'cursor-grab hover:cursor-grabbing' => $hasPositionIdentifier,
@@ -24,8 +24,8 @@
     data-position="{{ $record['position'] ?? '' }}"
 >
     <div class="flowforge-card-content">
-        <div class="flex items-start justify-between mb-2">
-            <h4 class="text-sm font-semibold text-gray-900 dark:text-white p-3"
+        <div class="flex items-start justify-between">
+            <h4 class="text-xs font-semibold text-gray-900 dark:text-white px-3 pt-2"
                 @if($hasCardAction && $cardAction)
                     wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
                 style="cursor: pointer;"
@@ -35,13 +35,13 @@
             </h4>
 
             @if($hasActions)
-                <div class="m-3">
+                <div class="mt-1 mr-1">
                     <x-filament-actions::group :actions="$processedRecordActions"/>
                 </div>
             @endif
         </div>
 
-        <div class="px-3 pb-3"
+        <div class="px-3 pb-2"
              @if($hasCardAction && $cardAction)
                  wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
              style="cursor: pointer;"
@@ -49,8 +49,23 @@
         >
             {{-- Render card schema with compact spacing --}}
             @if(filled($record['schema']))
-                {{ $record['schema'] }}
+                <div class="flowforge-card-schema">
+                    {{ $record['schema'] }}
+                </div>
             @endif
         </div>
     </div>
 </div>
+
+@once
+<style>
+    /* Collapse Filament's default gap-6 between schema entries inside cards */
+    .flowforge-card-schema .fi-sc.fi-sc-has-gap {
+        gap: 0;
+    }
+    /* Remove internal gap within each entry wrapper */
+    .flowforge-card-schema .fi-in-entry {
+        gap: 0;
+    }
+</style>
+@endonce
