@@ -23,38 +23,50 @@
     @endif
     data-position="{{ $record['position'] ?? '' }}"
 >
-    <div class="flowforge-card-content">
+    <div class="flowforge-card-content px-3 pt-2 pb-2"
+         @if($hasCardAction && $cardAction)
+             wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
+         style="cursor: pointer;"
+        @endif
+    >
         <div class="flex items-start justify-between">
-            <h4 class="text-xs font-semibold text-gray-900 dark:text-white px-3 pt-2"
-                @if($hasCardAction && $cardAction)
-                    wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
-                style="cursor: pointer;"
+            <div class="flex-1 min-w-0">
+                {{-- Optional header (e.g. ticket number) --}}
+                @if(filled($record['headerSchema'] ?? null))
+                    <div class="flowforge-card-schema">
+                        {{ $record['headerSchema'] }}
+                    </div>
                 @endif
-            >
-                {{ $record['title'] }}
-            </h4>
+
+                {{-- Card title --}}
+                <h4 class="text-xs font-semibold text-gray-900 dark:text-white leading-snug">
+                    {{ $record['title'] }}
+                </h4>
+            </div>
 
             @if($hasActions)
-                <div class="mt-1 mr-1">
+                <div class="flex-shrink-0 -mt-0.5 -mr-1">
                     <x-filament-actions::group :actions="$processedRecordActions"/>
                 </div>
             @endif
         </div>
 
-        <div class="px-3 pb-2"
-             @if($hasCardAction && $cardAction)
-                 wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
-             style="cursor: pointer;"
-            @endif
-        >
-            {{-- Render card schema with compact spacing --}}
-            @if(filled($record['schema']))
-                <div class="flowforge-card-schema">
-                    {{ $record['schema'] }}
-                </div>
-            @endif
-        </div>
+        {{-- Card schema (body fields) --}}
+        @if(filled($record['schema']))
+            <div class="flowforge-card-schema">
+                {{ $record['schema'] }}
+            </div>
+        @endif
     </div>
+
+    {{-- Optional card footer --}}
+    @if(filled($record['footerSchema'] ?? null))
+        <div class="flowforge-card-footer border-t border-gray-200 dark:border-gray-700 px-3 py-1.5">
+            <div class="flowforge-card-schema">
+                {{ $record['footerSchema'] }}
+            </div>
+        </div>
+    @endif
 </div>
 
 @once

@@ -243,6 +243,15 @@ trait HasBoardRecords
             'model' => $record,
         ];
 
+        // Process card header schema if available
+        $formatted['headerSchema'] = null;
+        $headerSchema = $this->getCardHeaderSchema($record);
+
+        if ($headerSchema !== null) {
+            $headerSchema->model($record);
+            $formatted['headerSchema'] = $headerSchema;
+        }
+
         // Process card schema if available
         $formatted['schema'] = null;
         $schema = $this->getCardSchema($record);
@@ -253,6 +262,15 @@ trait HasBoardRecords
 
             // Store the schema object with record context for proper Livewire rendering
             $formatted['schema'] = $schema;
+        }
+
+        // Process card footer schema if available
+        $formatted['footerSchema'] = null;
+        $footerSchema = $this->getCardFooterSchema($record);
+
+        if ($footerSchema !== null) {
+            $footerSchema->model($record);
+            $formatted['footerSchema'] = $footerSchema;
         }
 
         return $formatted;
