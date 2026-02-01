@@ -68,8 +68,8 @@
                 <tr wire:key="lane-row-{{ $swimlaneId }}">
                     {{-- Swimlane Label Cell (row header) --}}
                     <td
-                        class="sticky left-0 z-10 bg-white dark:bg-gray-900 border-b border-r border-gray-200 dark:border-gray-700 p-3 align-top"
-                        style="width: 180px; min-width: 180px;"
+                        class="sticky left-0 z-10 bg-white dark:bg-gray-900 border-b border-r border-gray-200 dark:border-gray-700 p-3"
+                        style="width: 180px; min-width: 180px; vertical-align: top;"
                         wire:key="lane-label-{{ $swimlaneId }}"
                     >
                         <button
@@ -124,8 +124,8 @@
                             $cellKey = $columnId . '|' . $swimlaneId;
                         @endphp
                         <td
-                            class="border-b border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 align-top p-0"
-                            style="width: 280px; min-width: 280px;"
+                            class="border-b border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-0"
+                            style="width: 280px; min-width: 280px; vertical-align: top;"
                             wire:key="cell-{{ $cellKey }}"
                         >
                             <div x-show="!isCollapsed('{{ $swimlaneId }}')">

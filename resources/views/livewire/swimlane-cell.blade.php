@@ -17,8 +17,8 @@
     @if($total > count($items))
         @scroll.throttle.100ms="handleColumnScroll($event, '{{ $cellKey }}')"
     @endif
-    class="flowforge-swimlane-cell p-2 overflow-x-hidden kanban-cards"
-    style="min-height: 100px;"
+    class="flowforge-swimlane-cell overflow-x-hidden kanban-cards"
+    style="padding: 0.5rem;"
 >
     @if (count($items) > 0)
         @foreach ($items as $record)
@@ -42,9 +42,5 @@
                 </div>
             </div>
         @endif
-    @else
-        <div class="p-2 flex flex-col items-center justify-center h-full rounded-lg border border-dashed border-gray-200 dark:border-gray-700" style="min-height: 60px;">
-            <p class="text-xs text-gray-400 dark:text-gray-500">—</p>
-        </div>
     @endif
 </div>
