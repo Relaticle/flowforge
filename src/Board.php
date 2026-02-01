@@ -11,6 +11,7 @@ use Relaticle\Flowforge\Concerns\HasBoardActions;
 use Relaticle\Flowforge\Concerns\HasBoardColumns;
 use Relaticle\Flowforge\Concerns\HasBoardFilters;
 use Relaticle\Flowforge\Concerns\HasBoardRecords;
+use Relaticle\Flowforge\Concerns\HasBoardSwimlanes;
 use Relaticle\Flowforge\Concerns\HasCardSchema;
 use Relaticle\Flowforge\Concerns\InteractsWithKanbanQuery;
 use Relaticle\Flowforge\Contracts\HasBoard;
@@ -23,6 +24,7 @@ class Board extends ViewComponent
     use HasBoardColumns;
     use HasBoardFilters;
     use HasBoardRecords;
+    use HasBoardSwimlanes;
     use HasCardSchema;
     use InteractsWithKanbanQuery;
 
@@ -55,18 +57,38 @@ class Board extends ViewComponent
     /**
      * Get view data for the board template.
      * Delegates to Livewire component like Filament's Table does.
+     *
+     * When swimlanes are configured, returns a 2D structure:
+     *   columns = header definitions (no items), swimlanes = rows with cells.
+     * When no swimlanes, returns the flat column structure (unchanged).
      */
     public function getViewData(): array
     {
-        // Batch all column counts in a single query
+        $config = [
+            'recordTitleAttribute' => $this->getRecordTitleAttribute(),
+            'columnIdentifierAttribute' => $this->getColumnIdentifierAttribute(),
+            'cardLabel' => __('flowforge::flowforge.card_label'),
+            'pluralCardLabel' => __('flowforge::flowforge.plural_card_label'),
+        ];
+
+        if ($this->hasSwimlanes()) {
+            return $this->getViewDataWithSwimlanes($config);
+        }
+
+        return $this->getViewDataFlat($config);
+    }
+
+    /**
+     * Build the flat (no-swimlane) view data — original behavior.
+     */
+    protected function getViewDataFlat(array $config): array
+    {
         $allCounts = $this->getBatchedBoardRecordCounts();
 
-        // Build columns data using new concerns
         $columns = [];
         foreach ($this->getColumns() as $column) {
             $columnId = $column->getName();
 
-            // Get formatted records
             $records = $this->getBoardRecords($columnId);
             $formattedRecords = $records->map(fn ($record) => $this->formatBoardRecord($record))->toArray();
 
@@ -82,12 +104,109 @@ class Board extends ViewComponent
 
         return [
             'columns' => $columns,
-            'config' => [
-                'recordTitleAttribute' => $this->getRecordTitleAttribute(),
-                'columnIdentifierAttribute' => $this->getColumnIdentifierAttribute(),
-                'cardLabel' => __('flowforge::flowforge.card_label'),
-                'pluralCardLabel' => __('flowforge::flowforge.plural_card_label'),
-            ],
+            'swimlanes' => null,
+            'config' => $config,
+        ];
+    }
+
+    /**
+     * Build the 2D swimlane view data: columns (headers only) × swimlanes (rows with cells).
+     */
+    protected function getViewDataWithSwimlanes(array $config): array
+    {
+        $config['swimlaneIdentifierAttribute'] = $this->getSwimlaneIdentifierAttribute();
+
+        // Column header definitions (no items — those live in cells)
+        $columnHeaders = [];
+        foreach ($this->getColumns() as $column) {
+            $columnHeaders[$column->getName()] = [
+                'id' => $column->getName(),
+                'label' => $column->getLabel(),
+                'color' => $column->getColor(),
+                'icon' => $column->getIcon(),
+            ];
+        }
+
+        // Batch all cell counts in one query
+        $cellCounts = $this->getBatchedSwimlaneRecordCounts();
+
+        // Build swimlane rows with cells
+        $swimlaneData = [];
+        $columnIds = array_keys($columnHeaders);
+
+        foreach ($this->getSwimlanes() as $swimlane) {
+            $swimlaneId = $swimlane->getName();
+            $laneTotal = 0;
+            $cells = [];
+
+            foreach ($columnIds as $columnId) {
+                $cellKey = $columnId . '|' . $swimlaneId;
+                $cellCount = $cellCounts[$cellKey] ?? 0;
+                $laneTotal += $cellCount;
+
+                $records = $this->getBoardRecordsForCell($columnId, $swimlaneId);
+                $formattedRecords = $records->map(fn ($record) => $this->formatBoardRecord($record))->toArray();
+
+                $cells[$columnId] = [
+                    'items' => $formattedRecords,
+                    'total' => $cellCount,
+                ];
+            }
+
+            $swimlaneData[$swimlaneId] = [
+                'id' => $swimlaneId,
+                'label' => $swimlane->getLabel(),
+                'color' => $swimlane->getColor(),
+                'icon' => $swimlane->getIcon(),
+                'total' => $laneTotal,
+                'cells' => $cells,
+            ];
+        }
+
+        // Check for uncategorized records (cards whose swimlane value doesn't match any defined swimlane)
+        $definedSwimlaneIds = $this->getSwimlaneIdentifiers();
+        $uncategorizedTotal = 0;
+        $uncategorizedCells = [];
+
+        foreach ($columnIds as $columnId) {
+            $cellKey = $columnId . '|__uncategorized__';
+            $cellCount = $cellCounts[$cellKey] ?? 0;
+
+            // Also check for values that don't match any defined swimlane
+            foreach ($cellCounts as $key => $count) {
+                if (! str_starts_with($key, $columnId . '|')) {
+                    continue;
+                }
+                $laneId = substr($key, strlen($columnId) + 1);
+                if ($laneId !== '__uncategorized__' && ! in_array($laneId, $definedSwimlaneIds, true)) {
+                    $cellCount += $count;
+                }
+            }
+
+            if ($cellCount > 0) {
+                $uncategorizedTotal += $cellCount;
+                $uncategorizedCells[$columnId] = [
+                    'items' => [], // Uncategorized cards loaded on-demand if needed
+                    'total' => $cellCount,
+                ];
+            }
+        }
+
+        if ($uncategorizedTotal > 0) {
+            $swimlaneData['__uncategorized__'] = [
+                'id' => '__uncategorized__',
+                'label' => __('flowforge::flowforge.uncategorized'),
+                'color' => 'gray',
+                'icon' => null,
+                'total' => $uncategorizedTotal,
+                'cells' => $uncategorizedCells,
+            ];
+        }
+
+        return [
+            'columns' => $columnHeaders,
+            'swimlanes' => $swimlaneData,
+            'config' => $config,
         ];
     }
 
