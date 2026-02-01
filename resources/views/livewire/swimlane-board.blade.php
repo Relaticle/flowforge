@@ -8,8 +8,7 @@
 @endphp
 
 <div
-    class="flowforge-swimlane-board overflow-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
-    style="max-height: calc(100vh - 10rem);"
+    class="flowforge-swimlane-board overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
     x-data="{
         collapsed: {},
         init() {

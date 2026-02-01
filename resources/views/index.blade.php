@@ -23,13 +23,11 @@
     <!-- Board Content -->
     @if($swimlanes)
         {{-- 2D Swimlane Grid Layout --}}
-        <div class="flex-1 overflow-hidden h-full">
-            <x-flowforge::swimlane-board
-                :columns="$columns"
-                :swimlanes="$swimlanes"
-                :config="$config"
-            />
-        </div>
+        <x-flowforge::swimlane-board
+            :columns="$columns"
+            :swimlanes="$swimlanes"
+            :config="$config"
+        />
     @else
         {{-- Flat Column Layout (original) --}}
         <div class="flex-1 overflow-hidden h-full">
