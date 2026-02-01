@@ -26,7 +26,7 @@
         }
     }"
 >
-    <table class="border-collapse" style="min-width: {{ 180 + ($columnCount * 280) }}px;">
+    <table class="border-collapse w-full" style="min-width: {{ 180 + ($columnCount * 300) }}px;">
         {{-- Sticky Column Header Row --}}
         <thead>
             <tr>
@@ -40,7 +40,7 @@
                     @endphp
                     <th
                         class="sticky top-0 z-20 bg-white dark:bg-gray-900 border-b border-r border-gray-200 dark:border-gray-700 p-3 text-left font-normal"
-                        style="width: 280px; min-width: 280px;"
+                        style="min-width: 300px;"
                         wire:key="header-{{ $columnId }}"
                     >
                         <div class="flex items-center">
@@ -125,7 +125,7 @@
                         @endphp
                         <td
                             class="border-b border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-0"
-                            style="width: 280px; min-width: 280px; vertical-align: top;"
+                            style="min-width: 300px; vertical-align: top;"
                             wire:key="cell-{{ $cellKey }}"
                         >
                             <div x-show="!isCollapsed('{{ $swimlaneId }}')">
