@@ -88,10 +88,10 @@ Visual form builder for all your public-facing forms.
 <td width="50%" valign="top">
 
 ### Custom Fields
-[<img src="https://github.com/Relaticle/custom-fields/raw/2.x/art/preview.png" width="100%" />](https://custom-fields.relaticle.com)
+[<img src="https://github.com/Relaticle/custom-fields/raw/2.x/art/preview.png" width="100%" />](https://relaticle.github.io/custom-fields)
 
 Let users add custom fields to any model without code changes.
-[Learn more →](https://custom-fields.relaticle.com)
+[Learn more →](https://relaticle.github.io/custom-fields)
 
 </td>
 </tr>
