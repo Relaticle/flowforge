@@ -149,6 +149,55 @@ trait HasBoardRecords
     }
 
     /**
+     * Get records for ALL columns in a single query, partitioned in PHP.
+     *
+     * @return array<string, Collection>
+     */
+    public function getBatchedBoardRecords(): array
+    {
+        $query = $this->getQuery();
+
+        if (! $query) {
+            return [];
+        }
+
+        $statusField = $this->getColumnIdentifierAttribute();
+        $positionField = $this->getPositionIdentifierAttribute();
+        $limit = $this->getCardsPerColumn();
+        $livewire = $this->getLivewire();
+
+        $baseQuery = clone $query;
+
+        if ($livewire->getTable()->isFilterable() || $livewire->hasTableSearch()) {
+            $baseQuery = clone $livewire->getFilteredTableQuery();
+        }
+
+        $keyName = $baseQuery->getModel()->getKeyName();
+        $columnIds = collect($this->getColumns())->map(fn ($col) => $col->getName())->all();
+
+        $allRecords = (clone $baseQuery)
+            ->whereIn($statusField, $columnIds)
+            ->orderBy($positionField, 'asc')
+            ->orderBy($keyName, 'asc')
+            ->get();
+
+        $partitioned = [];
+
+        foreach ($columnIds as $columnId) {
+            $columnLimit = property_exists($livewire, 'columnCardLimits')
+                ? ($livewire->columnCardLimits[$columnId] ?? $limit)
+                : $limit;
+
+            $partitioned[$columnId] = $allRecords
+                ->filter(fn ($record) => (string) data_get($record, $statusField) === (string) $columnId)
+                ->take($columnLimit)
+                ->values();
+        }
+
+        return $partitioned;
+    }
+
+    /**
      * Format a record for display with Infolist entries.
      */
     public function formatBoardRecord(Model $record): array

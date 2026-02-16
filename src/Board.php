@@ -58,16 +58,15 @@ class Board extends ViewComponent
      */
     public function getViewData(): array
     {
-        // Batch all column counts in a single query
         $allCounts = $this->getBatchedBoardRecordCounts();
+        $batchedRecords = $this->getBatchedBoardRecords();
 
-        // Build columns data using new concerns
         $columns = [];
+
         foreach ($this->getColumns() as $column) {
             $columnId = $column->getName();
 
-            // Get formatted records
-            $records = $this->getBoardRecords($columnId);
+            $records = $batchedRecords[$columnId] ?? new \Illuminate\Database\Eloquent\Collection;
             $formattedRecords = $records->map(fn ($record) => $this->formatBoardRecord($record))->toArray();
 
             $columns[$columnId] = [
