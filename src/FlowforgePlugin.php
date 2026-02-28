@@ -6,8 +6,15 @@ use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Livewire\Livewire;
 
-// use Relaticle\Flowforge\Livewire\KanbanBoard;
-
+/**
+ * Filament Panel plugin for FlowForge.
+ *
+ * This class requires the full `filament/filament` package (Panel Builder).
+ * For standalone Livewire usage without a panel, use the InteractsWithBoard
+ * trait directly on your Livewire component instead.
+ *
+ * @see \Relaticle\Flowforge\Concerns\InteractsWithBoard
+ */
 class FlowforgePlugin implements Plugin
 {
     public function getId(): string
