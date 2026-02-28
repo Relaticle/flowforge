@@ -48,7 +48,8 @@ describe('standalone card movement', function () {
         $taskToMove = Task::factory()->todo()->withPosition('65535.0000000000')->create();
 
         Livewire::test(TestStandaloneBoard::class)
-            ->call('moveCard', (string) $taskToMove->id, 'in_progress', (string) $task1->id, (string) $task2->id);
+            ->call('moveCard', (string) $taskToMove->id, 'in_progress', (string) $task1->id, (string) $task2->id)
+            ->assertDispatched('kanban-card-moved');
 
         $movedTask = $taskToMove->fresh();
         expect($movedTask->status)->toBe('in_progress')
