@@ -13,7 +13,6 @@ use Relaticle\Flowforge\Tests\Fixtures\TestStandaloneBoard;
  *
  * @see https://github.com/relaticle/flowforge/issues/84
  */
-
 describe('standalone board rendering', function () {
     test('renders board without a panel registered', function () {
         Livewire::test(TestStandaloneBoard::class)
