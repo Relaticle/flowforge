@@ -21,13 +21,13 @@
     ],
     "require": {
         "php": "^8.3",
+        "ext-bcmath": "*",
         "filament/actions": "^5.0",
         "filament/forms": "^5.0",
         "filament/schemas": "^5.0",
         "filament/support": "^5.0",
         "filament/tables": "^5.0",
-        "spatie/laravel-package-tools": "^1.15.0",
-        "ext-bcmath": "*"
+        "spatie/laravel-package-tools": "^1.15.0"
     },
     "suggest": {
         "filament/filament": "Required for BoardPage, BoardResourcePage, and FlowforgePlugin panel integration (^5.0)"

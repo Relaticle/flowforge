@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Relaticle\Flowforge;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
-use Livewire\Livewire;
 
 /**
  * Filament Panel plugin for FlowForge.
@@ -29,7 +30,7 @@ class FlowforgePlugin implements Plugin
 
     public function boot(Panel $panel): void
     {
-        // Livewire::component('relaticle.flowforge.livewire.kanban-board', KanbanBoard::class);
+        //
     }
 
     public static function make(): static

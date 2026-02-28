@@ -8,13 +8,10 @@ use Relaticle\Flowforge\Tests\Fixtures\Task;
 use Relaticle\Flowforge\Tests\Fixtures\TestStandaloneBoard;
 
 /**
- * Tests that verify FlowForge works WITHOUT a Filament Panel registered.
- * This uses StandaloneTestCase which excludes FilamentServiceProvider and TestPanelProvider.
- *
  * @see https://github.com/relaticle/flowforge/issues/84
  */
 describe('standalone board rendering', function () {
-    test('renders board without a panel registered', function () {
+    test('renders board with all columns', function () {
         Livewire::test(TestStandaloneBoard::class)
             ->assertStatus(200)
             ->assertSee('To Do')
@@ -22,7 +19,7 @@ describe('standalone board rendering', function () {
             ->assertSee('Completed');
     });
 
-    test('displays cards in correct columns without a panel', function () {
+    test('displays cards in correct columns', function () {
         Task::factory()->todo()->create(['title' => 'Standalone Todo']);
         Task::factory()->inProgress()->create(['title' => 'Standalone In Progress']);
         Task::factory()->completed()->create(['title' => 'Standalone Completed']);
@@ -35,7 +32,7 @@ describe('standalone board rendering', function () {
 });
 
 describe('standalone card movement', function () {
-    test('moves card to different column without a panel', function () {
+    test('moves card to different column', function () {
         $task = Task::factory()->todo()->withPosition('65535.0000000000')->create();
 
         Livewire::test(TestStandaloneBoard::class)
@@ -45,7 +42,7 @@ describe('standalone card movement', function () {
         expect($task->fresh()->status)->toBe('in_progress');
     });
 
-    test('moves card between two cards without a panel', function () {
+    test('moves card between two cards', function () {
         $task1 = Task::factory()->inProgress()->withPosition('65535.0000000000')->create();
         $task2 = Task::factory()->inProgress()->withPosition('131070.0000000000')->create();
         $taskToMove = Task::factory()->todo()->withPosition('65535.0000000000')->create();
@@ -59,7 +56,7 @@ describe('standalone card movement', function () {
             ->and((float) $movedTask->order_position)->toBeLessThan(131070);
     });
 
-    test('moves card to empty column without a panel', function () {
+    test('moves card to empty column', function () {
         $task = Task::factory()->todo()->withPosition('65535.0000000000')->create();
 
         Livewire::test(TestStandaloneBoard::class)
@@ -73,7 +70,7 @@ describe('standalone card movement', function () {
 });
 
 describe('standalone pagination', function () {
-    test('loads more items without a panel', function () {
+    test('loads more items on demand', function () {
         Task::factory(30)->todo()->create();
 
         Livewire::test(TestStandaloneBoard::class)
