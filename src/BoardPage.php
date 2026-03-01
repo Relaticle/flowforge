@@ -14,6 +14,11 @@ use Relaticle\Flowforge\Contracts\HasBoard;
 /**
  * Board page for standard Filament pages.
  * Extends Filament's base Page class with kanban board functionality.
+ *
+ * Requires the `filament/filament` package (Panel Builder).
+ * For standalone usage, use the InteractsWithBoard trait directly.
+ *
+ * @see \Relaticle\Flowforge\Concerns\InteractsWithBoard
  */
 abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
 {

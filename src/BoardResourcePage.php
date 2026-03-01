@@ -16,10 +16,15 @@ use Relaticle\Flowforge\Contracts\HasBoard;
  * Board page for Filament resource pages.
  * Extends Filament's resource Page class with kanban board functionality.
  *
+ * Requires the `filament/filament` package (Panel Builder).
+ * For standalone usage, use the InteractsWithBoard trait directly.
+ *
  * CRITICAL: This class doesn't use InteractsWithRecord trait itself, but child
  * classes might. To handle the trait conflict, we override getDefaultActionRecord()
  * to intelligently route to either board card records or resource records based
  * on whether a recordKey is present in the mounted action context.
+ *
+ * @see \Relaticle\Flowforge\Concerns\InteractsWithBoard
  */
 abstract class BoardResourcePage extends Page implements HasActions, HasBoard, HasForms
 {
