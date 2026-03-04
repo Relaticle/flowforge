@@ -201,6 +201,10 @@ Override these methods to customize board behavior for your specific needs.
 
 Override `moveCard()` to add custom logic when cards are moved:
 
+#### Simple Updates
+
+For basic updates on the exact same model, you can call the parent method and append your logic:
+
 ```php
 public function moveCard(
     string $cardId,
@@ -218,6 +222,41 @@ public function moveCard(
         $task->update(['completed_at' => now()]);
         $task->assignee->notify(new TaskCompletedNotification($task));
     }
+}
+```
+
+#### Data Integrity with Transactions (Recommended)
+
+If your custom logic involves complex state machines or updating secondary tables (like activity logs), it is highly recommended to wrap the override in a database transaction. Because parent::moveCard() executes a database update immediately, wrapping the entire method ensures that if your custom logic fails, the database safely rolls back. The frontend's optimistic UI will then gracefully snap the card back to its original column.
+
+```php
+use Illuminate\Support\Facades\DB;
+
+public function moveCard(
+    string $cardId,
+    string $targetColumnId,
+    ?string $afterCardId = null,
+    ?string $beforeCardId = null
+): void {
+    DB::transaction(function () use ($cardId, $targetColumnId, $afterCardId, $beforeCardId) {
+        // Let Flowforge handle the stage and position math
+        parent::moveCard($cardId, $targetColumnId, $afterCardId, $beforeCardId);
+
+        // Execute custom atomic logic safely
+        $task = Task::find($cardId);
+
+        if ($targetColumnId === 'completed') {
+            $task->update(['completed_at' => now()]);
+            
+            // Safe multi-table insert - rolls back the card move if it fails!
+            ActivityLog::create([
+                'task_id' => $task->id, 
+                'action' => 'Task marked as completed'
+            ]);
+            
+            $task->assignee->notify(new TaskCompletedNotification($task));
+        }
+    });
 }
 ```
 
