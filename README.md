@@ -1,6 +1,6 @@
 # Flowforge
 
-<img src="art/preview.png" alt="Flowforge Kanban Board" width="800">
+<img src="art/card.png" alt="Flowforge Kanban Board" width="800">
 
 Transform any Laravel model into a production-ready drag-and-drop Kanban board.
 
