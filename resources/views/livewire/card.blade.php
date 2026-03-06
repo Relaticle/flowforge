@@ -16,8 +16,8 @@
         'cursor-grab hover:cursor-grabbing' => $hasPositionIdentifier,
         'cursor-default' => !$hasActions && !$hasCardAction && !$hasPositionIdentifier,
     ])
-    x-sortable-item="{{ $record['id'] }}"
-    data-card-id="{{ $record['id'] }}"
+    x-sortable-item="{{ (string) $record['id'] }}"
+    data-card-id="{{ (string) $record['id'] }}"
     @if($hasPositionIdentifier)
         x-sortable-handle
     @endif
@@ -27,7 +27,7 @@
         <div class="flex items-start justify-between mb-2">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-white p-3"
                 @if($hasCardAction && $cardAction)
-                    wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
+                    wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => (string) $record['id']]))"
                 style="cursor: pointer;"
                 @endif
             >
@@ -43,7 +43,7 @@
 
         <div class="px-3 pb-3"
              @if($hasCardAction && $cardAction)
-                 wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
+                 wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => (string) $record['id']]))"
              style="cursor: pointer;"
             @endif
         >
