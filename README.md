@@ -1,5 +1,7 @@
 # Flowforge
 
+<img src="art/card.png" alt="Flowforge Kanban Board" width="800">
+
 Transform any Laravel model into a production-ready drag-and-drop Kanban board.
 
 **Works with Filament admin panels and standalone Livewire applications.**
@@ -10,9 +12,6 @@ Transform any Laravel model into a production-ready drag-and-drop Kanban board.
 [![Laravel 12+](https://img.shields.io/badge/laravel-12%2B-red.svg?style=for-the-badge)](https://laravel.com)
 [![Tests](https://img.shields.io/github/actions/workflow/status/relaticle/flowforge/run-tests.yml?branch=4.x&style=for-the-badge&label=tests)](https://github.com/relaticle/flowforge/actions)
 
-<div align="center">
-<img src="art/preview.png" alt="Flowforge Kanban Board" width="800">
-</div>
 
 ## Features
 
