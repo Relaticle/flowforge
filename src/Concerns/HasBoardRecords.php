@@ -154,7 +154,7 @@ trait HasBoardRecords
     public function formatBoardRecord(Model $record): array
     {
         $formatted = [
-            'id' => $record->getKey(),
+            'id' => (string) $record->getKey(),
             'title' => data_get($record, $this->getRecordTitleAttribute()),
             'column' => data_get($record, $this->getColumnIdentifierAttribute()),
             'position' => data_get($record, $this->getPositionIdentifierAttribute()),
