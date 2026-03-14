@@ -10,7 +10,7 @@ Transform any Laravel model into a production-ready drag-and-drop Kanban board.
 [![Total Downloads](https://img.shields.io/packagist/dt/relaticle/flowforge.svg?style=for-the-badge)](https://packagist.org/packages/relaticle/flowforge)
 [![PHP 8.3+](https://img.shields.io/badge/php-8.3%2B-blue.svg?style=for-the-badge)](https://php.net)
 [![Laravel 12+](https://img.shields.io/badge/laravel-12%2B-red.svg?style=for-the-badge)](https://laravel.com)
-[![Tests](https://img.shields.io/github/actions/workflow/status/relaticle/flowforge/run-tests.yml?branch=4.x&style=for-the-badge&label=tests)](https://github.com/relaticle/flowforge/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/relaticle/flowforge/tests.yml?branch=4.x&style=for-the-badge&label=tests)](https://github.com/relaticle/flowforge/actions)
 
 
 ## Features
