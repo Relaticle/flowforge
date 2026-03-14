@@ -18,7 +18,7 @@ jobs:
           TAG="${{ github.event.release.tag_name }}"
           MAJOR=$(echo "$TAG" | sed -E 's/^v?([0-9]+)\..*/\1/')
           BRANCH="${MAJOR}.x"
-          if ! git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null 2>&1; then
+          if ! git ls-remote --exit-code --heads "https://github.com/${{ github.repository }}" "$BRANCH" > /dev/null 2>&1; then
             BRANCH="${{ github.event.repository.default_branch }}"
           fi
           echo "name=${BRANCH}" >> $GITHUB_OUTPUT
