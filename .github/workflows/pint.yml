@@ -1,4 +1,4 @@
-name: "Fix PHP Code Styling"
+name: Pint
 
 on:
   push:
