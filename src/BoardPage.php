@@ -9,6 +9,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Livewire\Attributes\Url;
 use Relaticle\Flowforge\Concerns\BaseBoard;
+use Relaticle\Flowforge\Concerns\InteractsWithBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
 /**
@@ -18,7 +19,7 @@ use Relaticle\Flowforge\Contracts\HasBoard;
  * Requires the `filament/filament` package (Panel Builder).
  * For standalone usage, use the InteractsWithBoard trait directly.
  *
- * @see \Relaticle\Flowforge\Concerns\InteractsWithBoard
+ * @see InteractsWithBoard
  */
 abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
 {

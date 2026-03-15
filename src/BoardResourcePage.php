@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge;
 
+use Filament\Actions\Action;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
 use Livewire\Attributes\Url;
 use Relaticle\Flowforge\Concerns\BaseBoard;
+use Relaticle\Flowforge\Concerns\InteractsWithBoard;
 use Relaticle\Flowforge\Contracts\HasBoard;
 
 /**
@@ -24,7 +26,7 @@ use Relaticle\Flowforge\Contracts\HasBoard;
  * to intelligently route to either board card records or resource records based
  * on whether a recordKey is present in the mounted action context.
  *
- * @see \Relaticle\Flowforge\Concerns\InteractsWithBoard
+ * @see InteractsWithBoard
  */
 abstract class BoardResourcePage extends Page implements HasActions, HasBoard, HasForms
 {
@@ -50,7 +52,7 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
      * board action detection.
      *
      * @param  array<array<string, mixed>>  $actions
-     * @return array<\Filament\Actions\Action>
+     * @return array<Action>
      *
      * @throws ActionNotResolvableException
      */

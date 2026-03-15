@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
+use Relaticle\Flowforge\Board;
+use Relaticle\Flowforge\BoardPage;
+use Relaticle\Flowforge\Column;
 use Relaticle\Flowforge\Commands\MakeKanbanBoardCommand;
 use Relaticle\Flowforge\FlowforgeServiceProvider;
 
@@ -24,7 +27,7 @@ test('package assets are defined', function () {
     $serviceProvider = new FlowforgeServiceProvider(app());
 
     // Use reflection to test protected getAssets method
-    $reflection = new \ReflectionClass($serviceProvider);
+    $reflection = new ReflectionClass($serviceProvider);
     $method = $reflection->getMethod('getAssets');
     $method->setAccessible(true);
     $assets = $method->invoke($serviceProvider);
@@ -60,7 +63,7 @@ test('package script data is configured', function () {
     $serviceProvider = new FlowforgeServiceProvider(app());
 
     // Use reflection to test protected getScriptData method
-    $reflection = new \ReflectionClass($serviceProvider);
+    $reflection = new ReflectionClass($serviceProvider);
     $method = $reflection->getMethod('getScriptData');
     $method->setAccessible(true);
     $scriptData = $method->invoke($serviceProvider);
@@ -81,8 +84,8 @@ test('package configuration exists if defined', function () {
 });
 
 test('core classes exist and are autoloadable', function () {
-    expect(class_exists(\Relaticle\Flowforge\Board::class))->toBeTrue();
-    expect(class_exists(\Relaticle\Flowforge\BoardPage::class))->toBeTrue();
-    expect(class_exists(\Relaticle\Flowforge\Column::class))->toBeTrue();
-    expect(class_exists(\Relaticle\Flowforge\Commands\MakeKanbanBoardCommand::class))->toBeTrue();
+    expect(class_exists(Board::class))->toBeTrue();
+    expect(class_exists(BoardPage::class))->toBeTrue();
+    expect(class_exists(Column::class))->toBeTrue();
+    expect(class_exists(MakeKanbanBoardCommand::class))->toBeTrue();
 });

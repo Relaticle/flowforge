@@ -6,6 +6,7 @@ namespace Relaticle\Flowforge;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Relaticle\Flowforge\Concerns\InteractsWithBoard;
 
 /**
  * Filament Panel plugin for FlowForge.
@@ -14,7 +15,7 @@ use Filament\Panel;
  * For standalone Livewire usage without a panel, use the InteractsWithBoard
  * trait directly on your Livewire component instead.
  *
- * @see \Relaticle\Flowforge\Concerns\InteractsWithBoard
+ * @see InteractsWithBoard
  */
 class FlowforgePlugin implements Plugin
 {

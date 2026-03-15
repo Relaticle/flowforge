@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
+use Relaticle\Flowforge\Board;
 use Relaticle\Flowforge\Concerns\InteractsWithBoard;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 
@@ -13,12 +15,12 @@ class RetryMechanismTestHelper
         isDuplicatePositionError as public;
     }
 
-    public function getBoard(): \Relaticle\Flowforge\Board
+    public function getBoard(): Board
     {
         throw new RuntimeException('Not implemented for testing');
     }
 
-    public function getBoardQuery(): ?\Illuminate\Database\Eloquent\Builder
+    public function getBoardQuery(): ?Builder
     {
         return null;
     }
