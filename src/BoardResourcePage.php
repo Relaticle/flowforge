@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge;
 
+use Filament\Actions\Action;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Forms\Contracts\HasForms;
@@ -45,7 +46,7 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
      * board action detection.
      *
      * @param  array<array<string, mixed>>  $actions
-     * @return array<\Filament\Actions\Action>
+     * @return array<Action>
      *
      * @throws ActionNotResolvableException
      */

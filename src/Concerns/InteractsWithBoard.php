@@ -532,7 +532,7 @@ trait InteractsWithBoard
      * Uses __invoke() to set column arguments so they are serialized
      * into the wire:click handler via getInvokedArguments().
      *
-     * @return array<\Filament\Actions\Action>
+     * @return array<Action>
      */
     public function getBoardColumnActions(string $columnId): array
     {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\QueryException;
 use Relaticle\Flowforge\Services\DecimalPosition;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 
@@ -38,7 +39,7 @@ describe('concurrent position insertions', function () {
                     'order_position' => $position,
                 ]);
                 $insertedPositions[] = $task->order_position;
-            } catch (\Illuminate\Database\QueryException $e) {
+            } catch (QueryException $e) {
                 // If we hit a duplicate (extremely rare), count it
                 $failedInserts++;
             }
@@ -89,7 +90,7 @@ describe('concurrent position insertions', function () {
                     'order_position' => $position,
                 ]);
                 $insertedCount++;
-            } catch (\Illuminate\Database\QueryException) {
+            } catch (QueryException) {
                 // Unique constraint violation - should never happen
             }
         }
@@ -118,7 +119,7 @@ describe('concurrent position insertions', function () {
             'title' => 'Duplicate Card',
             'status' => 'todo',
             'order_position' => '1500.0000000000',
-        ]))->toThrow(\Illuminate\Database\QueryException::class);
+        ]))->toThrow(QueryException::class);
     });
 
     test('positions remain sortable after many insertions', function () {
