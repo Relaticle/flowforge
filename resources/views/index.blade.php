@@ -16,7 +16,9 @@
     })"
 >
 
-    @include('flowforge::components.filters')
+    @unless($config['headerToolbar'] ?? false)
+        @include('flowforge::components.filters')
+    @endunless
 
     <!-- Board Content -->
     <div class="flex-1 overflow-hidden h-full">

@@ -6,6 +6,7 @@ namespace Relaticle\Flowforge\Concerns;
 
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Illuminate\Contracts\View\View;
 use Relaticle\Flowforge\Board;
 
 /**
@@ -31,5 +32,27 @@ trait BaseBoard
     protected function getBoardView(): string
     {
         return 'flowforge::filament.pages.board-page';
+    }
+
+    /**
+     * Override Filament's page header when headerToolbar is enabled.
+     *
+     * Renders the page title with the filter/search toolbar inline,
+     * replacing the default stacked layout.
+     */
+    public function getHeader(): ?View
+    {
+        if (! $this->getBoard()->hasHeaderToolbar()) {
+            return null;
+        }
+
+        /** @var view-string $viewName */
+        $viewName = 'flowforge::filament.pages.board-header';
+
+        return view($viewName, [
+            'heading' => $this->getHeading(),
+            'subheading' => $this->getSubheading(),
+            'breadcrumbs' => filament()->hasBreadcrumbs() ? $this->getBreadcrumbs() : [],
+        ]);
     }
 }
