@@ -261,6 +261,22 @@
       
     </td>
   </tr>
+  
+  <tr>
+    <td>
+      <code>
+        headerToolbar(bool)
+      </code>
+    </td>
+    
+    <td>
+      Render filters/search inline with page title
+    </td>
+    
+    <td>
+      
+    </td>
+  </tr>
 </tbody>
 </table>
 
@@ -323,6 +339,7 @@ use Filament\Support\Enums\Width;
 ->filtersLayout(FiltersLayout::AboveContent)      // Display filters above board
 ->filtersFormWidth(Width::Large)                  // Filter panel width
 ->filtersFormColumns(3)                           // Columns in filter form
+->headerToolbar()                                 // Inline filters/search in page header
 ```
 
 ## Column Configuration

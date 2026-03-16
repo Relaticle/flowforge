@@ -201,6 +201,24 @@ public function board(Board $board): Board
 }
 ```
 
+## Header Toolbar
+
+By default, filters and search render in a separate toolbar above the board. Enable `headerToolbar()` to move them inline with the page title for a more compact layout:
+
+```php
+public function board(Board $board): Board
+{
+    return $board
+        ->searchable(['title', 'description'])
+        ->filters([
+            SelectFilter::make('priority')->options([...]),
+        ])
+        ->headerToolbar();
+}
+```
+
+The header toolbar supports `Dropdown` and `Modal` filter layouts. For other layouts (AboveContent, BeforeContent, etc.), leave `headerToolbar` disabled (the default) and the full filter view will be used instead.
+
 ## Search and Filtering
 
 Enable powerful search and filtering capabilities:

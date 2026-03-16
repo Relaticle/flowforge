@@ -909,6 +909,24 @@ public function board(Board $board): Board
 }
 ```
 
+## Header Toolbar
+
+By default, filters and search render in a separate toolbar above the board. Enable `headerToolbar()` to move them inline with the page title for a more compact layout:
+
+```php
+public function board(Board $board): Board
+{
+    return $board
+        ->searchable(['title', 'description'])
+        ->filters([
+            SelectFilter::make('priority')->options([...]),
+        ])
+        ->headerToolbar();
+}
+```
+
+The header toolbar supports `Dropdown` and `Modal` filter layouts. For other layouts (AboveContent, BeforeContent, etc.), leave `headerToolbar` disabled (the default) and the full filter view will be used instead.
+
 ## Search and Filtering
 
 Enable powerful search and filtering capabilities:
@@ -1275,6 +1293,7 @@ If a unique constraint violation occurs (rare with jitter), Flowforge automatica
 | `filtersFormWidth(Width)`      | Filter panel width                                   |          |
 | `filtersFormColumns(int)`      | Columns in filter form                               |          |
 | `filtersLayout(FiltersLayout)` | Filter display layout (Dropdown, AboveContent, etc.) |          |
+| `headerToolbar(bool)`          | Render filters/search inline with page title         |          |
 
 ## Board Methods
 
@@ -1335,6 +1354,7 @@ use Filament\Support\Enums\Width;
 ->filtersLayout(FiltersLayout::AboveContent)      // Display filters above board
 ->filtersFormWidth(Width::Large)                  // Filter panel width
 ->filtersFormColumns(3)                           // Columns in filter form
+->headerToolbar()                                 // Inline filters/search in page header
 ```
 
 ## Column Configuration
