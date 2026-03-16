@@ -29,20 +29,7 @@
     $hasFiltersDialog = $isFilterable && in_array($filtersLayout, [FiltersLayout::Dropdown, FiltersLayout::Modal]);
 @endphp
 
-<style>
-    .fi-board-header-toolbar .fi-dropdown-panel {
-        background: white;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        border-radius: 12px;
-    }
-    .dark .fi-board-header-toolbar .fi-dropdown-panel {
-        background: rgb(17, 24, 39);
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-</style>
-
-<div class="fi-page-header-main-ctn fi-board-header-toolbar">
+<div class="fi-page-header-main-ctn !gap-y-2 !pt-4 !pb-0">
     {{-- Breadcrumbs --}}
     @if (filled($breadcrumbs))
         <x-filament::breadcrumbs :breadcrumbs="$breadcrumbs" class="mb-2" />
@@ -62,27 +49,32 @@
             @endif
         </div>
 
-        <div class="flex items-center gap-x-3 shrink-0">
+        <div class="flex items-center gap-x-6 shrink-0">
+            {{-- Wrap in fi-ta-ctn context so Filament's scoped table CSS applies to filters --}}
             @if ($isFilterable && $hasFiltersDialog)
-                <x-filament::dropdown
-                    :max-height="$filtersFormMaxHeight"
-                    placement="bottom-end"
-                    shift
-                    :flip="false"
-                    :width="$filtersFormWidth ?? Width::ExtraSmall"
-                    :wire:key="$this->getId() . '.board.filters'"
-                    class="fi-ta-filters-dropdown"
-                >
-                    <x-slot name="trigger">
-                        {{ $filtersTriggerAction->badge($activeFiltersCount) }}
-                    </x-slot>
+                <div class="fi-ta-ctn fi-ta-ctn-with-header" style="display: contents;">
+                    <div class="fi-ta-header-toolbar" style="display: contents;">
+                        <x-filament::dropdown
+                            :max-height="$filtersFormMaxHeight"
+                            placement="bottom-end"
+                            shift
+                            :flip="false"
+                            :width="$filtersFormWidth ?? Width::ExtraSmall"
+                            :wire:key="$this->getId() . '.board.filters'"
+                            class="fi-ta-filters-dropdown"
+                        >
+                            <x-slot name="trigger">
+                                {{ $filtersTriggerAction->badge($activeFiltersCount) }}
+                            </x-slot>
 
-                    <x-filament-tables::filters
-                        :apply-action="$filtersApplyAction"
-                        :form="$filtersForm"
-                        :reset-action-position="$filtersResetActionPosition"
-                    />
-                </x-filament::dropdown>
+                            <x-filament-tables::filters
+                                :apply-action="$filtersApplyAction"
+                                :form="$filtersForm"
+                                :reset-action-position="$filtersResetActionPosition"
+                            />
+                        </x-filament::dropdown>
+                    </div>
+                </div>
             @endif
 
             @if ($isSearchable)
