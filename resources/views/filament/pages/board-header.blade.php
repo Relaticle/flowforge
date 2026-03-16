@@ -49,7 +49,7 @@
             @endif
         </div>
 
-        <div class="flex items-center gap-x-3 shrink-0">
+        <div class="fi-ta-ctn flex items-center gap-x-3 shrink-0 !overflow-visible !shadow-none !ring-0 !bg-transparent">
             @if ($isFilterable && $hasFiltersDialog)
                 <x-filament::dropdown
                     :max-height="$filtersFormMaxHeight"
@@ -58,6 +58,7 @@
                     :flip="false"
                     :width="$filtersFormWidth ?? Width::ExtraSmall"
                     :wire:key="$this->getId() . '.board.filters'"
+                    class="fi-ta-filters-dropdown"
                 >
                     <x-slot name="trigger">
                         {{ $filtersTriggerAction->badge($activeFiltersCount) }}
