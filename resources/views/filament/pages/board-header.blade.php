@@ -29,7 +29,7 @@
     $hasFiltersDialog = $isFilterable && in_array($filtersLayout, [FiltersLayout::Dropdown, FiltersLayout::Modal]);
 @endphp
 
-<div class="fi-header fi-page-header-main-ctn">
+<div class="fi-page-header-main-ctn">
     {{-- Breadcrumbs --}}
     @if (filled($breadcrumbs))
         <x-filament::breadcrumbs :breadcrumbs="$breadcrumbs" class="mb-2" />
