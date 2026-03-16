@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v4.0.8 - 2026-03-16
+
+### Fixes
+
+- Fix nested `fi-page-header-main-ctn` wrapper causing board page headings to sit lower than resource list pages
+- Persist search query in URL (`?search=`) matching existing filter URL persistence
+- Remove redundant "remove all filters" button from indicator row (Reset in dropdown handles this)
+- Use `gap-x-5` instead of `gap-5` on board column container
+
 ## v4.0.7 - 2026-03-16
 
 ### What's Changed
