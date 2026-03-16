@@ -32,7 +32,7 @@ class Board extends ViewComponent
 
     protected string $evaluationIdentifier = 'board';
 
-    protected bool $headerToolbar = true;
+    protected bool $headerToolbar = false;
 
     final public function __construct(HasBoard $livewire)
     {
