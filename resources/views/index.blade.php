@@ -22,7 +22,7 @@
 
     <!-- Board Content -->
     <div class="flex-1 overflow-hidden h-full">
-        <div class="flex flex-row h-full overflow-x-auto overflow-y-hidden gap-5">
+        <div class="flex flex-row h-full overflow-x-auto overflow-y-hidden gap-x-5">
             @foreach($columns as $columnId => $column)
                 <x-flowforge::column
                     :columnId="$columnId"
