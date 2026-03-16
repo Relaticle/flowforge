@@ -41,6 +41,16 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
     public ?array $tableFilters = null;
 
     /**
+     * @return array<string, array<string, mixed>>
+     */
+    protected function queryString(): array
+    {
+        return [
+            'tableSearch' => ['as' => 'search', 'except' => ''],
+        ];
+    }
+
+    /**
      * Override Filament's action resolution to detect and route board actions.
      *
      * This method intercepts the action resolution flow to check if an action

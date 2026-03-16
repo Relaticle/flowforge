@@ -32,4 +32,14 @@ abstract class BoardPage extends Page implements HasActions, HasBoard, HasForms
      */
     #[Url(as: 'filters')]
     public ?array $tableFilters = null;
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    protected function queryString(): array
+    {
+        return [
+            'tableSearch' => ['as' => 'search', 'except' => ''],
+        ];
+    }
 }
