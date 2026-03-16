@@ -1,14 +1,9 @@
 @php
-    use Filament\Support\Enums\IconSize;
     use Filament\Support\Enums\Width;
     use Filament\Support\Facades\FilamentView;
-    use Filament\Support\Icons\Heroicon;
     use Filament\Tables\Enums\FiltersLayout;
     use Filament\Tables\Filters\Indicator;
-    use Filament\Tables\View\TablesIconAlias;
     use Filament\Tables\View\TablesRenderHook;
-
-    use function Filament\Support\generate_icon_html;
 
     $table = $this->getTable();
     $isFilterable = $table->isFilterable();
@@ -32,7 +27,7 @@
     $isModalLayout = ($filtersLayout === FiltersLayout::Modal) || ($hasFiltersDialog && $filtersTriggerAction->isModalSlideOver());
 @endphp
 
-<div class="fi-page-header-main-ctn !gap-y-2 !pt-4 !pb-0">
+<div class="flex flex-col gap-y-1">
     {{-- Breadcrumbs --}}
     @if (filled($breadcrumbs))
         <x-filament::breadcrumbs :breadcrumbs="$breadcrumbs" class="mb-2" />
@@ -144,40 +139,22 @@
         @if (filled($filterIndicatorsView = FilamentView::renderHook(TablesRenderHook::FILTER_INDICATORS, scopes: static::class, data: ['filterIndicators' => $filterIndicators])))
             {{ $filterIndicatorsView }}
         @else
-            <div class="fi-ta-filter-indicators flex items-center gap-x-2">
-                <div class="flex flex-wrap items-center gap-1">
-                    @foreach ($filterIndicators as $indicator)
-                        <x-filament::badge :color="$indicator->getColor()">
-                            {{ $indicator->getLabel() }}
+            <div class="fi-ta-filter-indicators flex flex-wrap items-center gap-1 mt-1">
+                @foreach ($filterIndicators as $indicator)
+                    <x-filament::badge :color="$indicator->getColor()">
+                        {{ $indicator->getLabel() }}
 
-                            @if ($indicator->isRemovable())
-                                <x-slot
-                                    name="deleteButton"
-                                    :label="__('filament-tables::table.filters.actions.remove.label')"
-                                    :wire:click="$indicator->getRemoveLivewireClickHandler()"
-                                    wire:loading.attr="disabled"
-                                    wire:target="removeTableFilter"
-                                ></x-slot>
-                            @endif
-                        </x-filament::badge>
-                    @endforeach
-                </div>
-
-                @if (collect($filterIndicators)->contains(fn (Indicator $indicator): bool => $indicator->isRemovable()))
-                    <button
-                        type="button"
-                        x-tooltip="{
-                            content: @js(__('filament-tables::table.filters.actions.remove_all.tooltip')),
-                            theme: $store.theme,
-                        }"
-                        wire:click="removeTableFilters"
-                        wire:loading.attr="disabled"
-                        wire:target="removeTableFilters,removeTableFilter"
-                        class="fi-icon-btn fi-size-sm"
-                    >
-                        {{ generate_icon_html(Heroicon::XMark, alias: TablesIconAlias::FILTERS_REMOVE_ALL_BUTTON, size: IconSize::Small) }}
-                    </button>
-                @endif
+                        @if ($indicator->isRemovable())
+                            <x-slot
+                                name="deleteButton"
+                                :label="__('filament-tables::table.filters.actions.remove.label')"
+                                :wire:click="$indicator->getRemoveLivewireClickHandler()"
+                                wire:loading.attr="disabled"
+                                wire:target="removeTableFilter"
+                            ></x-slot>
+                        @endif
+                    </x-filament::badge>
+                @endforeach
             </div>
         @endif
     @endif
