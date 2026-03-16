@@ -32,6 +32,8 @@ class Board extends ViewComponent
 
     protected string $evaluationIdentifier = 'board';
 
+    protected bool $headerToolbar = false;
+
     final public function __construct(HasBoard $livewire)
     {
         $this->livewire($livewire);
@@ -45,11 +47,25 @@ class Board extends ViewComponent
         return $static;
     }
 
+    /**
+     * Move the filter/search toolbar into the page header,
+     * rendering it inline with the page title.
+     */
+    public function headerToolbar(bool $condition = true): static
+    {
+        $this->headerToolbar = $condition;
+
+        return $this;
+    }
+
+    public function hasHeaderToolbar(): bool
+    {
+        return $this->headerToolbar;
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Any board-specific setup can go here
     }
 
     /**
@@ -87,6 +103,7 @@ class Board extends ViewComponent
                 'columnIdentifierAttribute' => $this->getColumnIdentifierAttribute(),
                 'cardLabel' => __('flowforge::flowforge.card_label'),
                 'pluralCardLabel' => __('flowforge::flowforge.plural_card_label'),
+                'headerToolbar' => $this->hasHeaderToolbar(),
             ],
         ];
     }
