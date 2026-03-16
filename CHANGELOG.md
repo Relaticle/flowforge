@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v4.0.7 - 2026-03-16
+
+### What's Changed
+
+#### New Features
+
+- **Header Toolbar**: New `headerToolbar()` method renders filter/search controls inline with the page title for a compact board layout. Supports Dropdown and Modal filter layouts. Disabled by default for backward compatibility.
+
+#### Bug Fixes
+
+- Fix filter dropdown styling by using native Filament CSS context (`fi-ta-ctn`) instead of inline JS workaround
+- Add proper Modal/slide-over support to header toolbar
+- Respect `TablesRenderHook::FILTER_INDICATORS` in header toolbar
+
+#### Documentation
+
+- Add `headerToolbar()` to API reference and customization guide
+
+**Full Changelog**: https://github.com/relaticle/flowforge/compare/v4.0.6...v4.0.7
+
 ## v4.0.5 - 2026-03-06
 
 ### Fixed
