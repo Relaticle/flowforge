@@ -36,8 +36,8 @@
     @endif
 
     {{-- Title row: heading + filter + search --}}
-    <div class="flex items-center justify-between gap-4">
-        <div class="min-w-0">
+    <div class="flex items-center gap-4">
+        <div class="flex-1 min-w-0">
             <h1 class="fi-header-heading text-2xl font-bold tracking-tight text-gray-950 dark:text-white sm:text-3xl">
                 {{ $heading }}
             </h1>
@@ -83,25 +83,23 @@
 
     {{-- Active filter indicators --}}
     @if ($filterIndicators)
-        <div class="fi-ta-filter-indicators mt-3">
-            <div>
-                <div class="fi-ta-filter-indicators-badges-ctn">
-                    @foreach ($filterIndicators as $indicator)
-                        <x-filament::badge :color="$indicator->getColor()">
-                            {{ $indicator->getLabel() }}
+        <div class="fi-ta-filter-indicators flex items-center gap-x-2 mt-3">
+            <div class="flex flex-wrap items-center gap-1">
+                @foreach ($filterIndicators as $indicator)
+                    <x-filament::badge :color="$indicator->getColor()">
+                        {{ $indicator->getLabel() }}
 
-                            @if ($indicator->isRemovable())
-                                <x-slot
-                                    name="deleteButton"
-                                    :label="__('filament-tables::table.filters.actions.remove.label')"
-                                    :wire:click="$indicator->getRemoveLivewireClickHandler()"
-                                    wire:loading.attr="disabled"
-                                    wire:target="removeTableFilter"
-                                ></x-slot>
-                            @endif
-                        </x-filament::badge>
-                    @endforeach
-                </div>
+                        @if ($indicator->isRemovable())
+                            <x-slot
+                                name="deleteButton"
+                                :label="__('filament-tables::table.filters.actions.remove.label')"
+                                :wire:click="$indicator->getRemoveLivewireClickHandler()"
+                                wire:loading.attr="disabled"
+                                wire:target="removeTableFilter"
+                            ></x-slot>
+                        @endif
+                    </x-filament::badge>
+                @endforeach
             </div>
 
             @if (collect($filterIndicators)->contains(fn (Indicator $indicator): bool => $indicator->isRemovable()))
