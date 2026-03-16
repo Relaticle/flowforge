@@ -1,10 +1,12 @@
 @php
     use Filament\Support\Enums\IconSize;
     use Filament\Support\Enums\Width;
+    use Filament\Support\Facades\FilamentView;
     use Filament\Support\Icons\Heroicon;
     use Filament\Tables\Enums\FiltersLayout;
     use Filament\Tables\Filters\Indicator;
     use Filament\Tables\View\TablesIconAlias;
+    use Filament\Tables\View\TablesRenderHook;
 
     use function Filament\Support\generate_icon_html;
 
@@ -27,6 +29,7 @@
     }
 
     $hasFiltersDialog = $isFilterable && in_array($filtersLayout, [FiltersLayout::Dropdown, FiltersLayout::Modal]);
+    $isModalLayout = ($filtersLayout === FiltersLayout::Modal) || ($hasFiltersDialog && $filtersTriggerAction->isModalSlideOver());
 @endphp
 
 <div class="fi-page-header-main-ctn !gap-y-2 !pt-4 !pb-0">
@@ -50,31 +53,80 @@
         </div>
 
         <div class="flex items-center gap-x-6 shrink-0">
-            {{-- Wrap in fi-ta-ctn context so Filament's scoped table CSS applies to filters --}}
             @if ($isFilterable && $hasFiltersDialog)
-                <div class="fi-ta-ctn fi-ta-ctn-with-header" style="display: contents;">
-                    <div class="fi-ta-header-toolbar" style="display: contents;">
-                        <x-filament::dropdown
-                            :max-height="$filtersFormMaxHeight"
-                            placement="bottom-end"
-                            shift
-                            :flip="false"
-                            :width="$filtersFormWidth ?? Width::ExtraSmall"
-                            :wire:key="$this->getId() . '.board.filters'"
-                            class="fi-ta-filters-dropdown"
-                        >
-                            <x-slot name="trigger">
-                                {{ $filtersTriggerAction->badge($activeFiltersCount) }}
-                            </x-slot>
+                @if ($isModalLayout)
+                    @php
+                        $filtersTriggerActionModalAlignment = $filtersTriggerAction->getModalAlignment();
+                        $filtersTriggerActionIsModalAutofocused = $filtersTriggerAction->isModalAutofocused();
+                        $filtersTriggerActionHasModalCloseButton = $filtersTriggerAction->hasModalCloseButton();
+                        $filtersTriggerActionIsModalClosedByClickingAway = $filtersTriggerAction->isModalClosedByClickingAway();
+                        $filtersTriggerActionIsModalClosedByEscaping = $filtersTriggerAction->isModalClosedByEscaping();
+                        $filtersTriggerActionModalDescription = $filtersTriggerAction->getModalDescription();
+                        $filtersTriggerActionVisibleModalFooterActions = $filtersTriggerAction->getVisibleModalFooterActions();
+                        $filtersTriggerActionModalFooterActionsAlignment = $filtersTriggerAction->getModalFooterActionsAlignment();
+                        $filtersTriggerActionModalHeading = $filtersTriggerAction->getCustomModalHeading() ?? __('filament-tables::table.filters.heading');
+                        $filtersTriggerActionModalIcon = $filtersTriggerAction->getModalIcon();
+                        $filtersTriggerActionModalIconColor = $filtersTriggerAction->getModalIconColor();
+                        $filtersTriggerActionIsModalSlideOver = $filtersTriggerAction->isModalSlideOver();
+                        $filtersTriggerActionIsModalFooterSticky = $filtersTriggerAction->isModalFooterSticky();
+                        $filtersTriggerActionIsModalHeaderSticky = $filtersTriggerAction->isModalHeaderSticky();
+                    @endphp
 
-                            <x-filament-tables::filters
-                                :apply-action="$filtersApplyAction"
-                                :form="$filtersForm"
-                                :reset-action-position="$filtersResetActionPosition"
-                            />
-                        </x-filament::dropdown>
+                    <x-filament::modal
+                        :alignment="$filtersTriggerActionModalAlignment"
+                        :autofocus="$filtersTriggerActionIsModalAutofocused"
+                        :close-button="$filtersTriggerActionHasModalCloseButton"
+                        :close-by-clicking-away="$filtersTriggerActionIsModalClosedByClickingAway"
+                        :close-by-escaping="$filtersTriggerActionIsModalClosedByEscaping"
+                        :description="$filtersTriggerActionModalDescription"
+                        :footer-actions="$filtersTriggerActionVisibleModalFooterActions"
+                        :footer-actions-alignment="$filtersTriggerActionModalFooterActionsAlignment"
+                        :heading="$filtersTriggerActionModalHeading"
+                        :icon="$filtersTriggerActionModalIcon"
+                        :icon-color="$filtersTriggerActionModalIconColor"
+                        :slide-over="$filtersTriggerActionIsModalSlideOver"
+                        :sticky-footer="$filtersTriggerActionIsModalFooterSticky"
+                        :sticky-header="$filtersTriggerActionIsModalHeaderSticky"
+                        :width="$filtersFormWidth"
+                        :wire:key="$this->getId() . '.board.filters'"
+                        class="fi-ta-filters-modal"
+                    >
+                        <x-slot name="trigger">
+                            {{ $filtersTriggerAction->badge($activeFiltersCount) }}
+                        </x-slot>
+
+                        {{ $filtersTriggerAction->getModalContent() }}
+
+                        {{ $filtersForm }}
+
+                        {{ $filtersTriggerAction->getModalContentFooter() }}
+                    </x-filament::modal>
+                @else
+                    {{-- Wrap in fi-ta-ctn context so Filament's scoped table CSS applies to filters --}}
+                    <div class="fi-ta-ctn fi-ta-ctn-with-header" style="display: contents;">
+                        <div class="fi-ta-header-toolbar" style="display: contents;">
+                            <x-filament::dropdown
+                                :max-height="$filtersFormMaxHeight"
+                                placement="bottom-end"
+                                shift
+                                :flip="false"
+                                :width="$filtersFormWidth ?? Width::ExtraSmall"
+                                :wire:key="$this->getId() . '.board.filters'"
+                                class="fi-ta-filters-dropdown"
+                            >
+                                <x-slot name="trigger">
+                                    {{ $filtersTriggerAction->badge($activeFiltersCount) }}
+                                </x-slot>
+
+                                <x-filament-tables::filters
+                                    :apply-action="$filtersApplyAction"
+                                    :form="$filtersForm"
+                                    :reset-action-position="$filtersResetActionPosition"
+                                />
+                            </x-filament::dropdown>
+                        </div>
                     </div>
-                </div>
+                @endif
             @endif
 
             @if ($isSearchable)
@@ -89,40 +141,44 @@
 
     {{-- Active filter indicators --}}
     @if ($filterIndicators)
-        <div class="fi-ta-filter-indicators flex items-center gap-x-2 mt-3">
-            <div class="flex flex-wrap items-center gap-1">
-                @foreach ($filterIndicators as $indicator)
-                    <x-filament::badge :color="$indicator->getColor()">
-                        {{ $indicator->getLabel() }}
+        @if (filled($filterIndicatorsView = FilamentView::renderHook(TablesRenderHook::FILTER_INDICATORS, scopes: static::class, data: ['filterIndicators' => $filterIndicators])))
+            {{ $filterIndicatorsView }}
+        @else
+            <div class="fi-ta-filter-indicators flex items-center gap-x-2">
+                <div class="flex flex-wrap items-center gap-1">
+                    @foreach ($filterIndicators as $indicator)
+                        <x-filament::badge :color="$indicator->getColor()">
+                            {{ $indicator->getLabel() }}
 
-                        @if ($indicator->isRemovable())
-                            <x-slot
-                                name="deleteButton"
-                                :label="__('filament-tables::table.filters.actions.remove.label')"
-                                :wire:click="$indicator->getRemoveLivewireClickHandler()"
-                                wire:loading.attr="disabled"
-                                wire:target="removeTableFilter"
-                            ></x-slot>
-                        @endif
-                    </x-filament::badge>
-                @endforeach
+                            @if ($indicator->isRemovable())
+                                <x-slot
+                                    name="deleteButton"
+                                    :label="__('filament-tables::table.filters.actions.remove.label')"
+                                    :wire:click="$indicator->getRemoveLivewireClickHandler()"
+                                    wire:loading.attr="disabled"
+                                    wire:target="removeTableFilter"
+                                ></x-slot>
+                            @endif
+                        </x-filament::badge>
+                    @endforeach
+                </div>
+
+                @if (collect($filterIndicators)->contains(fn (Indicator $indicator): bool => $indicator->isRemovable()))
+                    <button
+                        type="button"
+                        x-tooltip="{
+                            content: @js(__('filament-tables::table.filters.actions.remove_all.tooltip')),
+                            theme: $store.theme,
+                        }"
+                        wire:click="removeTableFilters"
+                        wire:loading.attr="disabled"
+                        wire:target="removeTableFilters,removeTableFilter"
+                        class="fi-icon-btn fi-size-sm"
+                    >
+                        {{ generate_icon_html(Heroicon::XMark, alias: TablesIconAlias::FILTERS_REMOVE_ALL_BUTTON, size: IconSize::Small) }}
+                    </button>
+                @endif
             </div>
-
-            @if (collect($filterIndicators)->contains(fn (Indicator $indicator): bool => $indicator->isRemovable()))
-                <button
-                    type="button"
-                    x-tooltip="{
-                        content: @js(__('filament-tables::table.filters.actions.remove_all.tooltip')),
-                        theme: $store.theme,
-                    }"
-                    wire:click="removeTableFilters"
-                    wire:loading.attr="disabled"
-                    wire:target="removeTableFilters,removeTableFilter"
-                    class="fi-icon-btn fi-size-sm"
-                >
-                    {{ generate_icon_html(Heroicon::XMark, alias: TablesIconAlias::FILTERS_REMOVE_ALL_BUTTON, size: IconSize::Small) }}
-                </button>
-            @endif
-        </div>
+        @endif
     @endif
 </div>
