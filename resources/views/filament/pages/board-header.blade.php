@@ -29,7 +29,20 @@
     $hasFiltersDialog = $isFilterable && in_array($filtersLayout, [FiltersLayout::Dropdown, FiltersLayout::Modal]);
 @endphp
 
-<div class="fi-page-header-main-ctn">
+<style>
+    .fi-board-header-toolbar .fi-dropdown-panel {
+        background: white;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+    }
+    .dark .fi-board-header-toolbar .fi-dropdown-panel {
+        background: rgb(17, 24, 39);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+</style>
+
+<div class="fi-page-header-main-ctn fi-board-header-toolbar">
     {{-- Breadcrumbs --}}
     @if (filled($breadcrumbs))
         <x-filament::breadcrumbs :breadcrumbs="$breadcrumbs" class="mb-2" />
@@ -49,7 +62,7 @@
             @endif
         </div>
 
-        <div class="fi-ta-ctn flex items-center gap-x-3 shrink-0 !overflow-visible !shadow-none !ring-0 !bg-transparent">
+        <div class="flex items-center gap-x-3 shrink-0">
             @if ($isFilterable && $hasFiltersDialog)
                 <x-filament::dropdown
                     :max-height="$filtersFormMaxHeight"
