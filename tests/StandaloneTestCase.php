@@ -19,7 +19,6 @@ use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Relaticle\Flowforge\FlowforgeServiceProvider;
-use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
 
 /**
  * Test case for standalone Livewire usage WITHOUT the Filament Panel Builder.
@@ -60,7 +59,6 @@ class StandaloneTestCase extends Orchestra
     {
         $providers = [
             ActionsServiceProvider::class,
-            BladeCaptureDirectiveServiceProvider::class,
             BladeHeroiconsServiceProvider::class,
             BladeIconsServiceProvider::class,
             FormsServiceProvider::class,
