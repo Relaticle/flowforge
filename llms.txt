@@ -10,7 +10,6 @@
 
 ## Docs
 
-- [Introduction](https://relaticle.github.io/flowforge/getting-started/introduction): Transform any Laravel model into production-ready drag-and-drop Kanban boards.
 - [Installation](https://relaticle.github.io/flowforge/getting-started/installation): Get started with Flowforge in 90 seconds.
 - [Upgrading](https://relaticle.github.io/flowforge/getting-started/upgrading): Upgrade guide for Flowforge
 - [Integration Patterns](https://relaticle.github.io/flowforge/essentials/integration-patterns): Three ways to integrate Flowforge into your application.
