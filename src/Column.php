@@ -55,6 +55,14 @@ class Column extends ViewComponent
         return $static;
     }
 
+    public static function enum(BackedEnum $enum): static
+    {
+        return static::make($enum->value)
+            ->label($enum instanceof \Filament\Support\Contracts\HasLabel ? $enum->getLabel() : null)
+            ->color($enum instanceof \Filament\Support\Contracts\HasColor ? $enum->getColor() : null)
+            ->icon($enum instanceof \Filament\Support\Contracts\HasIcon ? $enum->getIcon() : null);
+    }
+
     public static function getDefaultName(): ?string
     {
         return null;
