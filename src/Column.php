@@ -57,10 +57,21 @@ class Column extends ViewComponent
 
     public static function enum(BackedEnum $enum): static
     {
-        return static::make($enum->value)
-            ->label($enum instanceof \Filament\Support\Contracts\HasLabel ? $enum->getLabel() : null)
-            ->color($enum instanceof \Filament\Support\Contracts\HasColor ? $enum->getColor() : null)
-            ->icon($enum instanceof \Filament\Support\Contracts\HasIcon ? $enum->getIcon() : null);
+        $column = static::make($enum->value);
+
+        if ($enum instanceof \Filament\Support\Contracts\HasLabel) {
+            $column->label($enum->getLabel());
+        }
+
+        if ($enum instanceof \Filament\Support\Contracts\HasColor) {
+            $column->color($enum->getColor());
+        }
+
+        if ($enum instanceof \Filament\Support\Contracts\HasIcon) {
+            $column->icon($enum->getIcon());
+        }
+
+        return $column;
     }
 
     public static function getDefaultName(): ?string
