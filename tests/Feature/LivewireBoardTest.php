@@ -13,7 +13,16 @@ describe('board rendering', function () {
             ->assertStatus(200)
             ->assertSee('To Do')
             ->assertSee('In Progress')
-            ->assertSee('Completed');
+            ->assertSee('Completed')
+            ->assertDontSee('Hidden Column');
+    });
+
+    test('renders board with unhidden column', function () {
+        Livewire::test(TestBoard::class)
+            ->assertStatus(200)
+            ->assertDontSee('Hidden Column')
+            ->set('showAllColumns', true)
+            ->assertSee('Hidden Column');
     });
 
     test('displays cards in correct columns', function () {

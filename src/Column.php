@@ -13,10 +13,12 @@ use Filament\Support\Concerns\HasIconColor;
 use Filament\Support\Concerns\HasIconPosition;
 use Illuminate\Contracts\Support\Htmlable;
 use Relaticle\Flowforge\Concerns\BelongsToBoard;
+use Relaticle\Flowforge\Concerns\CanBeHidden;
 
 class Column extends ViewComponent
 {
     use BelongsToBoard;
+    use CanBeHidden;
     use HasColor;
     use HasIcon;
     use HasIconColor;

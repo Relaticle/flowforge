@@ -38,7 +38,7 @@ trait HasBoardColumns
      */
     public function getColumns(): array
     {
-        return $this->columns;
+        return array_filter($this->columns, fn (Column $column) => $column->isVisible());
     }
 
     /**

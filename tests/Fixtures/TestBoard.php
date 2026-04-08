@@ -11,6 +11,8 @@ use Relaticle\Flowforge\Column;
 
 class TestBoard extends BoardPage
 {
+    public bool $showAllColumns = false;
+
     public function getEloquentQuery(): Builder
     {
         return Task::query();
@@ -25,6 +27,7 @@ class TestBoard extends BoardPage
             ->positionIdentifier('order_position')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
+                Column::make('hidden_column')->visible(fn () => $this->showAllColumns)->label('Hidden Column'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
                 Column::make('completed')->label('Completed')->color('green'),
             ]);
