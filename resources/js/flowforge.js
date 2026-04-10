@@ -11,6 +11,18 @@ export default function flowforge({state}) {
                     this.fullyLoaded[columnId] = true;
                 }
             });
+
+            this.$nextTick(() => this.enhanceSortableScroll());
+        },
+
+        enhanceSortableScroll() {
+            this.$el.querySelectorAll('[x-sortable]').forEach(el => {
+                if (el.sortable) {
+                    el.sortable.option('scrollSensitivity', 100);
+                    el.sortable.option('scrollSpeed', 15);
+                    el.sortable.option('forceAutoScrollFallback', true);
+                }
+            });
         },
 
         handleSortableEnd(event) {
