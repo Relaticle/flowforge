@@ -1,148 +1,3 @@
-# Filament/Livewire Kanban Boards
-
-::u-page-hero
-#title
-Flowforge
-
-#description
-Transform any Laravel model into a production-ready drag-and-drop Kanban board.
-
-Perfect for Filament admin panels and standalone Livewire applications.
-
-#links
-  :::u-button
-  ---
-  color: neutral
-  size: xl
-  to: https://relaticle.github.io/flowforge/getting-started/installation
-  trailing-icon: i-lucide-arrow-right
-  ---
-  Get started
-  :::
-
-  :::u-button
-  ---
-  color: neutral
-  icon: simple-icons:github
-  size: xl
-  to: https://github.com/relaticle/flowforge
-  variant: outline
-  ---
-  GitHub
-  :::
-::
-
-::div{.text-center.max-w-4xl.mx-auto}
-![Flowforge Kanban Board Preview](https://relaticle.github.io/flowforge/preview.png){.mx-auto.max-w-full.h-auto.rounded-lg.shadow-lg}
-::
-
-::u-page-section
-#title
-Why choose Flowforge?
-
-#features
-  :::u-page-feature
-  ---
-  icon: i-lucide-zap
-  ---
-  #title
-  Enterprise-Scale Performance
-  
-  #description
-  Cursor-based pagination handles unlimited cards per column with intelligent loading and position-based ordering optimization.
-  :::
-
-  :::u-page-feature
-  ---
-  icon: i-lucide-layers
-  ---
-  #title
-  3 Integration Patterns
-  
-  #description
-  Use as Filament Pages, Resource integration, or standalone Livewire components - whatever fits your architecture.
-  :::
-
-  :::u-page-feature
-  ---
-  icon: i-lucide-palette
-  ---
-  #title
-  Rich Card Schemas
-  
-  #description
-  Filament Schema builder creates complex card layouts with forms, components, and dynamic content rendering.
-  :::
-
-  :::u-page-feature
-  ---
-  icon: i-lucide-move
-  ---
-  #title
-  Smart Position Management
-  
-  #description
-  Advanced ranking algorithm handles unlimited drag-and-drop ordering with automatic conflict resolution and repair commands.
-  :::
-
-  :::u-page-feature
-  ---
-  icon: i-lucide-activity
-  ---
-  #title
-  Optimistic UI Experience
-  
-  #description
-  Instant visual feedback with loading states, smooth scrolling, and responsive drag interactions for seamless UX.
-  :::
-
-  :::u-page-feature
-  ---
-  icon: i-lucide-filter
-  ---
-  #title
-  Native Filament Integration
-  
-  #description
-  Deep integration with Filament's table system for filters, search, actions, and consistent admin panel experience.
-  :::
-::
-
-::u-page-section
-  :::card-group
-    ::::card
-    ---
-    icon: i-simple-icons-laravel
-    target: _blank
-    title: FilaForms
-    to: https://filaforms.app
-    ---
-    ![FilaForms](https://filaforms.app/img/og-image.png){.mb-4.rounded-lg.w-full.pointer-events-none}
-    
-    Visual form builder for all your public-facing forms.
-    ::::
-  
-    ::::card
-    ---
-    icon: i-lucide-sliders
-    target: _blank
-    title: Custom Fields
-    to: https://relaticle.github.io/custom-fields
-    ---
-    ![Custom Fields](https://relaticle.github.io/custom-fields/og-image.png){.mb-4.rounded-lg.w-full.pointer-events-none}
-    
-    Let users add custom fields to any model without code changes.
-    ::::
-  :::
-
-#title
-Our Ecosystem
-
-#description
-Extend your Laravel applications with our ecosystem of complementary tools
-::
-
-
 # Installation
 
 ## Requirements
@@ -167,9 +22,9 @@ Prerequisite: You need a custom Filament theme to include the FlowForge styles.
 
   :::alert{type="warning"}
   If you haven't set up a custom theme for Filament, follow the 
-  
-  [Filament Docs](https://filamentphp.com/docs/5.x/styling/overview#creating-a-custom-theme){rel="nofollow"}
-  
+
+  [Filament Docs](https://filamentphp.com/docs/5.x/styling/overview#creating-a-custom-theme){rel=""nofollow""}
+
    first.
   :::
 
@@ -237,7 +92,7 @@ v4.x upgrades Filament support from 4.x to 5.x. No database or code changes requ
 composer require relaticle/flowforge:^4.0
 ```
 
-Review the [Filament 5 Upgrade Guide](https://filamentphp.com/docs/5.x/upgrade-guide){rel="nofollow"} if you customized Filament components.
+Review the [Filament 5 Upgrade Guide](https://filamentphp.com/docs/5.x/upgrade-guide){rel="&#x22;nofollow&#x22;"} if you customized Filament components.
 
 ### No Changes Required
 
@@ -1638,7 +1493,7 @@ public function testDragDrop()
 
 If you encounter issues not covered here:
 
-1. **Check the GitHub issues**: [github.com/relaticle/flowforge/issues](https://github.com/relaticle/flowforge/issues){rel="nofollow"}
+1. **Check the GitHub issues**: [github.com/relaticle/flowforge/issues](https://github.com/relaticle/flowforge/issues){rel="&#x22;nofollow&#x22;"}
 2. **Review test examples**: Look at the test suite for working examples
 3. **Enable debug mode**: Add `dd()` statements to understand data flow
 4. **Create minimal reproduction**: Isolate the issue in a fresh Laravel install
@@ -1676,8 +1531,8 @@ composer analyse
 
 ## Need Help?
 
-- [Open an issue](https://github.com/relaticle/flowforge/issues){rel="nofollow"} for bugs or questions
-- Check [existing issues](https://github.com/relaticle/flowforge/issues){rel="nofollow"} first
+- [Open an issue](https://github.com/relaticle/flowforge/issues){rel="&#x22;nofollow&#x22;"} for bugs or questions
+- Check [existing issues](https://github.com/relaticle/flowforge/issues){rel="&#x22;nofollow&#x22;"} first
 
 That's it! Keep it simple and focused. 🚀
 
@@ -1716,3 +1571,148 @@ THE SOFTWARE.
 ✅ **You can** sell applications that include it
 
 Just include the license notice in your copy. That's it!
+
+
+# Filament/Livewire Kanban Boards
+
+::u-page-hero
+#title
+Flowforge
+
+#description
+Transform any Laravel model into a production-ready drag-and-drop Kanban board.
+
+Perfect for Filament admin panels and standalone Livewire applications.
+
+#links
+  :::u-button
+  ---
+  color: neutral
+  size: xl
+  to: https://relaticle.github.io/flowforge/getting-started/installation
+  trailing-icon: i-lucide-arrow-right
+  ---
+  Get started
+  :::
+
+  :::u-button
+  ---
+  color: neutral
+  icon: simple-icons:github
+  size: xl
+  to: https://github.com/relaticle/flowforge
+  variant: outline
+  ---
+  GitHub
+  :::
+::
+
+::div{.text-center.max-w-4xl.mx-auto}
+![Flowforge Kanban Board Preview](https://relaticle.github.io/flowforge/preview.png){.mx-auto.max-w-full.h-auto.rounded-lg.shadow-lg}
+::
+
+::u-page-section
+#title
+Why choose Flowforge?
+
+#features
+  :::u-page-feature
+  ---
+  icon: i-lucide-zap
+  ---
+  #title
+  Enterprise-Scale Performance
+
+  #description
+  Cursor-based pagination handles unlimited cards per column with intelligent loading and position-based ordering optimization.
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-layers
+  ---
+  #title
+  3 Integration Patterns
+
+  #description
+  Use as Filament Pages, Resource integration, or standalone Livewire components - whatever fits your architecture.
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-palette
+  ---
+  #title
+  Rich Card Schemas
+
+  #description
+  Filament Schema builder creates complex card layouts with forms, components, and dynamic content rendering.
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-move
+  ---
+  #title
+  Smart Position Management
+
+  #description
+  Advanced ranking algorithm handles unlimited drag-and-drop ordering with automatic conflict resolution and repair commands.
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-activity
+  ---
+  #title
+  Optimistic UI Experience
+
+  #description
+  Instant visual feedback with loading states, smooth scrolling, and responsive drag interactions for seamless UX.
+  :::
+
+  :::u-page-feature
+  ---
+  icon: i-lucide-filter
+  ---
+  #title
+  Native Filament Integration
+
+  #description
+  Deep integration with Filament's table system for filters, search, actions, and consistent admin panel experience.
+  :::
+::
+
+::u-page-section
+  :::card-group
+    ::::card
+    ---
+    icon: i-simple-icons-laravel
+    target: _blank
+    title: FilaForms
+    to: https://filaforms.app
+    ---
+    ![FilaForms](https://filaforms.app/img/og-image.png){.mb-4.rounded-lg.w-full.pointer-events-none}
+
+    Visual form builder for all your public-facing forms.
+    ::::
+
+    ::::card
+    ---
+    icon: i-lucide-sliders
+    target: _blank
+    title: Custom Fields
+    to: https://relaticle.github.io/custom-fields
+    ---
+    ![Custom Fields](https://relaticle.github.io/custom-fields/og-image.png){.mb-4.rounded-lg.w-full.pointer-events-none}
+
+    Let users add custom fields to any model without code changes.
+    ::::
+  :::
+
+#title
+Our Ecosystem
+
+#description
+Extend your Laravel applications with our ecosystem of complementary tools
+::

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://relaticle.github.io/getting-started/installation</loc>
+  </url>
+  <url>
+    <loc>https://relaticle.github.io/getting-started/upgrading</loc>
+  </url>
+  <url>
+    <loc>https://relaticle.github.io/essentials/integration-patterns</loc>
+  </url>
+  <url>
+    <loc>https://relaticle.github.io/essentials/customization</loc>
+  </url>
+  <url>
+    <loc>https://relaticle.github.io/essentials/database-schema</loc>
+  </url>
+  <url>
+    <loc>https://relaticle.github.io/essentials/api-reference</loc>
+  </url>
+  <url>
+    <loc>https://relaticle.github.io/essentials/troubleshooting</loc>
+  </url>
+  <url>
+    <loc>https://relaticle.github.io/community/contributing</loc>
+  </url>
+  <url>
+    <loc>https://relaticle.github.io/community/license</loc>
+  </url>
+  <url>
+    <loc>https://relaticle.github.io/</loc>
+  </url>
+</urlset>
