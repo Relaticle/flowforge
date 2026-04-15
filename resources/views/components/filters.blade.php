@@ -120,7 +120,7 @@
             @if ($hasHeaderToolbar)
                 <div class="fi-ta-header-toolbar mb-4 px-0">
                     <div>
-                        {{-- fi-ta-header-toolbar has an nth-child(2) styling that assumes an actions divs here and needs an element before any other search or filter elements --}}
+                        {{-- fi-ta-header-toolbar has an nth-child(2) styling that assumes an actions div is here and needs an element before any other search or filter elements --}}
                     </div>
                     <div class="flex items-center gap-x-4">
                         {{-- Filters trigger for sidebar layouts (BeforeContent/AfterContent) --}}
