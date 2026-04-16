@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Relaticle\Flowforge\Support\EnumHelper;
 
 /**
  * Handles rebalancing of positions within a column when gaps become too small.
@@ -104,7 +105,7 @@ final readonly class PositionRebalancer
             ->pluck($columnField);
 
         return $columns->filter(function ($columnId) use ($query, $columnField, $positionField) {
-            return $this->needsRebalancing($query, $columnField, (string) $columnId, $positionField);
+            return $this->needsRebalancing($query, $columnField, EnumHelper::convertEnumToString($columnId), $positionField);
         })->values();
     }
 
@@ -130,10 +131,12 @@ final readonly class PositionRebalancer
         );
 
         foreach ($columnsNeedingRebalancing as $columnId) {
-            $results[(string) $columnId] = $this->rebalanceColumn(
+            $columnValue = EnumHelper::convertEnumToString($columnId);
+            
+            $results[$columnValue] = $this->rebalanceColumn(
                 $query,
                 $columnField,
-                (string) $columnId,
+                $columnValue,
                 $positionField
             );
         }
