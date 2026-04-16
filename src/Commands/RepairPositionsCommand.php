@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Relaticle\Flowforge\Services\DecimalPosition;
-
 use Relaticle\Flowforge\Support\EnumHelper;
+
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\select;

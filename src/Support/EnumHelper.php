@@ -2,7 +2,8 @@
 
 namespace Relaticle\Flowforge\Support;
 
-class EnumHelper {
+class EnumHelper
+{
     public static function convertEnumToString($value): string
     {
         if (is_object($value)) {

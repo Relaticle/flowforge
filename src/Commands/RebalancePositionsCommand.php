@@ -5,8 +5,8 @@ namespace Relaticle\Flowforge\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Relaticle\Flowforge\Services\PositionRebalancer;
-
 use Relaticle\Flowforge\Support\EnumHelper;
+
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\info;

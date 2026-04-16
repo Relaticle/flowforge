@@ -132,7 +132,7 @@ final readonly class PositionRebalancer
 
         foreach ($columnsNeedingRebalancing as $columnId) {
             $columnValue = EnumHelper::convertEnumToString($columnId);
-            
+
             $results[$columnValue] = $this->rebalanceColumn(
                 $query,
                 $columnField,
