@@ -26,35 +26,49 @@ export default function flowforge({state}) {
         },
 
         handleSortableEnd(event) {
-            const newOrder = event.to.sortable.toArray();
-            let cardId = event.item.getAttribute('x-sortable-item');
+            const draggedNode = event.item;
+            const parentNode = event.to;
+            const newDraggableIndex = event.newDraggableIndex;
 
-            // Fallback to data-card-id if x-sortable-item is missing (edge case safety)
-            if (!cardId) {
-                cardId = event.item.getAttribute('data-card-id');
-                if (!cardId) {
-                    console.error('Flowforge: Could not determine card ID for move operation');
-                    return;
+            // Filament's shared x-sortable directive re-inserts the dragged node
+            // after items[newDraggableIndex - 1] to work around filamentphp/filament#17402,
+            // but that branch is skipped when newDraggableIndex === 0 — leaving the
+            // DOM stale on top drops. Extend the workaround so the top position is
+            // normalized before we read neighbors.
+            if (newDraggableIndex === 0) {
+                const firstItem = parentNode.querySelector(':scope > [x-sortable-item]');
+                if (firstItem && firstItem !== draggedNode) {
+                    parentNode.insertBefore(draggedNode, firstItem);
                 }
             }
 
-            const targetColumn = event.to.getAttribute('data-column-id');
+            let cardId = draggedNode.getAttribute('x-sortable-item')
+                || draggedNode.getAttribute('data-card-id');
+            if (!cardId) {
+                console.error('Flowforge: Could not determine card ID for move operation');
+                return;
+            }
+
+            const targetColumn = parentNode.getAttribute('data-column-id');
             if (!targetColumn) {
                 console.error('Flowforge: Target column ID is missing');
                 return;
             }
 
-            const cardElement = event.item;
+            // Derive neighbors from the normalized DOM rather than sortable.toArray(),
+            // which can return stale order when SortableJS leaves the DOM out of sync.
+            const items = parentNode.querySelectorAll(':scope > [x-sortable-item]');
+            const index = Array.prototype.indexOf.call(items, draggedNode);
+            const afterCardId = index > 0 ? items[index - 1].getAttribute('x-sortable-item') : null;
+            const beforeCardId = index >= 0 && index < items.length - 1
+                ? items[index + 1].getAttribute('x-sortable-item')
+                : null;
 
-            this.setCardState(cardElement, true);
-
-            const cardIndex = newOrder.indexOf(cardId);
-            const afterCardId = cardIndex > 0 ? newOrder[cardIndex - 1] : null;
-            const beforeCardId = cardIndex < newOrder.length - 1 ? newOrder[cardIndex + 1] : null;
+            this.setCardState(draggedNode, true);
 
             this.$wire.moveCard(cardId, targetColumn, afterCardId, beforeCardId)
-                .then(() => this.setCardState(cardElement, false))
-                .catch(() => this.setCardState(cardElement, false));
+                .then(() => this.setCardState(draggedNode, false))
+                .catch(() => this.setCardState(draggedNode, false));
         },
 
         setCardState(cardElement, disabled) {
