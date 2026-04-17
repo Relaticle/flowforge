@@ -5,12 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
-
-### Fixed
-
-- Dragging a card to the top of a column no longer snaps it to the bottom. Extended the SortableJS top-drop workaround so the DOM is normalized before neighbors are read, and switched to reading them from the DOM directly rather than the stale internal sortable array (#110)
-
 ## v4.0.9 - 2026-04-10
 
 ### Fixed
