@@ -28,22 +28,29 @@ export default function flowforge({state}) {
         handleSortableEnd(event) {
             const draggedNode = event.item;
             const parentNode = event.to;
-            const newDraggableIndex = event.newDraggableIndex;
+            // SortableJS exposes both newIndex (across all children) and
+            // newDraggableIndex (draggable children only). Prefer the draggable
+            // index where available and fall back to newIndex for older or
+            // alternative SortableJS builds.
+            const dropIndex = event.newDraggableIndex ?? event.newIndex;
 
-            // Filament's shared x-sortable directive re-inserts the dragged node
-            // after items[newDraggableIndex - 1] to work around filamentphp/filament#17402,
-            // but that branch is skipped when newDraggableIndex === 0 — leaving the
-            // DOM stale on top drops. Extend the workaround so the top position is
-            // normalized before we read neighbors.
-            if (newDraggableIndex === 0) {
-                const firstItem = parentNode.querySelector(':scope > [x-sortable-item]');
+            const itemSelector = ':scope > [x-sortable-item], :scope > [data-card-id]';
+            const readId = (el) => el.getAttribute('x-sortable-item') || el.getAttribute('data-card-id');
+
+            // Filament's shared x-sortable directive re-inserts the dragged
+            // node after items[dropIndex - 1] to work around
+            // filamentphp/filament#17402, but that branch is skipped when
+            // dropIndex === 0 — leaving the DOM stale on top drops. Extend
+            // the workaround so the top position is normalized before we
+            // read neighbors.
+            if (dropIndex === 0) {
+                const firstItem = parentNode.querySelector(itemSelector);
                 if (firstItem && firstItem !== draggedNode) {
                     parentNode.insertBefore(draggedNode, firstItem);
                 }
             }
 
-            let cardId = draggedNode.getAttribute('x-sortable-item')
-                || draggedNode.getAttribute('data-card-id');
+            const cardId = readId(draggedNode);
             if (!cardId) {
                 console.error('Flowforge: Could not determine card ID for move operation');
                 return;
@@ -55,13 +62,14 @@ export default function flowforge({state}) {
                 return;
             }
 
-            // Derive neighbors from the normalized DOM rather than sortable.toArray(),
-            // which can return stale order when SortableJS leaves the DOM out of sync.
-            const items = parentNode.querySelectorAll(':scope > [x-sortable-item]');
+            // Derive neighbors from the normalized DOM rather than
+            // sortable.toArray(), which can return stale order when SortableJS
+            // leaves the DOM out of sync.
+            const items = parentNode.querySelectorAll(itemSelector);
             const index = Array.prototype.indexOf.call(items, draggedNode);
-            const afterCardId = index > 0 ? items[index - 1].getAttribute('x-sortable-item') : null;
+            const afterCardId = index > 0 ? readId(items[index - 1]) : null;
             const beforeCardId = index >= 0 && index < items.length - 1
-                ? items[index + 1].getAttribute('x-sortable-item')
+                ? readId(items[index + 1])
                 : null;
 
             this.setCardState(draggedNode, true);
