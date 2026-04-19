@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Relaticle\Flowforge\Concerns;
 
 use Closure;
+use Illuminate\Contracts\Support\Htmlable;
 use Relaticle\Flowforge\Column;
 
 /**
@@ -34,11 +35,13 @@ trait HasBoardColumns
     }
 
     /**
-     * Get configured columns.
+     * Get configured columns, excluding any that are hidden.
+     *
+     * @return array<Column>
      */
     public function getColumns(): array
     {
-        return array_filter($this->columns, fn (Column $column) => $column->isVisible());
+        return $this->getVisibleColumns();
     }
 
     /**
@@ -56,21 +59,25 @@ trait HasBoardColumns
     }
 
     /**
-     * Get column identifiers.
+     * Get column identifiers for visible columns.
+     *
+     * @return array<string>
      */
     public function getColumnIdentifiers(): array
     {
-        return array_map(fn (Column $column) => $column->getName(), $this->columns);
+        return array_map(fn (Column $column) => $column->getName(), $this->getVisibleColumns());
     }
 
     /**
-     * Get column labels mapped by identifier.
+     * Get column labels mapped by identifier for visible columns.
+     *
+     * @return array<string, string|Htmlable>
      */
     public function getColumnLabels(): array
     {
         $labels = [];
 
-        foreach ($this->columns as $column) {
+        foreach ($this->getVisibleColumns() as $column) {
             $labels[$column->getName()] = $column->getLabel() ?? $column->getName();
         }
 
@@ -78,18 +85,33 @@ trait HasBoardColumns
     }
 
     /**
-     * Get column colors mapped by identifier.
+     * Get column colors mapped by identifier for visible columns.
+     *
+     * @return array<string, mixed>
      */
     public function getColumnColors(): array
     {
         $colors = [];
 
-        foreach ($this->columns as $column) {
+        foreach ($this->getVisibleColumns() as $column) {
             if ($color = $column->getColor()) {
                 $colors[$column->getName()] = $color;
             }
         }
 
         return $colors;
+    }
+
+    /**
+     * Internal helper returning a sequentially keyed list of visible columns.
+     *
+     * @return array<int, Column>
+     */
+    protected function getVisibleColumns(): array
+    {
+        return array_values(array_filter(
+            $this->columns,
+            fn (Column $column) => $column->isVisible(),
+        ));
     }
 }
