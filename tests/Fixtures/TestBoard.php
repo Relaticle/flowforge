@@ -13,6 +13,8 @@ class TestBoard extends BoardPage
 {
     public bool $showAllColumns = false;
 
+    public bool $hideEverything = false;
+
     public function getEloquentQuery(): Builder
     {
         return Task::query();
@@ -26,10 +28,11 @@ class TestBoard extends BoardPage
             ->columnIdentifier('status')
             ->positionIdentifier('order_position')
             ->columns([
-                Column::make('todo')->label('To Do')->color('gray'),
-                Column::make('hidden_column')->visible(fn () => $this->showAllColumns)->label('Hidden Column'),
-                Column::make('in_progress')->label('In Progress')->color('blue'),
-                Column::make('completed')->label('Completed')->color('green'),
+                Column::make('todo')->label('To Do')->color('gray')->visible(fn () => ! $this->hideEverything),
+                Column::make('hidden_column')->visible(fn () => $this->showAllColumns && ! $this->hideEverything)->label('Hidden Column'),
+                Column::make('archived')->label('Archived Column')->hidden(true),
+                Column::make('in_progress')->label('In Progress')->color('blue')->visible(fn () => ! $this->hideEverything),
+                Column::make('completed')->label('Completed')->color('green')->visible(fn () => ! $this->hideEverything),
             ]);
     }
 }
