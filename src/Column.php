@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge;
 
+use BackedEnum;
 use Closure;
 use Exception;
 use Filament\Support\Components\ViewComponent;
@@ -11,6 +12,9 @@ use Filament\Support\Concerns\HasColor;
 use Filament\Support\Concerns\HasIcon;
 use Filament\Support\Concerns\HasIconColor;
 use Filament\Support\Concerns\HasIconPosition;
+use Filament\Support\Contracts\HasColor as HasColorContract;
+use Filament\Support\Contracts\HasIcon as HasIconContract;
+use Filament\Support\Contracts\HasLabel;
 use Illuminate\Contracts\Support\Htmlable;
 use Relaticle\Flowforge\Concerns\BelongsToBoard;
 
@@ -55,19 +59,24 @@ class Column extends ViewComponent
         return $static;
     }
 
+    /**
+     * Build a column from a backed enum, deriving the identifier from
+     * `$enum->value` and applying Filament's enum metadata (label, color,
+     * icon) when the enum implements the corresponding contract.
+     */
     public static function enum(BackedEnum $enum): static
     {
-        $column = static::make($enum->value);
+        $column = static::make((string) $enum->value);
 
-        if ($enum instanceof \Filament\Support\Contracts\HasLabel) {
+        if ($enum instanceof HasLabel) {
             $column->label($enum->getLabel());
         }
 
-        if ($enum instanceof \Filament\Support\Contracts\HasColor) {
+        if ($enum instanceof HasColorContract) {
             $column->color($enum->getColor());
         }
 
-        if ($enum instanceof \Filament\Support\Contracts\HasIcon) {
+        if ($enum instanceof HasIconContract) {
             $column->icon($enum->getIcon());
         }
 
