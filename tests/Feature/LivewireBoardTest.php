@@ -139,6 +139,30 @@ describe('card movement', function () {
             ->and((float) $movedTask->order_position)->toBeLessThan(65535);
     });
 
+    test('dragging last card to top places it above first card (regression for #110)', function () {
+        $first = Task::factory()->inProgress()->withPosition('65535.0000000000')->create(['title' => 'First']);
+        $second = Task::factory()->inProgress()->withPosition('131070.0000000000')->create(['title' => 'Second']);
+        $third = Task::factory()->inProgress()->withPosition('196605.0000000000')->create(['title' => 'Third']);
+        $last = Task::factory()->inProgress()->withPosition('262140.0000000000')->create(['title' => 'Last']);
+
+        Livewire::test(TestBoard::class)
+            ->call('moveCard', (string) $last->id, 'in_progress', null, (string) $first->id);
+
+        $movedTask = $last->fresh();
+        expect((float) $movedTask->order_position)->toBeLessThan((float) $first->order_position);
+
+        $orderedIds = Task::where('status', 'in_progress')
+            ->orderBy('order_position')
+            ->pluck('id')
+            ->map(fn ($id) => (string) $id)
+            ->toArray();
+
+        expect($orderedIds[0])->toBe((string) $last->id)
+            ->and($orderedIds[1])->toBe((string) $first->id)
+            ->and($orderedIds[2])->toBe((string) $second->id)
+            ->and($orderedIds[3])->toBe((string) $third->id);
+    });
+
     test('moves card to bottom of column', function () {
         $existingTask = Task::factory()->inProgress()->withPosition('65535.0000000000')->create();
         $taskToMove = Task::factory()->todo()->withPosition('65535.0000000000')->create();
