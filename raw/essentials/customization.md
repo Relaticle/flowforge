@@ -382,3 +382,34 @@ Any contract your enum does not implement is simply skipped — you can start
 with `HasLabel` only and add color/icon later without changing the call site.
 Int-backed enums are supported too; the value is coerced to a string column
 identifier.
+
+### Conditional Visibility
+
+Hide or show columns based on runtime state (current user, feature flags,
+permissions, toggles on the page). Use `->hidden()` to hide a column or
+`->visible()` to show one — both accept a boolean literal or a closure. A
+hidden column is excluded from rendering and from every column getter
+(`getColumns()`, `getColumnIdentifiers()`, `getColumnLabels()`,
+`getColumnColors()`), so counts and other column-derived data stay in sync.
+
+```php
+use Relaticle\Flowforge\Column;
+
+->columns([
+    Column::make('todo')->label('To Do')->color('gray'),
+    Column::make('in_progress')->label('In Progress')->color('blue'),
+    Column::make('completed')->label('Completed')->color('green'),
+
+    // Permanently hidden — useful for columns you plan to enable later.
+    Column::make('archived')->label('Archived')->hidden(),
+
+    // Conditionally visible based on a Livewire property / user state.
+    Column::make('internal_review')
+        ->label('Internal Review')
+        ->visible(fn () => auth()->user()?->isStaff()),
+])
+```
+
+Both methods are re-evaluated on every render, so toggling a Livewire
+property that the closure reads will show or hide the column immediately.
+When both are set, `hidden(true)` wins over `visible(true)`.

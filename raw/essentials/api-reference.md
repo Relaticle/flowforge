@@ -349,6 +349,8 @@ Column::make('identifier')
     ->label('Display Name')                       // Column header text
     ->color('blue')                              // Column color theme
     ->icon('heroicon-o-flag')                    // Column header icon
+    ->hidden(fn () => ! auth()->user()?->isStaff()) // Hide from rendering
+    ->visible(fn () => $this->showArchived)      // Inverse of hidden()
 ```
 
 ### Building a column from a backed enum
@@ -361,6 +363,13 @@ When the enum implements `HasLabel`, `HasColor`, or `HasIcon` those values are
 applied automatically; missing contracts are skipped. See the
 [Column Configuration guide](/essentials/customization#building-columns-from-enums)
 for a full example.
+
+### Conditional visibility
+
+Hidden columns are excluded from all column getters (`getColumns()`,
+`getColumnIdentifiers()`, `getColumnLabels()`, `getColumnColors()`) — see
+[Conditional Visibility](/essentials/customization#conditional-visibility)
+for a worked example.
 
 ### Available Colors
 
