@@ -25,6 +25,8 @@ class TestStandaloneBoard extends Component implements HasActions, HasBoard, Has
     }
     use InteractsWithForms;
 
+    public bool $showAllColumns = false;
+
     public function board(Board $board): Board
     {
         return $board
@@ -34,6 +36,7 @@ class TestStandaloneBoard extends Component implements HasActions, HasBoard, Has
             ->positionIdentifier('order_position')
             ->columns([
                 Column::make('todo')->label('To Do')->color('gray'),
+                Column::make('hidden_column')->visible(fn () => $this->showAllColumns)->label('Hidden Column'),
                 Column::make('in_progress')->label('In Progress')->color('blue'),
                 Column::make('completed')->label('Completed')->color('green'),
             ]);
