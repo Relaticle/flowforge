@@ -351,6 +351,17 @@ Column::make('identifier')
     ->icon('heroicon-o-flag')                    // Column header icon
 ```
 
+### Building a column from a backed enum
+
+```php
+Column::enum(TaskStatus::Todo)                   // identifier = $enum->value
+```
+
+When the enum implements `HasLabel`, `HasColor`, or `HasIcon` those values are
+applied automatically; missing contracts are skipped. See the
+[Column Configuration guide](/essentials/customization#building-columns-from-enums)
+for a full example.
+
 ### Available Colors
 
 - `gray` - Neutral/default

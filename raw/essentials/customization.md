@@ -326,3 +326,59 @@ use Filament\Support\Colors\Color;
         ->color('#22c55e'),                  // Custom hex
 ])
 ```
+
+### Building Columns From Enums
+
+If your model already uses a backed enum for its status attribute, pass the enum
+cases directly to `Column::enum()`. The column identifier is taken from
+`$enum->value`, and Filament's `HasLabel` / `HasColor` / `HasIcon` contracts are
+applied automatically when the enum implements them.
+
+```php
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasIcon;
+use Filament\Support\Contracts\HasLabel;
+
+enum TaskStatus: string implements HasColor, HasIcon, HasLabel
+{
+    case Todo = 'todo';
+    case InProgress = 'in_progress';
+    case Done = 'done';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Todo => 'To Do',
+            self::InProgress => 'In Progress',
+            self::Done => 'Done',
+        };
+    }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Todo => 'gray',
+            self::InProgress => 'blue',
+            self::Done => 'green',
+        };
+    }
+
+    public function getIcon(): string
+    {
+        return match ($this) {
+            self::Todo => 'heroicon-o-queue-list',
+            self::InProgress => 'heroicon-o-arrow-path',
+            self::Done => 'heroicon-o-check',
+        };
+    }
+}
+
+->columns(
+    array_map(fn (TaskStatus $status) => Column::enum($status), TaskStatus::cases()),
+)
+```
+
+Any contract your enum does not implement is simply skipped — you can start
+with `HasLabel` only and add color/icon later without changing the call site.
+Int-backed enums are supported too; the value is coerced to a string column
+identifier.
