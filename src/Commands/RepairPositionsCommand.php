@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Relaticle\Flowforge\Services\DecimalPosition;
 
+use function Illuminate\Support\enum_value;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\select;
@@ -154,29 +155,6 @@ class RepairPositionsCommand extends Command
         return $query;
     }
 
-    private function convertEnumToString($value): string
-    {
-        if (is_object($value)) {
-            // Handle Laravel Enums (implements UnitEnum)
-            if ($value instanceof \UnitEnum) {
-                return $value->value ?? $value->name;
-            }
-            // Handle objects with value property
-            if (property_exists($value, 'value')) {
-                return (string) $value->value;
-            }
-            // Handle objects with __toString method
-            if (method_exists($value, '__toString')) {
-                return (string) $value;
-            }
-
-            // Fallback: try to get class name or serialize
-            return class_basename($value);
-        }
-
-        return (string) $value;
-    }
-
     /**
      * @param  class-string<Model>  $model
      * @return array{total: int, null_positions: int, duplicates: int, groups: array<string, int>}
@@ -211,8 +189,7 @@ class RepairPositionsCommand extends Command
             ->groupBy($columnField)
             ->pluck('record_count', $columnField)
             ->mapWithKeys(function ($count, $key) {
-                // Convert enum to string value if needed
-                $stringKey = $this->convertEnumToString($key);
+                $stringKey = (string) enum_value($key);
 
                 return [$stringKey => $count];
             })
@@ -259,8 +236,7 @@ class RepairPositionsCommand extends Command
             ->pluck($columnField);
 
         foreach ($groups as $group) {
-            // Convert enum to string for array key
-            $groupKey = $this->convertEnumToString($group);
+            $groupKey = (string) enum_value($group);
 
             $records = $this->getRecordsForStrategy($model, $columnField, $positionField, $group, $strategy, $query);
 

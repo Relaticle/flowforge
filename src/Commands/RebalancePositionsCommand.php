@@ -162,7 +162,7 @@ class RebalancePositionsCommand extends Command
         $this->newLine();
 
         foreach ($columnsNeedingRebalancing as $columnId) {
-            $stats = $rebalancer->getGapStatistics($query, $columnField, (string) $columnId, $positionField);
+            $stats = $rebalancer->getGapStatistics($query, $columnField, $columnId, $positionField);
             $this->line("  - {$columnId}: {$stats['count']} records, {$stats['small_gaps']} small gaps");
         }
 

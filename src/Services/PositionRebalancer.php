@@ -10,6 +10,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+use function Illuminate\Support\enum_value;
+
 /**
  * Handles rebalancing of positions within a column when gaps become too small.
  *
@@ -101,10 +103,11 @@ final readonly class PositionRebalancer
         $columns = (clone $query)
             ->select($columnField)
             ->distinct()
-            ->pluck($columnField);
+            ->pluck($columnField)
+            ->map(fn ($columnId) => (string) enum_value($columnId));
 
-        return $columns->filter(function ($columnId) use ($query, $columnField, $positionField) {
-            return $this->needsRebalancing($query, $columnField, (string) $columnId, $positionField);
+        return $columns->filter(function (string $columnId) use ($query, $columnField, $positionField) {
+            return $this->needsRebalancing($query, $columnField, $columnId, $positionField);
         })->values();
     }
 
@@ -130,10 +133,10 @@ final readonly class PositionRebalancer
         );
 
         foreach ($columnsNeedingRebalancing as $columnId) {
-            $results[(string) $columnId] = $this->rebalanceColumn(
+            $results[$columnId] = $this->rebalanceColumn(
                 $query,
                 $columnField,
-                (string) $columnId,
+                $columnId,
                 $positionField
             );
         }
