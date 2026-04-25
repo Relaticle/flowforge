@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 use Relaticle\Flowforge\Services\DecimalPosition;
 use Relaticle\Flowforge\Services\PositionRebalancer;
-use Relaticle\Flowforge\Support\EnumHelper;
 use Relaticle\Flowforge\Tests\Fixtures\RebalancingStatusEnum;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
+
+use function Illuminate\Support\enum_value;
 
 function runPositionRebalancingTests(string $label, callable $s): void
 {
@@ -28,7 +29,7 @@ function runPositionRebalancingTests(string $label, callable $s): void
                 expect($rebalancer->needsRebalancing(
                     Task::query(),
                     'status',
-                    EnumHelper::convertEnumToString($s('in_progress')),
+                    (string) enum_value($s('in_progress')),
                     'order_position'
                 ))->toBeTrue();
             });
@@ -39,7 +40,7 @@ function runPositionRebalancingTests(string $label, callable $s): void
                 expect($rebalancer->needsRebalancing(
                     Task::query(),
                     'status',
-                    EnumHelper::convertEnumToString($s('todo')),
+                    (string) enum_value($s('todo')),
                     'order_position'
                 ))->toBeFalse();
             });
@@ -50,7 +51,7 @@ function runPositionRebalancingTests(string $label, callable $s): void
                 expect($rebalancer->needsRebalancing(
                     Task::query(),
                     'status',
-                    EnumHelper::convertEnumToString($s('done')), // No tasks in this column
+                    (string) enum_value($s('done')), // No tasks in this column
                     'order_position'
                 ))->toBeFalse();
             });
@@ -63,7 +64,7 @@ function runPositionRebalancingTests(string $label, callable $s): void
                 expect($rebalancer->needsRebalancing(
                     Task::query(),
                     'status',
-                    EnumHelper::convertEnumToString($s('review')),
+                    (string) enum_value($s('review')),
                     'order_position'
                 ))->toBeFalse();
             });
@@ -76,7 +77,7 @@ function runPositionRebalancingTests(string $label, callable $s): void
                 $count = $rebalancer->rebalanceColumn(
                     Task::query(),
                     'status',
-                    EnumHelper::convertEnumToString($s('todo')),
+                    (string) enum_value($s('todo')),
                     'order_position'
                 );
 
@@ -104,7 +105,7 @@ function runPositionRebalancingTests(string $label, callable $s): void
                 $rebalancer->rebalanceColumn(
                     Task::query(),
                     'status',
-                    EnumHelper::convertEnumToString($s('testing')),
+                    (string) enum_value($s('testing')),
                     'order_position'
                 );
 
@@ -173,8 +174,8 @@ function runPositionRebalancingTests(string $label, callable $s): void
                     ->and($results['blocked'])->toBe(2)
                     ->and($results['review'])->toBe(2);
 
-                expect($rebalancer->needsRebalancing(Task::query(), 'status', EnumHelper::convertEnumToString($s('blocked')), 'order_position'))->toBeFalse()
-                    ->and($rebalancer->needsRebalancing(Task::query(), 'status', EnumHelper::convertEnumToString($s('review')), 'order_position'))->toBeFalse();
+                expect($rebalancer->needsRebalancing(Task::query(), 'status', (string) enum_value($s('blocked')), 'order_position'))->toBeFalse()
+                    ->and($rebalancer->needsRebalancing(Task::query(), 'status', (string) enum_value($s('review')), 'order_position'))->toBeFalse();
             });
         });
 
@@ -185,7 +186,7 @@ function runPositionRebalancingTests(string $label, callable $s): void
                 $stats = $rebalancer->getGapStatistics(
                     Task::query(),
                     'status',
-                    EnumHelper::convertEnumToString($s('todo')),
+                    (string) enum_value($s('todo')),
                     'order_position'
                 );
 

@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Relaticle\Flowforge\Services\DecimalPosition;
-use Relaticle\Flowforge\Support\EnumHelper;
 
+use function Illuminate\Support\enum_value;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\select;
@@ -189,7 +189,7 @@ class RepairPositionsCommand extends Command
             ->groupBy($columnField)
             ->pluck('record_count', $columnField)
             ->mapWithKeys(function ($count, $key) {
-                $stringKey = EnumHelper::convertEnumToString($key);
+                $stringKey = (string) enum_value($key);
 
                 return [$stringKey => $count];
             })
@@ -236,7 +236,7 @@ class RepairPositionsCommand extends Command
             ->pluck($columnField);
 
         foreach ($groups as $group) {
-            $groupKey = EnumHelper::convertEnumToString($group);
+            $groupKey = (string) enum_value($group);
 
             $records = $this->getRecordsForStrategy($model, $columnField, $positionField, $group, $strategy, $query);
 
