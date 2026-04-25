@@ -102,10 +102,11 @@ final readonly class PositionRebalancer
         $columns = (clone $query)
             ->select($columnField)
             ->distinct()
-            ->pluck($columnField);
+            ->pluck($columnField)
+            ->map(fn ($columnId) => EnumHelper::convertEnumToString($columnId));
 
-        return $columns->filter(function ($columnId) use ($query, $columnField, $positionField) {
-            return $this->needsRebalancing($query, $columnField, EnumHelper::convertEnumToString($columnId), $positionField);
+        return $columns->filter(function (string $columnId) use ($query, $columnField, $positionField) {
+            return $this->needsRebalancing($query, $columnField, $columnId, $positionField);
         })->values();
     }
 
@@ -131,12 +132,10 @@ final readonly class PositionRebalancer
         );
 
         foreach ($columnsNeedingRebalancing as $columnId) {
-            $columnValue = EnumHelper::convertEnumToString($columnId);
-
-            $results[$columnValue] = $this->rebalanceColumn(
+            $results[$columnId] = $this->rebalanceColumn(
                 $query,
                 $columnField,
-                $columnValue,
+                $columnId,
                 $positionField
             );
         }

@@ -5,7 +5,6 @@ namespace Relaticle\Flowforge\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Relaticle\Flowforge\Services\PositionRebalancer;
-use Relaticle\Flowforge\Support\EnumHelper;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
@@ -163,9 +162,8 @@ class RebalancePositionsCommand extends Command
         $this->newLine();
 
         foreach ($columnsNeedingRebalancing as $columnId) {
-            $columnValue = EnumHelper::convertEnumToString($columnId);
-            $stats = $rebalancer->getGapStatistics($query, $columnField, $columnValue, $positionField);
-            $this->line("  - {$columnValue}: {$stats['count']} records, {$stats['small_gaps']} small gaps");
+            $stats = $rebalancer->getGapStatistics($query, $columnField, $columnId, $positionField);
+            $this->line("  - {$columnId}: {$stats['count']} records, {$stats['small_gaps']} small gaps");
         }
 
         $this->newLine();

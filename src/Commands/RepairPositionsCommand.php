@@ -189,7 +189,6 @@ class RepairPositionsCommand extends Command
             ->groupBy($columnField)
             ->pluck('record_count', $columnField)
             ->mapWithKeys(function ($count, $key) {
-                // Convert enum to string value if needed
                 $stringKey = EnumHelper::convertEnumToString($key);
 
                 return [$stringKey => $count];
@@ -237,7 +236,6 @@ class RepairPositionsCommand extends Command
             ->pluck($columnField);
 
         foreach ($groups as $group) {
-            // Convert enum to string for array key
             $groupKey = EnumHelper::convertEnumToString($group);
 
             $records = $this->getRecordsForStrategy($model, $columnField, $positionField, $group, $strategy, $query);

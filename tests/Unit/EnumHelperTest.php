@@ -20,11 +20,11 @@ describe('EnumHelper::convertEnumToString()', function () {
         expect(EnumHelper::convertEnumToString(42))->toBe('42');
     });
 
-    test('falls back to class basename for unknown objects', function () {
+    test('throws for unknown objects', function () {
         $obj = new class {};
 
-        expect(EnumHelper::convertEnumToString($obj))->toBeString()->not->toBeEmpty();
-    });
+        EnumHelper::convertEnumToString($obj);
+    })->throws(InvalidArgumentException::class);
 
     test('returns value from object with value property', function () {
         $obj = new class
