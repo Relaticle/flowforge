@@ -5,13 +5,13 @@ declare(strict_types=1);
 use Relaticle\Flowforge\Services\DecimalPosition;
 use Relaticle\Flowforge\Services\PositionRebalancer;
 use Relaticle\Flowforge\Support\EnumHelper;
-use Relaticle\Flowforge\Tests\Fixtures\StatusEnum;
+use Relaticle\Flowforge\Tests\Fixtures\RebalancingStatusEnum;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 
 function runPositionRebalancingTests(string $label, callable $s): void
 {
     describe($label, function () use ($s) {
-        // $s is a callback that either converts a string to a StatusEnum, or returns the string unchanged
+        // $s is a callback that either converts a string to a RebalancingStatusEnum, or returns the string unchanged
         beforeEach(function () use ($s) {
             Task::create(['title' => 'Task 1', 'status' => $s('todo'), 'order_position' => '1000.0000000000']);
             Task::create(['title' => 'Task 2', 'status' => $s('todo'), 'order_position' => '2000.0000000000']);
@@ -237,4 +237,4 @@ function runPositionRebalancingTests(string $label, callable $s): void
 }
 
 runPositionRebalancingTests('with string statuses', fn (string $v) => $v);
-runPositionRebalancingTests('with enum statuses', fn (string $v) => StatusEnum::tryFrom($v) ?? $v);
+runPositionRebalancingTests('with enum statuses', fn (string $v) => RebalancingStatusEnum::tryFrom($v) ?? $v);

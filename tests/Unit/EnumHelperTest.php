@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use Relaticle\Flowforge\Support\EnumHelper;
-use Relaticle\Flowforge\Tests\Fixtures\StatusEnum;
+use Relaticle\Flowforge\Tests\Fixtures\RebalancingStatusEnum;
 
 describe('EnumHelper::convertEnumToString()', function () {
     test('returns string value of a backed enum', function () {
-        expect(EnumHelper::convertEnumToString(StatusEnum::ToDo))->toBe('todo')
-            ->and(EnumHelper::convertEnumToString(StatusEnum::InProgress))->toBe('in_progress');
+        expect(EnumHelper::convertEnumToString(RebalancingStatusEnum::ToDo))->toBe('todo')
+            ->and(EnumHelper::convertEnumToString(RebalancingStatusEnum::InProgress))->toBe('in_progress');
     });
 
     test('returns string unchanged', function () {

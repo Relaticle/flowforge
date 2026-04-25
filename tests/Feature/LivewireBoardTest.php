@@ -13,7 +13,80 @@ describe('board rendering', function () {
             ->assertStatus(200)
             ->assertSee('To Do')
             ->assertSee('In Progress')
-            ->assertSee('Completed');
+            ->assertSee('Completed')
+            ->assertDontSee('Hidden Column');
+    });
+
+    test('renders board with unhidden column', function () {
+        Livewire::test(TestBoard::class)
+            ->assertStatus(200)
+            ->assertDontSee('Hidden Column')
+            ->set('showAllColumns', true)
+            ->assertSee('Hidden Column');
+    });
+
+    test('re-hides column when visibility condition flips back', function () {
+        Livewire::test(TestBoard::class)
+            ->assertStatus(200)
+            ->assertDontSee('Hidden Column')
+            ->set('showAllColumns', true)
+            ->assertSee('Hidden Column')
+            ->set('showAllColumns', false)
+            ->assertDontSee('Hidden Column');
+    });
+
+    test('column configured with hidden(true) literal never renders', function () {
+        Livewire::test(TestBoard::class)
+            ->assertStatus(200)
+            ->assertDontSee('Archived Column')
+            ->set('showAllColumns', true)
+            ->assertDontSee('Archived Column');
+    });
+
+    test('getColumnIdentifiers excludes hidden columns', function () {
+        $board = Livewire::test(TestBoard::class)->instance()->getBoard();
+
+        expect($board->getColumnIdentifiers())
+            ->not->toContain('hidden_column')
+            ->not->toContain('archived')
+            ->toContain('todo', 'in_progress', 'completed');
+    });
+
+    test('getColumnLabels excludes hidden columns', function () {
+        $board = Livewire::test(TestBoard::class)->instance()->getBoard();
+
+        expect(array_keys($board->getColumnLabels()))
+            ->not->toContain('hidden_column')
+            ->not->toContain('archived')
+            ->toContain('todo', 'in_progress', 'completed');
+    });
+
+    test('getColumnColors excludes hidden columns', function () {
+        $board = Livewire::test(TestBoard::class)->instance()->getBoard();
+
+        expect(array_keys($board->getColumnColors()))
+            ->not->toContain('hidden_column')
+            ->not->toContain('archived');
+    });
+
+    test('getColumns returns a sequentially-indexed array after filtering', function () {
+        $board = Livewire::test(TestBoard::class)->instance()->getBoard();
+
+        $columns = $board->getColumns();
+
+        expect(array_keys($columns))->toBe(range(0, count($columns) - 1));
+    });
+
+    test('getColumnIdentifiers returns empty when every column is hidden', function () {
+        $board = Livewire::test(TestBoard::class)
+            ->set('hideEverything', true)
+            ->instance()
+            ->getBoard();
+
+        expect($board->getColumns())->toBe([])
+            ->and($board->getColumnIdentifiers())->toBe([])
+            ->and($board->getColumnLabels())->toBe([])
+            ->and($board->getColumnColors())->toBe([]);
     });
 
     test('displays cards in correct columns', function () {
