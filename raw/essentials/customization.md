@@ -171,7 +171,7 @@ public function board(Board $board): Board
                         ->options(['low' => 'Low', 'medium' => 'Medium', 'high' => 'High'])
                         ->default('medium'),
                 ])
-                ->mutateFormDataUsing(function (array $data, array $arguments): array {
+                ->mutateDataUsing(function (array $data, array $arguments): array {
                     if (isset($arguments['column'])) {
                         $data['status'] = $arguments['column'];
                         $data['position'] = $this->getBoardPositionInColumn($arguments['column']);
