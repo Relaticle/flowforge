@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   update:
@@ -34,9 +35,23 @@ jobs:
           latest-version: ${{ github.event.release.name }}
           release-notes: ${{ github.event.release.body }}
 
-      - name: Commit updated CHANGELOG
-        uses: stefanzweifel/git-auto-commit-action@v7
+      - name: Open changelog PR
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
         with:
-          branch: ${{ steps.branch.outputs.name }}
-          commit_message: Update CHANGELOG
-          file_pattern: CHANGELOG.md
+          base: ${{ steps.branch.outputs.name }}
+          branch: chore/changelog-${{ github.event.release.tag_name }}
+          delete-branch: true
+          commit-message: "chore: update CHANGELOG for ${{ github.event.release.tag_name }}"
+          title: "chore: update CHANGELOG for ${{ github.event.release.tag_name }}"
+          body: |
+            Auto-generated CHANGELOG update for release ${{ github.event.release.tag_name }}.
+
+            Release notes: ${{ github.event.release.html_url }}
+          labels: skip-changelog
+
+      - name: Enable auto-merge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge --auto --squash "${{ steps.cpr.outputs.pull-request-number }}"
