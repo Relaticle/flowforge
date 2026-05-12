@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v4.0.12 - 2026-05-12
+
+### What's Changed
+
+#### Other Changes
+
+- ci: make release workflow idempotent [4.x] by @ManukMinasyan in https://github.com/relaticle/flowforge/pull/117
+- build(deps): bump the npm_and_yarn group across 2 directories with 1 update by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/118
+- build(deps): bump ip-address from 10.1.0 to 10.2.0 in /docs in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/120
+- build(deps): bump the npm_and_yarn group across 2 directories with 4 updates by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/121
+- build(deps): bump nuxt-og-image from 6.3.7 to 6.5.0 in /docs in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/122
+- build(deps): bump fast-uri from 3.1.0 to 3.1.2 in /docs in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/123
+- fix: pass 'column' argument to CreateAction mutateDataUsing by @eduardoribeirodev in https://github.com/relaticle/flowforge/pull/124
+
+**Full Changelog**: https://github.com/relaticle/flowforge/compare/v4.0.11...v4.0.12
+
+## v4.0.11 - 2026-04-25
+
+### What's Changed
+
+#### Other Changes
+
+- Add enum helper to column by @paulhennell in https://github.com/relaticle/flowforge/pull/100
+- Adding filament style hidden option to columns by @paulhennell in https://github.com/relaticle/flowforge/pull/101
+- build(deps): bump dependabot/fetch-metadata from 3.0.0 to 3.1.0 by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/115
+- 4.x enum helper by @cheesegrits in https://github.com/relaticle/flowforge/pull/116
+
+### New Contributors
+
+- @paulhennell made their first contribution in https://github.com/relaticle/flowforge/pull/100
+
+**Full Changelog**: https://github.com/relaticle/flowforge/compare/v4.0.10...v4.0.11
+
+## v4.0.10 - 2026-04-17
+
+### What's Changed
+
+#### Other Changes
+
+- build(deps-dev): bump follow-redirects from 1.15.11 to 1.16.0 in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/111
+- build(deps): bump hono from 4.12.12 to 4.12.14 in /docs in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/112
+- fix: correct top-drop position to stay at top [4.x] by @ManukMinasyan in https://github.com/relaticle/flowforge/pull/114
+
+**Full Changelog**: https://github.com/relaticle/flowforge/compare/v4.0.9...v4.0.10
+
 ## v4.0.9 - 2026-04-10
 
 ### Fixed
