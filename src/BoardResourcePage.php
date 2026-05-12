@@ -9,6 +9,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
+use Filament\Tables\Contracts\HasTable;
 use Livewire\Attributes\Url;
 use Relaticle\Flowforge\Concerns\BaseBoard;
 use Relaticle\Flowforge\Concerns\InteractsWithBoard;
@@ -86,7 +87,7 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
                 $resolvedAction = $this->resolveBoardAction($action, $resolvedActions);
             } elseif (filled($action['context']['schemaComponent'] ?? null)) {
                 $resolvedAction = $this->resolveSchemaComponentAction($action, $resolvedActions);
-            } elseif (filled($action['context']['table'] ?? null)) {
+            } elseif ($this instanceof HasTable && filled($action['context']['table'] ?? null)) {
                 $resolvedAction = $this->resolveTableAction($action, $resolvedActions);
             } else {
                 $resolvedAction = $this->resolveAction($action, $resolvedActions);
@@ -96,15 +97,21 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
                 continue;
             }
 
+            if (filled($action['arguments'] ?? [])) {
+                $resolvedAction->mergeArguments($action['arguments']);
+            }
+
             $resolvedAction->nestingIndex($actionNestingIndex);
             $resolvedAction->boot();
 
             $resolvedActions[] = $resolvedAction;
 
-            $this->cacheSchema(
-                "mountedActionSchema{$actionNestingIndex}",
-                $this->getMountedActionSchema($actionNestingIndex, $resolvedAction),
-            );
+            if ($isMounting) {
+                $this->cacheSchema(
+                    "mountedActionSchema{$actionNestingIndex}",
+                    $this->getMountedActionSchema($actionNestingIndex, $resolvedAction),
+                );
+            }
         }
 
         return $resolvedActions;
