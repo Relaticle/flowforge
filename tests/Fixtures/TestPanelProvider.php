@@ -29,6 +29,9 @@ class TestPanelProvider extends PanelProvider
             ->pages([
                 TestBoard::class,
             ])
+            ->resources([
+                TestResource::class,
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
