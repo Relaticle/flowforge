@@ -37,7 +37,7 @@ jobs:
 
       - name: Open changelog PR
         id: cpr
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           base: ${{ steps.branch.outputs.name }}
           branch: chore/changelog-${{ github.event.release.tag_name }}
