@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v4.0.13 - 2026-06-14
+
+<!-- Release notes generated using configuration in .github/release.yml at 4.x -->
+### What's Changed
+
+#### Other Changes
+
+* ci: open changelog PR instead of pushing to protected branch [4.x] by @ManukMinasyan in https://github.com/relaticle/flowforge/pull/125
+* build(deps): bump devalue from 5.8.0 to 5.8.1 in /docs in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/128
+* build(deps): bump peter-evans/create-pull-request from 7 to 8 by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/127
+* build(deps): bump the npm_and_yarn group across 1 directory with 2 updates by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/129
+* build(deps): bump the npm_and_yarn group across 1 directory with 2 updates by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/132
+* build(deps): bump hono from 4.12.18 to 4.12.23 in /docs in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/133
+* build(deps): bump the npm_and_yarn group across 2 directories with 1 update by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/134
+* build(deps-dev): bump esbuild from 0.25.12 to 0.28.1 in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/135
+
+**Full Changelog**: https://github.com/relaticle/flowforge/compare/v4.0.12...v4.0.13
+
 ## v4.0.12 - 2026-05-12
 
 ### What's Changed
