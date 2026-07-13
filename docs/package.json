@@ -6,13 +6,16 @@
         "generate": "nuxt build --preset github_pages",
         "preview": "nuxt preview"
     },
+    "engines": {
+        "node": ">=22.12.0"
+    },
     "dependencies": {
         "@nuxt/image": "^1.11.0",
         "@nuxt/scripts": "^0.12.1",
         "@nuxt/ui": "^4.0.0",
         "@unhead/vue": "^2.0.17",
         "better-sqlite3": "^12.4.1",
-        "docus": "latest",
+        "docus": "^5.12.3",
         "nuxt": "^4.4.8",
         "typescript": "^5.9.2"
     },
