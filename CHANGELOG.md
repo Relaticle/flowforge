@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v4.0.14 - 2026-07-13
+
+<!-- Release notes generated using configuration in .github/release.yml at 4.x -->
+### What's Changed
+
+#### Other Changes
+
+* build(deps): bump nuxt from 4.4.6 to 4.4.8 in /docs in the npm_and_yarn group across 1 directory by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/136
+* build(deps): bump the npm_and_yarn group across 2 directories with 5 updates by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/137
+* build(deps): bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/138
+* fix(docs): unbreak docs deploy on node 24 + resync lockfile [4.x] by @ManukMinasyan in https://github.com/relaticle/flowforge/pull/139
+* build(deps): bump @nuxt/scripts from 0.12.2 to 1.3.0 in /docs by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/140
+
+**Full Changelog**: https://github.com/relaticle/flowforge/compare/v4.0.13...v4.0.14
+
 ## v4.0.12 - 2026-05-12
 
 ### What's Changed
