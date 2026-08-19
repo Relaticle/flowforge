@@ -8,9 +8,10 @@ use Filament\Actions\Action;
 
 /**
  * A card action with no ->url() of its own, on a page whose getDefaultActionUrl()
- * returns a url. Filament's resource pages do exactly this for modal-less
- * Create/Edit/View actions, so the card must keep mounting the action rather than
- * silently becoming a link.
+ * returns a url. Filament's resource pages do this for modal-less Create/Edit/View
+ * actions when the resource has the matching page. Filament's own table honours that
+ * fallback (its recordUrl() closure reads getUrl(), which consults it), so the card
+ * does too.
  */
 class TestCardActionDefaultUrlBoard extends TestCardActionBoard
 {

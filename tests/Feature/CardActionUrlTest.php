@@ -63,25 +63,35 @@ test('card action without a url still mounts the action', function () {
         ->and($title)->not->toContain('href=');
 });
 
-test('card action inheriting only a default action url still mounts the action', function () {
+/**
+ * getUrl() falls back to the livewire component's getDefaultActionUrl(). Filament's
+ * table does the same, so a card follows it too rather than inventing its own rule.
+ */
+test('card action inheriting a default action url renders as a link', function () {
     $title = cardTitleHtml(Livewire::test(TestCardActionDefaultUrlBoard::class)->html());
 
-    expect($title)->toContain("mountAction('run'")
-        ->and($title)->not->toContain('href=');
+    expect($title)->toContain('href="https://example.test/default-action-url"')
+        ->and($title)->not->toContain("mountAction('run'");
 });
 
-test('a confirmation on a url card action wins over the url', function () {
+/**
+ * Filament decides this on the url alone. ListRecords::table() has recordAction() skip
+ * any action whose getUrl() is filled and recordUrl() pick it up instead, without
+ * consulting the action's modal state, so a url action that also declares a
+ * confirmation renders as a plain link in a table row too. A board card matches that.
+ */
+test('a url card action that also declares a confirmation renders as a link', function () {
     $title = cardTitleHtml(Livewire::test(TestCardActionConfirmBoard::class)->html());
 
-    expect($title)->toContain("mountAction('urlWithConfirmation'")
-        ->and($title)->not->toContain('href=');
+    expect($title)->toContain('href="https://example.test/tasks/' . $this->task->getKey() . '"')
+        ->and($title)->not->toContain("mountAction('urlWithConfirmation'");
 });
 
-test('a custom modal heading on a url card action wins over the url', function () {
+test('a url card action that also declares a modal heading renders as a link', function () {
     $title = cardTitleHtml(Livewire::test(TestCardActionModalHeadingBoard::class)->html());
 
-    expect($title)->toContain("mountAction('urlWithModalHeading'")
-        ->and($title)->not->toContain('href=');
+    expect($title)->toContain('href="https://example.test/tasks/' . $this->task->getKey() . '"')
+        ->and($title)->not->toContain("mountAction('urlWithModalHeading'");
 });
 
 test('resolveCardAction finds the configured action among record actions', function () {
