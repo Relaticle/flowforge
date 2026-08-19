@@ -6,6 +6,30 @@
     $cardAction = $this->getBoard()->getCardAction();
     $hasCardAction = $cardAction !== null;
     $hasPositionIdentifier = $this->getBoard()->getPositionIdentifierAttribute() !== null;
+
+    // A card action configured with a url must navigate like a native link instead of
+    // mounting a modal, so middle-click, cmd-click and "copy link" keep working.
+    //
+    // The rule is Filament's own, taken from ListRecords::table(): a url on the action
+    // decides. There, recordAction() skips any action whose getUrl() is filled and
+    // recordUrl() takes it instead, with no check of the action's modal state. An
+    // action carrying both a url and a confirmation therefore renders as a plain link
+    // in core too. Mirroring that keeps a board card and a table row behaving the same
+    // way for the same action, which matters more than second-guessing the config.
+    //
+    // Only POST urls are excluded: those need a form rather than an anchor.
+    $cardActionInstance = $this->getBoard()->resolveCardAction($processedRecordActions);
+    $cardActionUrl = $cardActionInstance?->shouldPostToUrl()
+        ? null
+        : $cardActionInstance?->getUrl();
+    $hasCardActionUrl = filled($cardActionUrl);
+    $cardActionHref = $hasCardActionUrl
+        ? \Filament\Support\generate_href_html(
+            $cardActionUrl,
+            $cardActionInstance->shouldOpenUrlInNewTab(),
+            hasNestedClickEventHandler: true,
+        )
+        : null;
 @endphp
 
 <div
@@ -26,12 +50,18 @@
     <div class="flowforge-card-content">
         <div class="flex items-start justify-between mb-2">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-white p-3"
-                @if($hasCardAction && $cardAction)
+                @if($hasCardAction && $cardAction && !$hasCardActionUrl)
                     wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
                 style="cursor: pointer;"
                 @endif
             >
-                {{ $record['title'] }}
+                @if($hasCardActionUrl)
+                    <a {{ $cardActionHref }} class="block">
+                        {{ $record['title'] }}
+                    </a>
+                @else
+                    {{ $record['title'] }}
+                @endif
             </h4>
 
             @if($hasActions)
@@ -42,14 +72,20 @@
         </div>
 
         <div class="px-3 pb-3"
-             @if($hasCardAction && $cardAction)
+             @if($hasCardAction && $cardAction && !$hasCardActionUrl)
                  wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
              style="cursor: pointer;"
             @endif
         >
             {{-- Render card schema with compact spacing --}}
             @if(filled($record['schema']))
-                {{ $record['schema'] }}
+                @if($hasCardActionUrl)
+                    <a {{ $cardActionHref }} class="block">
+                        {{ $record['schema'] }}
+                    </a>
+                @else
+                    {{ $record['schema'] }}
+                @endif
             @endif
         </div>
     </div>

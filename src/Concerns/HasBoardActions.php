@@ -113,6 +113,42 @@ trait HasBoardActions
     }
 
     /**
+     * Find the configured card action among already-processed record actions.
+     *
+     * The record actions are passed in rather than rebuilt so the returned action
+     * keeps the record binding applied by getBoardRecordActions(), which is what
+     * makes per-record closures such as ->url(fn ($record) => ...) resolvable.
+     *
+     * @param  array<Action|ActionGroup>  $recordActions
+     */
+    public function resolveCardAction(array $recordActions): ?Action
+    {
+        $name = $this->getCardAction();
+
+        if (blank($name)) {
+            return null;
+        }
+
+        foreach ($recordActions as $action) {
+            if ($action instanceof ActionGroup) {
+                foreach ($action->getFlatActions() as $flatAction) {
+                    if ($flatAction->getName() === $name) {
+                        return $flatAction;
+                    }
+                }
+
+                continue;
+            }
+
+            if ($action->getName() === $name) {
+                return $action;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Get registered card actions.
      */
     public function getRegisteredCardActions(): array

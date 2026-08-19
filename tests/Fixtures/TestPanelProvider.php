@@ -28,6 +28,12 @@ class TestPanelProvider extends PanelProvider
             ->login()
             ->pages([
                 TestBoard::class,
+                TestCardActionBoard::class,
+                TestCardActionConfirmBoard::class,
+                TestCardActionDefaultUrlBoard::class,
+                TestCardActionModalHeadingBoard::class,
+                TestCardActionModalBoard::class,
+                TestCardActionNewTabBoard::class,
             ])
             ->resources([
                 TestResource::class,
