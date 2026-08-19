@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v4.0.15 - 2026-08-19
+
+Two card action fixes. No API changes, no configuration changes.
+
+### Repeaters and other nested actions inside a card action modal (#156)
+
+Opening an `EditAction` from `cardActions()` whose schema contained a `Repeater`, then clicking add or remove, closed the modal without applying the change. Afterwards no card action responded to clicks until the page was reloaded.
+
+Filament attaches `recordKey` to the context of any action that has a record, so a schema component action nested inside a mounted card action inherited the card's record and arrived carrying both `recordKey` and `schemaComponent`. `BoardResourcePage::resolveActions()` checked `recordKey` first and routed it to the board resolver, which could not find it, silently dropping the mounted entry. The open modal closed, and the orphaned entry left the action stack unusable.
+
+Board detection now runs after schema and table detection, matching the ordering in Filament's own `InteractsWithActions::resolveActions()`. This also covers the repeater's delete, reorder and clone actions, `Select::createOptionAction()`, Builder, and nested action modals. `BoardPage` was never affected.
+
+### Card actions with a url (#164)
+
+```php
+->cardActions([
+    Action::make('view')
+        ->url(fn (Task $record): string => TaskResource::getUrl('view', ['record' => $record])),
+])
+->cardAction('view')
+
+```
+Clicking a card did nothing at all: no navigation, no modal, nothing logged. The card blade hardcoded a `mountAction()` handler, and `getCardAction()` returns only a name, so the action's url was never read. The same action rendered correctly as a link in the card's actions dropdown.
+
+The card now renders as an anchor when the action has a url, using the same `generate_href_html()` helper Filament's table rows use for `recordUrl`, so SPA mode, prefetching, modifier keys and `->openUrlInNewTab()` all behave as they do elsewhere in the panel.
+
+The url decides, with no check of the action's modal state. That is Filament's rule: `ListRecords::table()` has `recordAction()` skip any action whose `getUrl()` is filled and `recordUrl()` take it instead. An action declaring both a url and a modal therefore renders as a link and never opens that modal, in a board card exactly as in a table row. Declare one or the other. Only `->postToUrl()` actions stay on the click handler, since a POST needs a form rather than an anchor.
+
+### Upgrading
+
+`composer update relaticle/flowforge`. Nothing to change in your board configuration.
+
 ## v4.0.12 - 2026-05-12
 
 ### What's Changed
