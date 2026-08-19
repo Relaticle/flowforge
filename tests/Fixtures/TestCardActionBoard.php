@@ -38,6 +38,8 @@ class TestCardActionBoard extends BoardPage
                         TextInput::make('title'),
                     ])
                     ->action(function (): void {}),
+                Action::make('run')
+                    ->action(function (): void {}),
             ])
             ->cardAction($this->cardActionName());
     }

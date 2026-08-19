@@ -9,10 +9,17 @@
 
     // A card action configured with ->url() must navigate like a native link instead
     // of mounting a modal, so middle-click, cmd-click and "copy link" keep working.
-    // getUrl() returns null when the action has a modal, and POST urls need a form
+    //
+    // Only an explicitly configured url opts a card into link rendering. getUrl()
+    // also falls back to the livewire component's getDefaultActionUrl(), which
+    // Filament's resource pages implement for modal-less Create/Edit/View actions;
+    // honouring that here would silently turn existing boards into links. getUrl()
+    // still returns null when the action has a modal, and POST urls need a form
     // rather than an anchor, so both fall through to the Livewire click handler.
     $cardActionInstance = $this->getBoard()->resolveCardAction($processedRecordActions);
-    $cardActionUrl = $cardActionInstance?->shouldPostToUrl() ? null : $cardActionInstance?->getUrl();
+    $cardActionUrl = ($cardActionInstance?->hasUrl() && ! $cardActionInstance->shouldPostToUrl())
+        ? $cardActionInstance->getUrl()
+        : null;
     $hasCardActionUrl = filled($cardActionUrl);
     $cardActionHref = $hasCardActionUrl
         ? \Filament\Support\generate_href_html(

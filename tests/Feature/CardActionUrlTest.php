@@ -6,6 +6,7 @@ use Livewire\Livewire;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 use Relaticle\Flowforge\Tests\Fixtures\TestBoard;
 use Relaticle\Flowforge\Tests\Fixtures\TestCardActionBoard;
+use Relaticle\Flowforge\Tests\Fixtures\TestCardActionDefaultUrlBoard;
 use Relaticle\Flowforge\Tests\Fixtures\TestCardActionModalBoard;
 use Relaticle\Flowforge\Tests\Fixtures\TestCardActionNewTabBoard;
 
@@ -57,6 +58,13 @@ test('card action without a url still mounts the action', function () {
     $title = cardTitleHtml(Livewire::test(TestCardActionModalBoard::class)->html());
 
     expect($title)->toContain("mountAction('edit'")
+        ->and($title)->not->toContain('href=');
+});
+
+test('card action inheriting only a default action url still mounts the action', function () {
+    $title = cardTitleHtml(Livewire::test(TestCardActionDefaultUrlBoard::class)->html());
+
+    expect($title)->toContain("mountAction('run'")
         ->and($title)->not->toContain('href=');
 });
 
