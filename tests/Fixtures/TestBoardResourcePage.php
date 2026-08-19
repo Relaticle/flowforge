@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Relaticle\Flowforge\Tests\Fixtures;
 
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use Relaticle\Flowforge\Board;
@@ -43,6 +45,17 @@ class TestBoardResourcePage extends BoardResourcePage
 
                         return $data;
                     }),
+            ])
+            ->cardActions([
+                Action::make('editTask')
+                    ->schema([
+                        TextInput::make('title'),
+                        Repeater::make('items')
+                            ->schema([
+                                TextInput::make('name'),
+                            ]),
+                    ])
+                    ->action(function (): void {}),
             ]);
     }
 }
