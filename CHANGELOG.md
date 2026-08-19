@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v4.1.0 - 2026-08-19
+
+Two card action fixes and Laravel 13 support. No API changes, no configuration changes.
+
+Supersedes v4.0.15, which shipped the same two fixes a few minutes earlier. Laravel 13 support arrived right after, and a minor is the honest place for it, so upgrade straight to this.
+
+### Repeaters and other nested actions inside a card action modal (#156)
+
+Opening an `EditAction` from `cardActions()` whose schema contained a `Repeater`, then clicking add or remove, closed the modal without applying the change. Afterwards no card action responded to clicks until the page was reloaded.
+
+Filament attaches `recordKey` to the context of any action that has a record, so a schema component action nested inside a mounted card action inherited the card's record and arrived carrying both `recordKey` and `schemaComponent`. `BoardResourcePage::resolveActions()` checked `recordKey` first and routed it to the board resolver, which could not find it, silently dropping the mounted entry. The open modal closed, and the orphaned entry left the action stack unusable.
+
+Board detection now runs after schema and table detection, matching the ordering in Filament's own `InteractsWithActions::resolveActions()`. This also covers the repeater's delete, reorder and clone actions, `Select::createOptionAction()`, Builder, and nested action modals. `BoardPage` was never affected.
+
+### Card actions with a url (#164)
+
+```php
+->cardActions([
+    Action::make('view')
+        ->url(fn (Task $record): string => TaskResource::getUrl('view', ['record' => $record])),
+])
+->cardAction('view')
+
+```
+Clicking a card did nothing at all: no navigation, no modal, nothing logged. The card blade hardcoded a `mountAction()` handler, and `getCardAction()` returns only a name, so the action's url was never read. The same action rendered correctly as a link in the card's actions dropdown.
+
+The card now renders as an anchor when the action has a url, using the same `generate_href_html()` helper Filament's table rows use for `recordUrl`, so SPA mode, prefetching, modifier keys and `->openUrlInNewTab()` all behave as they do elsewhere in the panel.
+
+The url decides, with no check of the action's modal state. That is Filament's rule: `ListRecords::table()` has `recordAction()` skip any action whose `getUrl()` is filled and `recordUrl()` take it instead. An action declaring both a url and a modal therefore renders as a link and never opens that modal, in a board card exactly as in a table row. Declare one or the other. Only `->postToUrl()` actions stay on the click handler, since a POST needs a form rather than an anchor.
+
+### Laravel 13
+
+Both bug reports above were filed against Laravel 13, which the dev constraints did not allow, so nothing verified the package there. `orchestra/testbench` now accepts `^10.11|^11.0` and the Pest packages `^4.0|^5.0`, with a Laravel 13 job added to the CI matrix. The suite passes on both: 161 tests on Laravel 12.67 with Pest 4, and on Laravel 13.26 with Pest 5.
+
+The runtime `require` block is unchanged, so this does not alter what your application needs.
+
+### Maintenance
+
+- Docs deploy has been fixed. It had failed on every push since `better-sqlite3` was bumped to 13.0.3, because `docus` declares a `12.x` peer and `npm ci` aborted on ERESOLVE.
+- Two advisories patched in the docs lockfile: esbuild `<0.28.1` (arbitrary file read via the dev server) and sharp `<0.35.0` (inherited libvips CVEs). `npm audit --omit=dev` now reports zero vulnerabilities.
+
+### Upgrading
+
+`composer update relaticle/flowforge`. Nothing to change in your board configuration.
+
 ## v4.0.12 - 2026-05-12
 
 ### What's Changed
