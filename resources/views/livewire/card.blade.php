@@ -10,16 +10,23 @@
     // A card action configured with ->url() must navigate like a native link instead
     // of mounting a modal, so middle-click, cmd-click and "copy link" keep working.
     //
-    // Only an explicitly configured url opts a card into link rendering. getUrl()
-    // also falls back to the livewire component's getDefaultActionUrl(), which
-    // Filament's resource pages implement for modal-less Create/Edit/View actions;
-    // honouring that here would silently turn existing boards into links. getUrl()
-    // still returns null when the action has a modal, and POST urls need a form
-    // rather than an anchor, so both fall through to the Livewire click handler.
+    // Three conditions keep an action on the Livewire click handler instead:
+    //
+    // - No explicit ->url(). getUrl() also falls back to the livewire component's
+    //   getDefaultActionUrl(), which Filament's resource pages implement for
+    //   modal-less Create/Edit/View actions; honouring that here would silently turn
+    //   existing boards into links. hasUrl() makes link rendering opt-in.
+    // - The action opens a modal. hasModal() only reports an explicit ->modal()
+    //   call, so it does not cover ->requiresConfirmation() or a custom modal
+    //   heading; shouldOpenModal() does. A whole card is a large accidental-click
+    //   target, so a configured confirmation step always wins over a url.
+    // - The url is posted to, which needs a form rather than an anchor.
     $cardActionInstance = $this->getBoard()->resolveCardAction($processedRecordActions);
-    $cardActionUrl = ($cardActionInstance?->hasUrl() && ! $cardActionInstance->shouldPostToUrl())
-        ? $cardActionInstance->getUrl()
-        : null;
+    $cardActionUrl = ($cardActionInstance?->hasUrl()
+        && ! $cardActionInstance->shouldOpenModal()
+        && ! $cardActionInstance->shouldPostToUrl())
+            ? $cardActionInstance->getUrl()
+            : null;
     $hasCardActionUrl = filled($cardActionUrl);
     $cardActionHref = $hasCardActionUrl
         ? \Filament\Support\generate_href_html(

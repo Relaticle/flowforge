@@ -6,8 +6,10 @@ use Livewire\Livewire;
 use Relaticle\Flowforge\Tests\Fixtures\Task;
 use Relaticle\Flowforge\Tests\Fixtures\TestBoard;
 use Relaticle\Flowforge\Tests\Fixtures\TestCardActionBoard;
+use Relaticle\Flowforge\Tests\Fixtures\TestCardActionConfirmBoard;
 use Relaticle\Flowforge\Tests\Fixtures\TestCardActionDefaultUrlBoard;
 use Relaticle\Flowforge\Tests\Fixtures\TestCardActionModalBoard;
+use Relaticle\Flowforge\Tests\Fixtures\TestCardActionModalHeadingBoard;
 use Relaticle\Flowforge\Tests\Fixtures\TestCardActionNewTabBoard;
 
 /**
@@ -65,6 +67,20 @@ test('card action inheriting only a default action url still mounts the action',
     $title = cardTitleHtml(Livewire::test(TestCardActionDefaultUrlBoard::class)->html());
 
     expect($title)->toContain("mountAction('run'")
+        ->and($title)->not->toContain('href=');
+});
+
+test('a confirmation on a url card action wins over the url', function () {
+    $title = cardTitleHtml(Livewire::test(TestCardActionConfirmBoard::class)->html());
+
+    expect($title)->toContain("mountAction('urlWithConfirmation'")
+        ->and($title)->not->toContain('href=');
+});
+
+test('a custom modal heading on a url card action wins over the url', function () {
+    $title = cardTitleHtml(Livewire::test(TestCardActionModalHeadingBoard::class)->html());
+
+    expect($title)->toContain("mountAction('urlWithModalHeading'")
         ->and($title)->not->toContain('href=');
 });
 

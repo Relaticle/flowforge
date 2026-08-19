@@ -40,6 +40,14 @@ class TestCardActionBoard extends BoardPage
                     ->action(function (): void {}),
                 Action::make('run')
                     ->action(function (): void {}),
+                Action::make('urlWithConfirmation')
+                    ->url(fn (Task $record): string => "https://example.test/tasks/{$record->getKey()}")
+                    ->requiresConfirmation()
+                    ->action(function (): void {}),
+                Action::make('urlWithModalHeading')
+                    ->url(fn (Task $record): string => "https://example.test/tasks/{$record->getKey()}")
+                    ->modalHeading('Really?')
+                    ->action(function (): void {}),
             ])
             ->cardAction($this->cardActionName());
     }
