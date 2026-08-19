@@ -62,6 +62,13 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
      * This mirrors the logic in InteractsWithActions::resolveActions() but adds
      * board action detection.
      *
+     * Board detection runs AFTER schema and table detection, because those contexts
+     * are more specific. Filament adds `recordKey` to the context of any action that
+     * has a record, so a schema component action nested inside a mounted card action
+     * (a Repeater's add button, for instance) inherits the card's record and arrives
+     * with both keys set. Checking `recordKey` first would send it to the board
+     * resolver, which cannot find it, silently dropping the mounted entry.
+     *
      * @param  array<array<string, mixed>>  $actions
      * @return array<Action>
      *
@@ -76,19 +83,17 @@ abstract class BoardResourcePage extends Page implements HasActions, HasBoard, H
                 throw new ActionNotResolvableException('An action tried to resolve without a name.');
             }
 
-            // Check if this is a board CARD action (has recordKey in context)
-            // Column actions have 'column' in arguments, not recordKey
-            // This detection happens BEFORE schema/table action detection
+            // A board CARD action carries recordKey in its context. Column actions
+            // carry 'column' in their arguments instead, and are resolved normally.
             $recordKey = $action['context']['recordKey'] ?? null;
             $columnId = $action['arguments']['column'] ?? null;
 
-            // Only route to resolveBoardAction for card actions (not column actions)
-            if (filled($recordKey) && blank($columnId)) {
-                $resolvedAction = $this->resolveBoardAction($action, $resolvedActions);
-            } elseif (filled($action['context']['schemaComponent'] ?? null)) {
+            if (filled($action['context']['schemaComponent'] ?? null)) {
                 $resolvedAction = $this->resolveSchemaComponentAction($action, $resolvedActions);
             } elseif ($this instanceof HasTable && filled($action['context']['table'] ?? null)) {
                 $resolvedAction = $this->resolveTableAction($action, $resolvedActions);
+            } elseif (filled($recordKey) && blank($columnId)) {
+                $resolvedAction = $this->resolveBoardAction($action, $resolvedActions);
             } else {
                 $resolvedAction = $this->resolveAction($action, $resolvedActions);
             }
