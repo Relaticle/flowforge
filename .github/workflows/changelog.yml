@@ -15,14 +15,17 @@ jobs:
     steps:
       - name: Determine target branch
         id: branch
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          REPO: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          TAG="${{ github.event.release.tag_name }}"
           MAJOR=$(echo "$TAG" | sed -E 's/^v?([0-9]+)\..*/\1/')
           BRANCH="${MAJOR}.x"
-          if ! git ls-remote --exit-code --heads "https://github.com/${{ github.repository }}" "$BRANCH" > /dev/null 2>&1; then
-            BRANCH="${{ github.event.repository.default_branch }}"
+          if ! git ls-remote --exit-code --heads "https://github.com/$REPO" "$BRANCH" > /dev/null 2>&1; then
+            BRANCH="$DEFAULT_BRANCH"
           fi
-          echo "name=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "name=${BRANCH}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -54,4 +57,5 @@ jobs:
         if: steps.cpr.outputs.pull-request-operation == 'created'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr merge --auto --squash "${{ steps.cpr.outputs.pull-request-number }}"
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr merge --auto --squash "$PR_NUMBER"

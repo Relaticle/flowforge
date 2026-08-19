@@ -6,16 +6,17 @@ on:
       - 'v*.*.*'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   tests:
     uses: ./.github/workflows/tests.yml
-    secrets: inherit
 
   release:
     needs: tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Determine release flags
