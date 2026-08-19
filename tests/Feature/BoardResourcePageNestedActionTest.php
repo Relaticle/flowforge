@@ -70,6 +70,23 @@ test('card actions stay mountable after a nested schema component action runs', 
         ->and($component->get('mountedActions.0.name'))->toBe('editTask');
 });
 
+/**
+ * A modal action registered on a card action has a parent action, so Filament's
+ * getContext() returns early with only `recordKey`. It must keep resolving through
+ * resolveBoardAction() and its getModalAction() lookup.
+ */
+test('modal actions registered on a card action still resolve through the board resolver', function () {
+    $task = Task::factory()->create(['status' => 'todo']);
+
+    $component = Livewire::test(TestBoardResourcePage::class)
+        ->call('mountAction', 'editTask', [], ['recordKey' => $task->getKey()])
+        ->call('mountAction', 'nestedModalAction', [], ['recordKey' => $task->getKey()]);
+
+    expect($component->get('mountedActions'))->toHaveCount(2)
+        ->and(array_column($component->get('mountedActions'), 'name'))
+        ->toBe(['editTask', 'nestedModalAction']);
+});
+
 test('card action still resolves its record', function () {
     $task = Task::factory()->create(['status' => 'todo', 'title' => 'Resolve me']);
 

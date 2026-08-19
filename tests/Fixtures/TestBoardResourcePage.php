@@ -55,6 +55,11 @@ class TestBoardResourcePage extends BoardResourcePage
                                 TextInput::make('name'),
                             ]),
                     ])
+                    ->registerModalActions([
+                        Action::make('nestedModalAction')
+                            ->requiresConfirmation()
+                            ->action(function (): void {}),
+                    ])
                     ->action(function (): void {}),
             ]);
     }
