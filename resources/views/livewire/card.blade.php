@@ -6,6 +6,21 @@
     $cardAction = $this->getBoard()->getCardAction();
     $hasCardAction = $cardAction !== null;
     $hasPositionIdentifier = $this->getBoard()->getPositionIdentifierAttribute() !== null;
+
+    // A card action configured with ->url() must navigate like a native link instead
+    // of mounting a modal, so middle-click, cmd-click and "copy link" keep working.
+    // getUrl() returns null when the action has a modal, and POST urls need a form
+    // rather than an anchor, so both fall through to the Livewire click handler.
+    $cardActionInstance = $this->getBoard()->resolveCardAction($processedRecordActions);
+    $cardActionUrl = $cardActionInstance?->shouldPostToUrl() ? null : $cardActionInstance?->getUrl();
+    $hasCardActionUrl = filled($cardActionUrl);
+    $cardActionHref = $hasCardActionUrl
+        ? \Filament\Support\generate_href_html(
+            $cardActionUrl,
+            $cardActionInstance->shouldOpenUrlInNewTab(),
+            hasNestedClickEventHandler: true,
+        )
+        : null;
 @endphp
 
 <div
@@ -26,12 +41,18 @@
     <div class="flowforge-card-content">
         <div class="flex items-start justify-between mb-2">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-white p-3"
-                @if($hasCardAction && $cardAction)
+                @if($hasCardAction && $cardAction && !$hasCardActionUrl)
                     wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
                 style="cursor: pointer;"
                 @endif
             >
-                {{ $record['title'] }}
+                @if($hasCardActionUrl)
+                    <a {{ $cardActionHref }} class="block">
+                        {{ $record['title'] }}
+                    </a>
+                @else
+                    {{ $record['title'] }}
+                @endif
             </h4>
 
             @if($hasActions)
@@ -42,14 +63,20 @@
         </div>
 
         <div class="px-3 pb-3"
-             @if($hasCardAction && $cardAction)
+             @if($hasCardAction && $cardAction && !$hasCardActionUrl)
                  wire:click="mountAction('{{ $cardAction }}', [], @js(['recordKey' => $record['id']]))"
              style="cursor: pointer;"
             @endif
         >
             {{-- Render card schema with compact spacing --}}
             @if(filled($record['schema']))
-                {{ $record['schema'] }}
+                @if($hasCardActionUrl)
+                    <a {{ $cardActionHref }} class="block">
+                        {{ $record['schema'] }}
+                    </a>
+                @else
+                    {{ $record['schema'] }}
+                @endif
             @endif
         </div>
     </div>
