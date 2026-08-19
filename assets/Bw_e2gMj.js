@@ -1,0 +1,1 @@
+import{o as e}from"./fAzeDrst.js";var t=()=>window?.__NUXT__?.config||window?.useNuxtApp?.().payload?.config,n=()=>t().app,r=()=>n().baseURL,i=()=>n().buildAssetsDir,a=(...t)=>e(o(),i(),...t),o=(...t)=>{let r=n(),i=r.cdnURL||r.baseURL;return t.length?e(i,...t):i};globalThis.__buildAssetsURL=a,globalThis.__publicAssetsURL=o;export{a as n,r as t};

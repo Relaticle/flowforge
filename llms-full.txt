@@ -1249,6 +1249,33 @@ public function board(Board $board): Board
 ->cardAction('edit')                              // Make cards clickable
 ```
 
+`cardAction()` takes the name of an action registered in `cardActions()`. When that
+action is configured with `->url()`, the card renders as a native link (respecting
+`->openUrlInNewTab()`) instead of opening a modal, so middle-click and "copy link
+address" work as expected:
+
+```php
+->cardActions([
+    Action::make('view')
+        ->url(fn (Task $record): string => TaskResource::getUrl('view', ['record' => $record])),
+])
+->cardAction('view')
+```
+
+A url decides, exactly as it does for a table row. Filament's `ListRecords` builds
+`recordUrl()` from the first `view`/`edit` action whose `getUrl()` is filled and has
+`recordAction()` skip those same actions, without consulting their modal state. A card
+follows that rule, so the same action behaves the same way in a board and in a table.
+
+Two consequences worth knowing:
+
+- An action declaring both a url and a modal (`->requiresConfirmation()`, a custom modal
+  heading, a schema) renders as a link and never opens that modal. Filament's own table
+  row and actions dropdown do the same. Pick one or the other.
+- A url inherited from the page's `getDefaultActionUrl()` counts, since `getUrl()`
+  consults it. Only `->postToUrl()` actions stay on the click handler, because a POST
+  needs a form rather than an anchor.
+
 ### Search & Filtering
 
 ```php
