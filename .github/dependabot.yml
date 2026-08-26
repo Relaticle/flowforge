@@ -24,8 +24,11 @@ updates:
     cooldown:
       default-days: 7
     groups:
-      npm:
+      npm-minor-patch:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
     labels:
       - "dependencies"

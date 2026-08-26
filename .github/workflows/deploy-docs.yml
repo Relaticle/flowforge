@@ -1,6 +1,8 @@
 name: Deploy Docs
 
 on:
+  pull_request:
+    branches: ["4.x", "3.x", "2.x"]
   push:
     branches: ["4.x", "3.x", "2.x"]
     paths:
@@ -17,32 +19,45 @@ on:
           - '3.x'
           - '2.x'
 
-# Prevent concurrent deploys to avoid push conflicts
 concurrency:
-  group: deploy-docs
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('deploy-docs-pr-{0}', github.event.pull_request.number) || 'deploy-docs' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  deploy:
+  build:
+    name: Docs build
     runs-on: ubuntu-latest
+
+    outputs:
+      branch: ${{ steps.version.outputs.branch }}
+      dest_folder: ${{ steps.config.outputs.dest_folder }}
+      is_latest: ${{ steps.config.outputs.is_latest }}
+
     steps:
       - name: Determine version
         id: version
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "branch=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          if [ "$EVENT_NAME" == "workflow_dispatch" ]; then
+            echo "branch=$INPUT_VERSION" >> $GITHUB_OUTPUT
+          elif [ "$EVENT_NAME" == "pull_request" ]; then
+            echo "branch=$BASE_REF" >> $GITHUB_OUTPUT
           else
             echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
           fi
 
       - name: Set version config
         id: config
+        env:
+          BRANCH: ${{ steps.version.outputs.branch }}
         run: |
-          BRANCH="${{ steps.version.outputs.branch }}"
-          case $BRANCH in
+          case "$BRANCH" in
             4.x)
               echo "dest_folder=." >> $GITHUB_OUTPUT
               echo "base_url=/flowforge/" >> $GITHUB_OUTPUT
@@ -67,13 +82,8 @@ jobs:
       - name: Checkout source branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ steps.version.outputs.branch }}
-
-      - name: Checkout gh-pages
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: gh-pages
-          path: gh-pages
+          ref: ${{ github.event_name == 'workflow_dispatch' && steps.version.outputs.branch || github.sha }}
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -95,11 +105,43 @@ jobs:
           DOCS_VERSION: ${{ steps.version.outputs.branch }}
           NUXT_PUBLIC_FATHOM_SITE_ID: ${{ secrets.FATHOM_SITE_ID }}
 
-      - name: Deploy to gh-pages
-        run: |
-          DEST="${{ steps.config.outputs.dest_folder }}"
-          IS_LATEST="${{ steps.config.outputs.is_latest }}"
+      - name: Upload documentation
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: docs-build
+          path: docs/.output/public
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 1
 
+  deploy:
+    name: Deploy docs
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: gh-pages
+          path: gh-pages
+          persist-credentials: false
+
+      - name: Download documentation
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: docs-build
+          path: built-docs
+
+      - name: Deploy to gh-pages
+        env:
+          DEST: ${{ needs.build.outputs.dest_folder }}
+          IS_LATEST: ${{ needs.build.outputs.is_latest }}
+        run: |
           if [ "$IS_LATEST" == "true" ]; then
             echo "Deploying latest version to root..."
             cd gh-pages
@@ -128,22 +170,27 @@ jobs:
             done
             cd ..
             # Copy new build to root
-            cp -r docs/.output/public/* gh-pages/
+            cp -R built-docs/. gh-pages/
           else
             echo "Deploying to $DEST subfolder..."
             rm -rf "gh-pages/$DEST"
-            cp -r docs/.output/public "gh-pages/$DEST"
+            mkdir -p "gh-pages/$DEST"
+            cp -R built-docs/. "gh-pages/$DEST/"
           fi
 
       - name: Commit and push
         working-directory: ./gh-pages
+        env:
+          BRANCH: ${{ needs.build.outputs.branch }}
+          GH_TOKEN: ${{ github.token }}
         run: |
+          gh auth setup-git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           if git diff --staged --quiet; then
             echo "No changes to deploy"
           else
-            git commit -m "Deploy ${{ steps.version.outputs.branch }} docs"
+            git commit -m "Deploy $BRANCH docs"
             git push
           fi
