@@ -1,0 +1,1 @@
+import{mt as e,qt as t,v as n,xt as r}from"./B4b-2GOK.js";import{t as i}from"./BDNMzG2s2.js";import{t as a}from"./BwqNhT1v2.js";var o={};function s(i,o){let s=a;return e(),n(s,null,{default:t(()=>[r(i.$slots,`default`)]),_:3})}var c=i(o,[[`render`,s]]);export{c as default};
