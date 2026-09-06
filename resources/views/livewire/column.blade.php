@@ -11,8 +11,17 @@
     $colorShades = $isSemantic ? null : $resolvedColor;
 @endphp
 
+@php
+    $columnIsEmpty = ($column['total'] ?? (isset($column['items']) ? count($column['items']) : 0)) === 0;
+    $shrinksEmpty = ($config['shrinkEmpty'] ?? false) && $columnIsEmpty;
+@endphp
+
 <div
-    class="flowforge-column w-[300px] min-w-[300px] flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden">
+    @class([
+        'flowforge-column flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden',
+        'w-[300px] min-w-[300px]' => ! $shrinksEmpty,
+        'flowforge-column-shrunk w-[180px] min-w-[180px]' => $shrinksEmpty,
+    ])>
     <!-- Column Header -->
     <div class="flowforge-column-header flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center">

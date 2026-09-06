@@ -36,6 +36,8 @@ class Board extends ViewComponent
 
     protected bool $headerToolbar = false;
 
+    protected bool $shrinkEmpty = false;
+
     final public function __construct(HasBoard $livewire)
     {
         $this->livewire($livewire);
@@ -63,6 +65,22 @@ class Board extends ViewComponent
     public function hasHeaderToolbar(): bool
     {
         return $this->headerToolbar;
+    }
+
+    /**
+     * Collapse empty columns to a slim placeholder, so the empty-state hint
+     * wraps instead of dictating the full column width.
+     */
+    public function shrinkEmpty(bool $condition = true): static
+    {
+        $this->shrinkEmpty = $condition;
+
+        return $this;
+    }
+
+    public function shrinksEmpty(): bool
+    {
+        return $this->shrinkEmpty;
     }
 
     protected function setUp(): void
@@ -106,6 +124,7 @@ class Board extends ViewComponent
                 'cardLabel' => $this->getCardLabel(),
                 'pluralCardLabel' => $this->getPluralCardLabel(),
                 'headerToolbar' => $this->hasHeaderToolbar(),
+                'shrinkEmpty' => $this->shrinksEmpty(),
             ],
         ];
     }
