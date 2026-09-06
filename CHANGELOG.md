@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v4.1.1 - 2026-09-06
+
+<!-- Release notes generated using configuration in .github/release.yml at 4.x -->
+### What's Changed
+
+#### Other Changes
+
+* chore(ci): pin actions to commit SHAs and add dependabot cooldown by @ManukMinasyan in https://github.com/relaticle/flowforge/pull/168
+* chore(ci): adopt zizmor, fix its high findings, group dependabot PRs by @ManukMinasyan in https://github.com/relaticle/flowforge/pull/169
+* build(deps): bump better-sqlite3 from 12.11.1 to 13.0.3 in /docs by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/170
+* fix(ci): validate docs before deployment by @ManukMinasyan in https://github.com/relaticle/flowforge/pull/171
+* build(deps): bump fast-uri from 3.1.5 to 3.1.7 in /docs by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/175
+* build(deps): bump the npm-minor-patch group in /docs with 3 updates by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/176
+* build(deps): bump qs from 6.15.3 to 6.16.0 in /docs by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/178
+* build(deps): bump typescript from 5.9.3 to 7.0.2 in /docs by @dependabot[bot] in https://github.com/relaticle/flowforge/pull/177
+* fix(i18n): keep the German card label capitalised in the empty-column hint by @grafst in https://github.com/relaticle/flowforge/pull/173
+* feat(board): name the cards after the model by @grafst in https://github.com/relaticle/flowforge/pull/174
+* chore: update compatible Composer and npm dependencies by @ManukMinasyan in https://github.com/relaticle/flowforge/pull/179
+* chore: simplify Composer version constraints by @ManukMinasyan in https://github.com/relaticle/flowforge/pull/180
+
+### New Contributors
+
+* @grafst made their first contribution in https://github.com/relaticle/flowforge/pull/173
+
+**Full Changelog**: https://github.com/relaticle/flowforge/compare/v4.1.0...v4.1.1
+
 ## v4.0.12 - 2026-05-12
 
 ### What's Changed
