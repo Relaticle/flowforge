@@ -105,6 +105,38 @@
   <tr>
     <td>
       <code>
+        cardLabel(string|Closure|null)
+      </code>
+    </td>
+    
+    <td>
+      Name of a single card, e.g. "Task"
+    </td>
+    
+    <td>
+      
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <code>
+        pluralCardLabel(string|Closure|null)
+      </code>
+    </td>
+    
+    <td>
+      Name of a set of cards, e.g. "Tasks"
+    </td>
+    
+    <td>
+      
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <code>
         cardSchema(Closure)
       </code>
     </td>
@@ -302,6 +334,8 @@ public function board(Board $board): Board
 
 ```php
 ->recordTitleAttribute('title')                   // Card title field
+->cardLabel('Task')                               // Defaults to the model label
+->pluralCardLabel('Tasks')                        // Defaults to the plural model label
 ->cardSchema(fn(Schema $schema) => $schema        // Rich card content
     ->components([
         TextEntry::make('description'),
@@ -309,6 +343,25 @@ public function board(Board $board): Board
     ])
 )
 ```
+
+### Card Labels
+
+Explicit labels take precedence over resource and model labels.
+Otherwise, Flowforge uses the board page's resource, then the model's resource in the current panel, then the model name.
+Without a resource or model, it uses the package translations.
+
+Model names are not translated automatically.
+Existing boards, including standalone boards, can therefore display different labels after upgrading.
+Set translated labels explicitly to preserve the previous wording:
+
+```php
+->cardLabel(fn (): string => __('flowforge::flowforge.card_label'))
+->pluralCardLabel(fn (): string => __('flowforge::flowforge.plural_card_label'))
+```
+
+Use your application's translation keys for custom names.
+Set both labels for languages whose plural forms cannot be derived from the singular label.
+Closures resolve in the current locale when the board renders.
 
 ### Actions Configuration
 

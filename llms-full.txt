@@ -1187,24 +1187,26 @@ If a unique constraint violation occurs (rare with jitter), Flowforge automatica
 
 ## Board Configuration
 
-| Method                         | Description                                          | Required |
-| ------------------------------ | ---------------------------------------------------- | -------- |
-| `query(Builder)`               | Set the Eloquent query as data source                | Yes      |
-| `columnIdentifier(string)`     | Field name for column status                         | Yes      |
-| `positionIdentifier(string)`   | Field name for drag-drop ordering                    | Yes      |
-| `columns(array)`               | Define board columns                                 | Yes      |
-| `recordTitleAttribute(string)` | Field name for card titles                           |          |
-| `cardSchema(Closure)`          | Rich card content using Schema                       |          |
-| `cardActions(array)`           | Actions available on each card                       |          |
-| `columnActions(array)`         | Actions available on column headers                  |          |
-| `searchable(array)`            | Enable search on specified fields                    |          |
-| `filters(array)`               | Add filtering capabilities                           |          |
-| `cardAction(string)`           | Make cards clickable with action                     |          |
-| `cardsPerColumn(int)`          | Cards to load per column (pagination)                |          |
-| `filtersFormWidth(Width)`      | Filter panel width                                   |          |
-| `filtersFormColumns(int)`      | Columns in filter form                               |          |
-| `filtersLayout(FiltersLayout)` | Filter display layout (Dropdown, AboveContent, etc.) |          |
-| `headerToolbar(bool)`          | Render filters/search inline with page title         |          |
+| Method                                 | Description                                          | Required |
+| -------------------------------------- | ---------------------------------------------------- | -------- |
+| `query(Builder)`                       | Set the Eloquent query as data source                | Yes      |
+| `columnIdentifier(string)`             | Field name for column status                         | Yes      |
+| `positionIdentifier(string)`           | Field name for drag-drop ordering                    | Yes      |
+| `columns(array)`                       | Define board columns                                 | Yes      |
+| `recordTitleAttribute(string)`         | Field name for card titles                           |          |
+| `cardLabel(string|Closure|null)`       | Name of a single card, e.g. "Task"                   |          |
+| `pluralCardLabel(string|Closure|null)` | Name of a set of cards, e.g. "Tasks"                 |          |
+| `cardSchema(Closure)`                  | Rich card content using Schema                       |          |
+| `cardActions(array)`                   | Actions available on each card                       |          |
+| `columnActions(array)`                 | Actions available on column headers                  |          |
+| `searchable(array)`                    | Enable search on specified fields                    |          |
+| `filters(array)`                       | Add filtering capabilities                           |          |
+| `cardAction(string)`                   | Make cards clickable with action                     |          |
+| `cardsPerColumn(int)`                  | Cards to load per column (pagination)                |          |
+| `filtersFormWidth(Width)`              | Filter panel width                                   |          |
+| `filtersFormColumns(int)`              | Columns in filter form                               |          |
+| `filtersLayout(FiltersLayout)`         | Filter display layout (Dropdown, AboveContent, etc.) |          |
+| `headerToolbar(bool)`                  | Render filters/search inline with page title         |          |
 
 ## Board Methods
 
@@ -1228,6 +1230,8 @@ public function board(Board $board): Board
 
 ```php
 ->recordTitleAttribute('title')                   // Card title field
+->cardLabel('Task')                               // Defaults to the model label
+->pluralCardLabel('Tasks')                        // Defaults to the plural model label
 ->cardSchema(fn(Schema $schema) => $schema        // Rich card content
     ->components([
         TextEntry::make('description'),
@@ -1235,6 +1239,25 @@ public function board(Board $board): Board
     ])
 )
 ```
+
+### Card Labels
+
+Explicit labels take precedence over resource and model labels.
+Otherwise, Flowforge uses the board page's resource, then the model's resource in the current panel, then the model name.
+Without a resource or model, it uses the package translations.
+
+Model names are not translated automatically.
+Existing boards, including standalone boards, can therefore display different labels after upgrading.
+Set translated labels explicitly to preserve the previous wording:
+
+```php
+->cardLabel(fn (): string => __('flowforge::flowforge.card_label'))
+->pluralCardLabel(fn (): string => __('flowforge::flowforge.plural_card_label'))
+```
+
+Use your application's translation keys for custom names.
+Set both labels for languages whose plural forms cannot be derived from the singular label.
+Closures resolve in the current locale when the board renders.
 
 ### Actions Configuration
 
