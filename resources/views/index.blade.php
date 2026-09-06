@@ -10,8 +10,8 @@
             columns: @js($columns),
             titleField: '{{ $config['recordTitleAttribute'] }}',
             columnField: '{{ $config['columnIdentifierAttribute'] }}',
-            cardLabel: '{{ $config['cardLabel'] }}',
-            pluralCardLabel: '{{ $config['pluralCardLabel'] }}',
+            cardLabel: @js($config['cardLabel']),
+            pluralCardLabel: @js($config['pluralCardLabel']),
         }
     })"
 >
