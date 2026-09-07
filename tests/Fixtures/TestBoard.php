@@ -15,6 +15,8 @@ class TestBoard extends BoardPage
 
     public bool $hideEverything = false;
 
+    public bool $collapseEmpty = false;
+
     public function getEloquentQuery(): Builder
     {
         return Task::query();
@@ -23,8 +25,10 @@ class TestBoard extends BoardPage
     public function board(Board $board): Board
     {
         return $board
+            ->collapseEmptyColumns($this->collapseEmpty)
             ->query($this->getEloquentQuery())
             ->recordTitleAttribute('title')
+            ->searchable(['title'])
             ->columnIdentifier('status')
             ->positionIdentifier('order_position')
             ->columns([

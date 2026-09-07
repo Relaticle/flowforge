@@ -36,6 +36,8 @@ class Board extends ViewComponent
 
     protected bool $headerToolbar = false;
 
+    protected bool $collapseEmptyColumns = false;
+
     final public function __construct(HasBoard $livewire)
     {
         $this->livewire($livewire);
@@ -63,6 +65,22 @@ class Board extends ViewComponent
     public function hasHeaderToolbar(): bool
     {
         return $this->headerToolbar;
+    }
+
+    /**
+     * Collapse columns holding no cards into a slim vertical rail, so a long
+     * pipeline spends its width on the stages that hold work.
+     */
+    public function collapseEmptyColumns(bool $condition = true): static
+    {
+        $this->collapseEmptyColumns = $condition;
+
+        return $this;
+    }
+
+    public function collapsesEmptyColumns(): bool
+    {
+        return $this->collapseEmptyColumns;
     }
 
     protected function setUp(): void
@@ -106,6 +124,7 @@ class Board extends ViewComponent
                 'cardLabel' => $this->getCardLabel(),
                 'pluralCardLabel' => $this->getPluralCardLabel(),
                 'headerToolbar' => $this->hasHeaderToolbar(),
+                'collapseEmptyColumns' => $this->collapsesEmptyColumns() && array_sum(array_column($columns, 'total')) > 0,
             ],
         ];
     }

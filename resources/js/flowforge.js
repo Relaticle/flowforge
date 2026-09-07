@@ -1,6 +1,7 @@
 export default function flowforge({state}) {
     return {
         state,
+        dragOverColumn: null,
         isLoading: {},
         fullyLoaded: {},
 
