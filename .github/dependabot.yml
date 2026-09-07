@@ -12,6 +12,11 @@ updates:
       default-days: 7
     groups:
       github-actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      github-actions-security:
+        applies-to: security-updates
         patterns:
           - "*"
     labels:
@@ -25,10 +30,15 @@ updates:
       default-days: 7
     groups:
       npm-minor-patch:
+        applies-to: version-updates
         patterns:
           - "*"
         update-types:
           - "minor"
           - "patch"
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
     labels:
       - "dependencies"
