@@ -1,72 +1,88 @@
 @props(['columnId', 'column', 'config'])
 
 @php
-    use Relaticle\Flowforge\Support\ColorResolver;
+    $total = $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0);
+    $isCollapsed = ($config['collapseEmptyColumns'] ?? false) && $total === 0;
+    $icon = $column['icon'] ?? null;
+    $actions = $this->getBoardColumnActions($columnId);
 
-    // Resolve the color once using our centralized resolver
-    $resolvedColor = ColorResolver::resolve($column['color']);
-    $isSemantic = ColorResolver::isSemantic($resolvedColor);
-
-    // For non-semantic colors, get the color array
-    $colorShades = $isSemantic ? null : $resolvedColor;
+    // A collapsed column keeps the expanded markup and swaps only the classes that
+    // differ, so hovering it during a drag restores the full header in place.
+    $isOpen = 'dragOverColumn === '.json_encode($columnId);
 @endphp
 
 <div
-    class="flowforge-column w-[300px] min-w-[300px] flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden">
+    @class([
+        'flowforge-column flex-shrink-0 border border-gray-200 dark:border-gray-700 shadow-sm dark:shadow-md rounded-xl flex flex-col max-h-full overflow-hidden',
+        'w-[300px] min-w-[300px]' => ! $isCollapsed,
+        'flowforge-column-collapsed w-12 min-w-12' => $isCollapsed,
+    ])
+    {{-- SortableJS stops propagation inside its own container, so the header and
+         footer of a rail need their own hook to register as hovered. --}}
+    x-on:dragenter="dragOverColumn = @js($columnId)"
+    @if($isCollapsed)
+        title="{{ $column['label'] }}"
+        x-bind:class="{
+            'w-12 min-w-12': ! ({{ $isOpen }}),
+            'w-[300px] min-w-[300px]': {{ $isOpen }},
+        }"
+    @endif
+>
     <!-- Column Header -->
-    <div class="flowforge-column-header flex items-center justify-between py-3 px-4 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center">
-            @if ($column['icon'] ?? null)
-                <x-filament::icon :icon="$column['icon']" class="h-4 w-4 text-gray-500 dark:text-gray-400 me-2" />
+    <div
+        @class([
+            'flowforge-column-header flex items-center gap-2 py-3',
+            'justify-between px-4 border-b border-gray-200 dark:border-gray-700' => ! $isCollapsed,
+            'flex-col px-1' => $isCollapsed,
+        ])
+        @if($isCollapsed)
+            x-bind:class="{
+                'justify-between px-4 border-b border-gray-200 dark:border-gray-700': {{ $isOpen }},
+                'flex-col px-1': ! ({{ $isOpen }}),
+            }"
+        @endif
+    >
+        <div
+            @class([
+                'flex min-w-0 items-center gap-2' => ! $isCollapsed,
+                'contents' => $isCollapsed,
+            ])
+            @if($isCollapsed)
+                x-bind:class="{
+                    'flex min-w-0 items-center gap-2': {{ $isOpen }},
+                    'contents': ! ({{ $isOpen }}),
+                }"
             @endif
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-200">
+        >
+            @if ($icon)
+                <x-filament::icon :icon="$icon" class="h-4 w-4 shrink-0 text-gray-500 dark:text-gray-400" />
+            @endif
+
+            <h3
+                @class([
+                    'text-sm font-medium',
+                    'truncate text-gray-700 dark:text-gray-200' => ! $isCollapsed,
+                    'max-h-64 overflow-hidden text-ellipsis whitespace-nowrap text-gray-500 dark:text-gray-400 [writing-mode:vertical-rl]' => $isCollapsed,
+                ])
+                @if($isCollapsed)
+                    x-bind:class="{
+                        'truncate text-gray-700 dark:text-gray-200': {{ $isOpen }},
+                        'max-h-64 text-gray-500 dark:text-gray-400 [writing-mode:vertical-rl]': ! ({{ $isOpen }}),
+                    }"
+                @endif
+            >
                 {{ $column['label'] }}
             </h3>
 
-            {{-- Count Badge --}}
-            @if($isSemantic)
-                {{-- Use native Filament badge for semantic colors --}}
-                <x-filament::badge
-                    tag="div"
-                    :color="$resolvedColor"
-                    class="ms-2"
-                >
-                    {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
-                </x-filament::badge>
-            @elseif($colorShades)
-                {{-- Custom badge for Color arrays --}}
-                <div
-                    @style([
-                        Filament\Support\get_color_css_variables($resolvedColor, shades: [50, 300, 600, 700])
-                    ])
-                    @class([
-                        'ms-2 items-center border px-2 py-0.5 rounded-md text-xs font-semibold',
-                        'bg-custom-50 dark:bg-custom-600/20',
-                        'text-custom-700 dark:text-custom-300',
-                        'border-custom-700/30 dark:border-custom-300/30',
-                    ])>
-                    {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
-                </div>
-            @else
-                {{-- Fallback: simple gray badge if no color --}}
-                <div class="ms-2 items-center border px-2 py-0.5 rounded-md text-xs font-semibold bg-gray-50 dark:bg-gray-600/20 text-gray-700 dark:text-gray-300 border-gray-700/30 dark:border-gray-300/30">
-                    {{ $column['total'] ?? (isset($column['items']) ? count($column['items']) : 0) }}
-                </div>
-            @endif
+            <x-flowforge::column-count :color="$column['color']" :total="$total" />
         </div>
 
-
-        {{-- Column actions are always visible --}}
-        @php
-            $processedActions = $this->getBoardColumnActions($columnId);
-        @endphp
-
-        @if(count($processedActions) > 0)
-            <div>
-                @if(count($processedActions) === 1)
-                    {{ $processedActions[0] }}
+        @if(count($actions) > 0)
+            <div class="shrink-0">
+                @if(count($actions) === 1)
+                    {{ $actions[0] }}
                 @else
-                    <x-filament-actions::group :actions="$processedActions"/>
+                    <x-filament-actions::group :actions="$actions"/>
                 @endif
             </div>
         @endif
@@ -78,12 +94,18 @@
         @if($this->getBoard()->getPositionIdentifierAttribute())
             x-sortable
         x-sortable-group="cards"
-        @end.stop="handleSortableEnd($event)"
+        @dragenter="dragOverColumn = @js($columnId)"
+        @end.stop="dragOverColumn = null; handleSortableEnd($event)"
         @endif
         @if(isset($column['total']) && $column['total'] > count($column['items']))
             @scroll.throttle.100ms="handleColumnScroll($event, '{{ $columnId }}')"
         @endif
-        class="flowforge-column-content p-3 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain kanban-cards"
+        @class([
+            'flowforge-column-content flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain kanban-cards',
+            'p-3' => ! $isCollapsed,
+            'p-0' => $isCollapsed,
+        ])
+        @if($isCollapsed) x-bind:class="{ 'p-3': dragOverColumn === @js($columnId), 'p-0': dragOverColumn !== @js($columnId) }" @endif
         style="max-height: calc(100vh - 13rem);"
     >
         @if (isset($column['items']) && count($column['items']) > 0)
@@ -112,6 +134,14 @@
                     </div>
                 @endif
             </div>
+        @elseif($isCollapsed)
+            {{-- The rail under the pointer widens to a full drop zone --}}
+            <div x-cloak x-show="dragOverColumn === @js($columnId)" class="h-full">
+                <x-flowforge::empty-column
+                    :columnId="$columnId"
+                    :pluralCardLabel="$config['pluralCardLabel']"
+                />
+            </div>
         @else
             <x-flowforge::empty-column
                 :columnId="$columnId"
@@ -119,4 +149,5 @@
             />
         @endif
     </div>
+
 </div>

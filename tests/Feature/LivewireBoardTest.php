@@ -17,6 +17,15 @@ describe('board rendering', function () {
             ->assertDontSee('Hidden Column');
     });
 
+    test('compiles every column component instead of echoing its tag', function () {
+        Task::factory()->todo()->create();
+
+        Livewire::test(TestBoard::class)
+            ->assertStatus(200)
+            ->assertDontSeeHtml('<x-flowforge')
+            ->assertDontSeeHtml('<x-filament');
+    });
+
     test('renders board with unhidden column', function () {
         Livewire::test(TestBoard::class)
             ->assertStatus(200)
