@@ -309,6 +309,22 @@
       
     </td>
   </tr>
+  
+  <tr>
+    <td>
+      <code>
+        collapseEmptyColumns(bool)
+      </code>
+    </td>
+    
+    <td>
+      Collapse columns holding no cards into a rail
+    </td>
+    
+    <td>
+      
+    </td>
+  </tr>
 </tbody>
 </table>
 
@@ -420,6 +436,7 @@ use Filament\Support\Enums\Width;
 ->filtersFormWidth(Width::Large)                  // Filter panel width
 ->filtersFormColumns(3)                           // Columns in filter form
 ->headerToolbar()                                 // Inline filters/search in page header
+->collapseEmptyColumns()                          // Collapse columns holding no cards
 ```
 
 ## Column Configuration

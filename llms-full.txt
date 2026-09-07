@@ -751,6 +751,37 @@ public function board(Board $board): Board
 
 The header toolbar supports `Dropdown` and `Modal` filter layouts. For other layouts (AboveContent, BeforeContent, etc.), leave `headerToolbar` disabled (the default) and the full filter view will be used instead.
 
+## Collapse Empty Columns
+
+Every column is 300px wide, so a long pipeline spends most of the screen on stages
+holding no work. Enable `collapseEmptyColumns()` and a column with no cards renders as a
+48px rail carrying its count and its name, the same convention Trello, GitLab and
+ClickUp use for a collapsed list:
+
+```php
+public function board(Board $board): Board
+{
+    return $board
+        ->collapseEmptyColumns();
+}
+```
+
+Three things the rail keeps, and they are the point of collapsing rather than hiding:
+
+- It is a full drop target. Drag a card over a rail and that rail alone widens to a full
+  column with its drop zone, so you aim at a slim target and drop into a wide one. Every
+  other rail keeps its width and its name, so the board does not reflow under the pointer
+  mid-drag. A card dropped on a rail leaves it expanded, and a column losing its last card
+  collapses. Neither needs a reload.
+- It keeps its column actions, so you can still create a card in a stage holding none.
+- It keeps its name and count, so the pipeline still reads end to end.
+
+The board never collapses every column at once. When nothing on the board has a card,
+whether the board is new or a search matched nothing, all columns render at full width so
+the empty state stays readable.
+
+Style the rail with the `.flowforge-column-collapsed` class.
+
 ## Search and Filtering
 
 Enable powerful search and filtering capabilities:
@@ -1207,6 +1238,7 @@ If a unique constraint violation occurs (rare with jitter), Flowforge automatica
 | `filtersFormColumns(int)`              | Columns in filter form                               |          |
 | `filtersLayout(FiltersLayout)`         | Filter display layout (Dropdown, AboveContent, etc.) |          |
 | `headerToolbar(bool)`                  | Render filters/search inline with page title         |          |
+| `collapseEmptyColumns(bool)`           | Collapse columns holding no cards into a rail        |          |
 
 ## Board Methods
 
@@ -1316,6 +1348,7 @@ use Filament\Support\Enums\Width;
 ->filtersFormWidth(Width::Large)                  // Filter panel width
 ->filtersFormColumns(3)                           // Columns in filter form
 ->headerToolbar()                                 // Inline filters/search in page header
+->collapseEmptyColumns()                          // Collapse columns holding no cards
 ```
 
 ## Column Configuration
